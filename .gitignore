@@ -77,3 +77,4 @@ Thumbs.db
 
 # Visual Studio config
 *.vsconfig
+ProjectSettings/EditorBuildSettings.asset
