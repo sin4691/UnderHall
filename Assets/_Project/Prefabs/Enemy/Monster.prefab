@@ -339,13 +339,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2245bf8a41e4ae84dadc5497f8fef541, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBase
-  maxHp: 50
-  attackRange: 2.5
-  attackDelay: 2
+  enemyData: {fileID: 11400000, guid: 16e5cc7d40ffcc541b8724400746797d, type: 2}
   hitDelay: 0.5
   hitRadius: 1.5
   hitOffset: 1.5
-  attackDamage: 10
 --- !u!1 &5958396013164755468
 GameObject:
   m_ObjectHideFlags: 0
