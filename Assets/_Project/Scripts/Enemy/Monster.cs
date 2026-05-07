@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class DmgTest : MonoBehaviour
+public class Monster : MonoBehaviour
 {
     [Header("Monster Stats")]
     public float currentHealth = 50f;

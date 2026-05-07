@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public enum PlayerState { Idle, Move, Attack, Dash }
+public enum PlayerState { Idle, Move, Attack, Dash, SpecialAttack }
 
 [RequireComponent(typeof(Rigidbody), typeof(PlayerMovement), typeof(PlayerAttack))]
 [RequireComponent(typeof(PlayerDash))]
@@ -52,6 +52,20 @@ public class Player : MonoBehaviour
         if (value.isPressed && CurrentState != PlayerState.Dash)
         {
             attack.ExecuteAttack();
+        }
+    }
+    public void OnSpecialAttack(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            if (CurrentState != PlayerState.Dash)
+            {
+                attack.StartSpecialAttack();
+            }
+        }
+        else
+        {
+            attack.StopSpecialAttack();
         }
     }
 

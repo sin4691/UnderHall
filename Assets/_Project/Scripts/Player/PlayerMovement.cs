@@ -51,7 +51,11 @@ public class PlayerMovement : MonoBehaviour
             case PlayerState.Attack:
                 StopMovement();
                 break;
-            case PlayerState.Dash:      
+            case PlayerState.Dash:            
+                break;
+            case PlayerState.SpecialAttack:
+                ApplyMovement();
+
                 break;
         }
     }
