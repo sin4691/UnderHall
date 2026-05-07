@@ -4,25 +4,19 @@ using UnityEngine.AI;
 
 public class EnemyBase : MonoBehaviour
 {
+    [SerializeField] private EnemyData enemyData;
+
     private NavMeshAgent agent;
     private Animator anim;
     private Transform target;
 
-    [Header("--- 상태 설정 ---")]
-    [SerializeField] private float maxHp = 50f;
     private float currentHp;
+    private float timer;
     private bool isDead = false;
 
-    [Header("--- 설정 ---")]
-    [SerializeField] private float attackRange = 2.5f;
-    [SerializeField] private float attackDelay = 2.0f;
-    private float timer;
-
-    [Header("--- 히트박스 설정 ---")]
     [SerializeField] private float hitDelay = 0.5f;
     [SerializeField] private float hitRadius = 1.5f;
     [SerializeField] private float hitOffset = 1.5f;
-    [SerializeField] private float attackDamage = 10f;
 
     void Start()
     {
@@ -30,17 +24,21 @@ public class EnemyBase : MonoBehaviour
         anim = GetComponent<Animator>();
         target = GameObject.FindGameObjectWithTag("Player").transform;
 
-        currentHp = maxHp;
-        agent.stoppingDistance = attackRange;
+        if (enemyData != null)
+        {
+            currentHp = enemyData.maxHealth;
+            agent.speed = enemyData.moveSpeed;
+            agent.stoppingDistance = enemyData.attackRange;
+        }
     }
 
     void Update()
     {
-        if (isDead || target == null || !agent.isOnNavMesh) return;
+        if (isDead || target == null || enemyData == null || !agent.isOnNavMesh) return;
 
         float dist = Vector3.Distance(transform.position, target.position);
 
-        if (dist <= attackRange)
+        if (dist <= enemyData.attackRange + 0.5f)
         {
             agent.isStopped = true;
             Attack();
@@ -58,7 +56,7 @@ public class EnemyBase : MonoBehaviour
     void Attack()
     {
         timer += Time.deltaTime;
-        if (timer >= attackDelay)
+        if (timer >= enemyData.attackCooldown)
         {
             anim.SetTrigger("Attack");
             timer = 0;
@@ -76,14 +74,13 @@ public class EnemyBase : MonoBehaviour
 
         bool hasHitPlayer = false;
 
-
         foreach (Collider hit in hitColliders)
         {
             if (hasHitPlayer) break;
 
             if (hit.CompareTag("Player"))
             {
-                Debug.Log($"<color=red>플레이어 히트! 데미지: {attackDamage}</color>");
+                Debug.Log($"<color=red>플레이어 히트! 데미지: {enemyData.damage}</color>");
                 hasHitPlayer = true;
             }
         }
@@ -94,30 +91,26 @@ public class EnemyBase : MonoBehaviour
         if (isDead) return;
 
         currentHp -= damage;
-        Debug.Log($"몬스터 피격! 남은 체력: {currentHp}");
+        Debug.Log($"{enemyData.enemyName} 피격! 남은 체력: {currentHp}");
 
-        if (currentHp <= 0)
-        {
-            Die();
-        }
-        else
-        {
-            anim.SetTrigger("Hurt");
-        }
+        if (currentHp <= 0) Die();
+        else anim.SetTrigger("Hurt");
     }
 
     void Die()
     {
         isDead = true;
         agent.isStopped = true;
-        agent.enabled = false; 
-
+        agent.enabled = false;
         anim.SetTrigger("Death");
+
+        Debug.Log($"{enemyData.enemyName} 처치! {enemyData.goldDrop} 골드 획득!");
         Destroy(gameObject, 5f);
     }
 
     private void OnDrawGizmosSelected()
     {
+        if (enemyData == null) return;
         Gizmos.color = Color.red;
         Vector3 hitPosition = transform.position + transform.forward * hitOffset;
         Gizmos.DrawWireSphere(hitPosition, hitRadius);
