@@ -45,6 +45,10 @@ public class PlayerData : ScriptableObject
     [Range(0.1f, 1f)]
     public float dashDuration = 0.2f;
 
+    [Tooltip("대쉬 횟수")]
+    [Range(1, 4)]
+    public int maxDashCount = 2;
+
     [Tooltip("대쉬 후 다시 사용 가능까지 시간 (초)")]
     [Range(0.1f, 5f)]
     public float dashCooldown = 1f;

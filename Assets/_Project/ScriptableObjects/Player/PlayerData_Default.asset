@@ -15,12 +15,13 @@ MonoBehaviour:
   maxHealth: 100
   damage: 10
   moveSpeed: 5
-  attackCooldown: 0.5
-  attackRange: 1.5
+  attackCooldown: 0.3
+  attackRange: 1.8
   specialAttackMultiplier: 3
   specialAttackCooldown: 5
-  dashSpeed: 15
+  dashSpeed: 20
   dashDuration: 0.2
+  maxDashCount: 2
   dashCooldown: 1
   dashInvincibilityTime: 0.2
   hitInvincibilityTime: 0.5
