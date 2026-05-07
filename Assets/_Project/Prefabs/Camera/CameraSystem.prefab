@@ -56,7 +56,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1704195604910083400, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: field of view
-      value: 70
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 2262919473865490177, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_Name
@@ -194,7 +194,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 124962374166461947, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: Lens.FieldOfView
-      value: 70
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 124962374166461947, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: Target.TrackingTarget
@@ -243,6 +243,18 @@ PrefabInstance:
     - target: {fileID: 3633620238294950111, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6484906422265539760, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
+      propertyPath: FollowOffset.x
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 6484906422265539760, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
+      propertyPath: FollowOffset.y
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 6484906422265539760, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
+      propertyPath: FollowOffset.z
+      value: -12
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
