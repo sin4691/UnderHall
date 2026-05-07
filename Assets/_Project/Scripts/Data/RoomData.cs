@@ -26,7 +26,7 @@ public class RoomData : ScriptableObject
 
     [Tooltip("클리어 시 강화 선택지 수")]
     [Range(1, 5)]
-    public int BuffChoiceCount = 3;
+    public int GiftChoiceCount = 3;
 }
 
 [System.Serializable]
