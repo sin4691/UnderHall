@@ -6,46 +6,61 @@ public class PlayerAttack : MonoBehaviour
 {
     private Player player;
 
+    [Header("Combo Settings")]
     private int currentCombo = 0;
     private bool isNextAttackBuffered = false;
     private readonly int maxCombo = 3;
-
     private Coroutine attackCoroutine;
     private bool isAttackOnCooldown = false;
 
-    private void Awake()
-    {
-        player = GetComponent<Player>();
-    }
+    [Header("Special (Spin) Settings")]
+    private Coroutine specialAttackCoroutine;
+    private bool isSpecialAttackOnCooldown = false;
+    private bool isSpinning = false;
 
+    private void Awake() => player = GetComponent<Player>();
+
+    // 마우스 좌클릭: 기본 공격
     public void ExecuteAttack()
     {
-        if (isAttackOnCooldown) return;
+        if (isAttackOnCooldown || player.CurrentState == PlayerState.Dash) return;
 
         if (player.CurrentState != PlayerState.Attack)
-        {
             attackCoroutine = StartCoroutine(ComboAttackRoutine());
-        }
-        else
-        {
-            if (currentCombo < maxCombo)
-            {
-                isNextAttackBuffered = true;
-            }
-        }
+        else if (currentCombo < maxCombo)
+            isNextAttackBuffered = true;
     }
 
+    // 마우스 우클릭 누름: 스킬 시작
+    public void StartSpecialAttack()
+    {
+        if (isSpecialAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.Dash) return;
+
+        if (player.CurrentState != PlayerState.Attack && player.CurrentState != PlayerState.SpecialAttack)
+            specialAttackCoroutine = StartCoroutine(SpinRoutine());
+    }
+
+    // 마우스 우클릭 뗌: 스킬 중지
+    public void StopSpecialAttack() => isSpinning = false;
+
+    // 대시 등으로 인한 강제 취소
     public void CancelAttack()
     {
-        if (attackCoroutine != null)
-        {
-            StopCoroutine(attackCoroutine);
-        }
+        if (attackCoroutine != null) StopCoroutine(attackCoroutine);
+        if (specialAttackCoroutine != null) StopCoroutine(specialAttackCoroutine);
+
+        isSpinning = false;
         currentCombo = 0;
         isNextAttackBuffered = false;
         isAttackOnCooldown = false;
+
+        // 대시 후 즉시 상태 복구를 위해 Idle 전환 (필요 시)
+        if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
+            player.ChangeState(PlayerState.Idle);
     }
 
+
+    // 기본 공격 콤보 루틴
     private IEnumerator ComboAttackRoutine()
     {
         player.ChangeState(PlayerState.Attack);
@@ -55,56 +70,85 @@ public class PlayerAttack : MonoBehaviour
         while (currentCombo <= maxCombo)
         {
             isNextAttackBuffered = false;
-
             LookAtMouse();
 
             player.animator.CrossFade("attack" + currentCombo, 0.02f);
+            yield return new WaitForSeconds(0.05f); // 애니메이션 싱크 조절용 선딜
 
-            yield return new WaitForSeconds(0.05f);
-
-            ExecuteHitDetection();
+            // 판정 중심점을 앞쪽으로 설정하여 공격
+            ExecuteHitDetection(transform.position + transform.forward * (player.playerData.attackRange * 0.5f),
+                                player.playerData.attackRange * 0.5f, 1f);
 
             AnimatorStateInfo stateInfo = player.animator.GetCurrentAnimatorStateInfo(0);
+            yield return new WaitForSeconds(stateInfo.length * 0.5f);
 
-            float waitTime = stateInfo.length * 0.5f;
-            yield return new WaitForSeconds(waitTime);
-
-            if (isNextAttackBuffered)
-            {
-                currentCombo++;
-            }
-            else
-            {
-                break;
-            }
+            if (isNextAttackBuffered) currentCombo++;
+            else break;
         }
 
         currentCombo = 0;
         player.animator.CrossFade("idle", 0.15f);
         player.ChangeState(PlayerState.Idle);
-
         StartCoroutine(AttackCooldownRoutine());
     }
 
-    private void ExecuteHitDetection()
-    {   
-        Vector3 hitCenter = transform.position + transform.forward * (player.playerData.attackRange * 0.5f);
-        hitCenter.y += 1f;
+    // 특수 공격 (가렌 E 스타일) 루틴
+    private IEnumerator SpinRoutine()
+    {
+        isSpinning = true;
+        player.ChangeState(PlayerState.SpecialAttack);
+        player.animator.CrossFade("specialAttack", 0.1f);
 
-        float hitRadius = player.playerData.attackRange * 0.5f;
+        float timer = 0f;
+        float maxDuration = 5f;
+        float tickRate = 0.25f;
+        float tickTimer = tickRate;
 
-        Collider[] colliders = Physics.OverlapSphere(hitCenter, hitRadius);
+        while (isSpinning && timer < maxDuration)
+        {
+            timer += Time.deltaTime;
+            tickTimer += Time.deltaTime;
 
-        foreach (Collider col in colliders)
+            if (tickTimer >= tickRate)
+            {
+                ExecuteHitDetection(transform.position, player.playerData.attackRange, player.playerData.specialAttackMultiplier);
+                tickTimer = 0f;
+            }
+            yield return null;
+        }
+
+        isSpinning = false;
+        player.animator.CrossFade("idle", 0.15f);
+        player.ChangeState(PlayerState.Idle);
+        StartCoroutine(SpecialCooldownRoutine());
+    }
+
+    // 통합 데미지 판정 시스템
+    private void ExecuteHitDetection(Vector3 center, float radius, float damageMultiplier)
+    {
+        center.y += 1f;
+        Collider[] colliders = Physics.OverlapSphere(center, radius);
+
+        foreach (var col in colliders)
         {
             if (col.gameObject == player.gameObject) continue;
-
-            DmgTest target = col.GetComponentInParent<DmgTest>();
-
+            var target = col.GetComponentInParent<Monster>();
             if (target != null)
             {
-                target.TakeDamage(player.playerData.damage);
+                float finalDamage = player.playerData.damage * damageMultiplier;
+                target.TakeDamage(finalDamage);
             }
+        }
+    }
+
+    private void LookAtMouse()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (new Plane(Vector3.up, transform.position).Raycast(ray, out float enter))
+        {
+            Vector3 lookDir = (ray.GetPoint(enter) - transform.position).normalized;
+            lookDir.y = 0;
+            if (lookDir != Vector3.zero) transform.rotation = Quaternion.LookRotation(lookDir);
         }
     }
 
@@ -115,34 +159,20 @@ public class PlayerAttack : MonoBehaviour
         isAttackOnCooldown = false;
     }
 
-    private void LookAtMouse()
-    { 
-        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        Plane groundPlane = new Plane(Vector3.up, transform.position);
-
-        if (groundPlane.Raycast(ray, out float enterDistance))
-        {
-            Vector3 hitPoint = ray.GetPoint(enterDistance);
-            Vector3 lookDirection = (hitPoint - transform.position).normalized;
-            lookDirection.y = 0f;
-
-            if (lookDirection != Vector3.zero)
-            {
-                transform.rotation = Quaternion.LookRotation(lookDirection);
-            }
-        }
+    private IEnumerator SpecialCooldownRoutine()
+    {
+        isSpecialAttackOnCooldown = true;
+        yield return new WaitForSeconds(player.playerData.specialAttackCooldown);
+        isSpecialAttackOnCooldown = false;
     }
 
     private void OnDrawGizmosSelected()
     {
         if (player == null || player.playerData == null) return;
-
         Gizmos.color = Color.red;
-        Vector3 hitCenter = transform.position + transform.forward * (player.playerData.attackRange * 0.5f);
-        hitCenter.y += 1f;
-        float hitRadius = player.playerData.attackRange * 0.5f;
-
-
-        Gizmos.DrawWireSphere(hitCenter, hitRadius);
+        Vector3 gizmoPos = transform.position + transform.forward * (player.playerData.attackRange * 0.5f);
+        gizmoPos.y += 1f;
+        Gizmos.DrawWireSphere(gizmoPos, player.playerData.attackRange * 0.5f);
     }
+
 }

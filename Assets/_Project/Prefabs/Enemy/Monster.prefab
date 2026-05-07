@@ -259,6 +259,7 @@ GameObject:
   - component: {fileID: 5958396013157320934}
   - component: {fileID: 9129603328743677934}
   - component: {fileID: 2670531333515342753}
+  - component: {fileID: 5576709264889676201}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Untagged
@@ -343,6 +344,19 @@ MonoBehaviour:
   hitDelay: 0.5
   hitRadius: 1.5
   hitOffset: 1.5
+--- !u!114 &5576709264889676201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5958396013164755466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d49171dc634e2a64cb6af5b101935f10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Monster
+  currentHealth: 50
 --- !u!1 &5958396013164755468
 GameObject:
   m_ObjectHideFlags: 0
