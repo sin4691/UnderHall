@@ -42,6 +42,7 @@ public class PlayerDash : MonoBehaviour
             player.attack.CancelAttack();
         }
 
+        player.GrantInvincibility(player.playerData.dashInvincibilityTime);
         player.ChangeState(PlayerState.Dash);
         player.animator.SetTrigger(doDashHash);
         player.animator.SetBool("isMoving", false);
