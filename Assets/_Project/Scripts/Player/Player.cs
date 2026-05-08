@@ -49,6 +49,10 @@ public class Player : MonoBehaviour
     }
     private void Start()
     {
+        if (virtualCamera == null)
+        {
+            virtualCamera = FindAnyObjectByType<CinemachineCamera>(FindObjectsInactive.Exclude);
+        }
         if (playerData != null)
         {
             currentHealth = playerData.maxHealth;
