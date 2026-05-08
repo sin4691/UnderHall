@@ -344,6 +344,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &633560767 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9172275626997765464, guid: 4cd19b94934416742b7b3c983a4843e7, type: 3}
+  m_PrefabInstance: {fileID: 1323596455}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
 --- !u!1 &821942857
 GameObject:
   m_ObjectHideFlags: 0
@@ -678,6 +689,7 @@ GameObject:
   - component: {fileID: 1573687053}
   - component: {fileID: 1573687052}
   - component: {fileID: 1573687051}
+  - component: {fileID: 1573687058}
   m_Layer: 0
   m_Name: Cylinder
   m_TagString: Untagged
@@ -698,6 +710,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DmgTest
   currentHealth: 50
+  touchDamage: 40
 --- !u!136 &1573687052
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -793,6 +806,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1573687058
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573687050}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000001, y: 2, z: 1.0000002}
+  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!1 &1705449099
 GameObject:
   m_ObjectHideFlags: 0
@@ -1253,18 +1287,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 5729585333764012101, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6664556787637774178, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
-      propertyPath: m_Height
-      value: 1.718921
-      objectReference: {fileID: 0}
-    - target: {fileID: 6664556787637774178, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
-      propertyPath: m_Center.y
-      value: 0.9794737
-      objectReference: {fileID: 0}
     - target: {fileID: 7817026909752936775, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1305,6 +1327,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9028523370062418071, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
+      propertyPath: virtualCamera
+      value: 
+      objectReference: {fileID: 633560767}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4378,7 +4404,6 @@ GameObject:
   - component: {fileID: 9129603327747069818}
   - component: {fileID: 2670531332459756341}
   - component: {fileID: 9129603327747069819}
-  - component: {fileID: 9129603327747069820}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Untagged
@@ -8293,19 +8318,6 @@ CapsuleCollider:
   m_Height: 2.4895911
   m_Direction: 1
   m_Center: {x: 0, y: 0.74479556, z: 0}
---- !u!114 &9129603327747069820
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5958396012239450782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d49171dc634e2a64cb6af5b101935f10, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Monster
-  currentHealth: 50
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
