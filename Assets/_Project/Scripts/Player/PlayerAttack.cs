@@ -99,7 +99,7 @@ public class PlayerAttack : MonoBehaviour
         {
             if (col.gameObject == player.gameObject) continue;
 
-            DmgTest target = col.GetComponentInParent<DmgTest>();
+            EnemyBase target = col.GetComponentInParent<EnemyBase>();
 
             if (target != null)
             {

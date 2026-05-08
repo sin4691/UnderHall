@@ -10,7 +10,7 @@ public class EnemyBase : MonoBehaviour
     private Animator anim;
     private Transform target;
 
-    private float currentHp;
+    private float currentHealth;
     private float timer;
     private bool isDead = false;
 
@@ -26,7 +26,7 @@ public class EnemyBase : MonoBehaviour
 
         if (enemyData != null)
         {
-            currentHp = enemyData.maxHealth;
+            currentHealth = enemyData.maxHealth;
             agent.speed = enemyData.moveSpeed;
             agent.stoppingDistance = enemyData.attackRange;
         }
@@ -88,23 +88,32 @@ public class EnemyBase : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        if (isDead) return;
+        currentHealth -= damage;
 
-        currentHp -= damage;
-        Debug.Log($"{enemyData.enemyName} 피격! 남은 체력: {currentHp}");
+        Debug.Log($"몬스터 피격! 들어온 데미지: {damage} / 남은 체력: {currentHealth}");
 
-        if (currentHp <= 0) Die();
-        else anim.SetTrigger("Hurt");
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+        else
+        {
+            anim.SetTrigger("Hurt");
+        }
     }
 
     void Die()
     {
+        if (isDead) return;
         isDead = true;
+
         agent.isStopped = true;
         agent.enabled = false;
-        anim.SetTrigger("Death");
 
-        Debug.Log($"{enemyData.enemyName} 처치! {enemyData.goldDrop} 골드 획득!");
+        anim.SetTrigger("Death");
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
         Destroy(gameObject, 5f);
     }
 

@@ -41,11 +41,6 @@ public class EnemyData : ScriptableObject
     [Range(1, 30)]
     public float detectionRange = 10f;
 
-    [Header("===== 보상 =====")]
-
-    [Tooltip("처치 시 골드")]
-    [Range(0, 100)]
-    public int goldDrop = 5;
 }
 
 public enum EnemyType
