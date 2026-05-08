@@ -106,6 +106,12 @@ public class PlayerAttack : MonoBehaviour
 
         while (isSpinning && timer < maxDuration)
         {
+            if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting)
+            {
+                isSpinning = false;
+                break; 
+            }
+
             timer += Time.deltaTime;
             tickTimer += Time.deltaTime;
 
@@ -118,8 +124,11 @@ public class PlayerAttack : MonoBehaviour
         }
 
         isSpinning = false;
-        player.animator.CrossFade("idle", 0.15f);
-        player.ChangeState(PlayerState.Idle);
+        if (player.CurrentState == PlayerState.SpecialAttack)
+        {
+            player.animator.CrossFade("idle", 0.15f);
+            player.ChangeState(PlayerState.Idle);
+        }
         StartCoroutine(SpecialCooldownRoutine());
     }
 
