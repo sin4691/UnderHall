@@ -18,12 +18,14 @@ public class PlayerAttack : MonoBehaviour
     private bool isSpecialAttackOnCooldown = false;
     private bool isSpinning = false;
 
+    private Collider[] hitColliders = new Collider[10];
+
     private void Awake() => player = GetComponent<Player>();
 
     // 마우스 좌클릭: 기본 공격
     public void ExecuteAttack()
     {
-        if (isAttackOnCooldown || player.CurrentState == PlayerState.Dash) return;
+        if (isAttackOnCooldown || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
 
         if (player.CurrentState != PlayerState.Attack)
             attackCoroutine = StartCoroutine(ComboAttackRoutine());
@@ -34,7 +36,7 @@ public class PlayerAttack : MonoBehaviour
     // 마우스 우클릭 누름: 스킬 시작
     public void StartSpecialAttack()
     {
-        if (isSpecialAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.Dash) return;
+        if (isSpecialAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
 
         if (player.CurrentState != PlayerState.Attack && player.CurrentState != PlayerState.SpecialAttack)
             specialAttackCoroutine = StartCoroutine(SpinRoutine());
@@ -54,7 +56,6 @@ public class PlayerAttack : MonoBehaviour
         isNextAttackBuffered = false;
         isAttackOnCooldown = false;
 
-        // 대시 후 즉시 상태 복구를 위해 Idle 전환 (필요 시)
         if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
             player.ChangeState(PlayerState.Idle);
     }
@@ -73,9 +74,8 @@ public class PlayerAttack : MonoBehaviour
             LookAtMouse();
 
             player.animator.CrossFade("attack" + currentCombo, 0.02f);
-            yield return new WaitForSeconds(0.05f); // 애니메이션 싱크 조절용 선딜
+            yield return new WaitForSeconds(0.05f);
 
-            // 판정 중심점을 앞쪽으로 설정하여 공격
             ExecuteHitDetection(transform.position + transform.forward * (player.playerData.attackRange * 0.5f),
                                 player.playerData.attackRange * 0.5f, 1f);
 
@@ -127,12 +127,14 @@ public class PlayerAttack : MonoBehaviour
     private void ExecuteHitDetection(Vector3 center, float radius, float damageMultiplier)
     {
         center.y += 1f;
-        Collider[] colliders = Physics.OverlapSphere(center, radius);
+        int hitCount = Physics.OverlapSphereNonAlloc(center, radius, hitColliders);
 
-        foreach (var col in colliders)
+        for (int i = 0; i < hitCount; i++)
         {
+            Collider col = hitColliders[i];
             if (col.gameObject == player.gameObject) continue;
-            var target = col.GetComponentInParent<Monster>();
+
+            var target = col.GetComponentInParent<EnemyBase>();
             if (target != null)
             {
                 float finalDamage = player.playerData.damage * damageMultiplier;
