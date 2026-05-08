@@ -818,6 +818,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b68114481eee94b86c8db0f31b94d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
+  virtualCamera: {fileID: 0}
+  zoomInFOV: 30
+  zoomDuration: 0.5
   playerData: {fileID: 11400000, guid: 44ad76d51a30ee74486bcc6c842e4478, type: 2}
 --- !u!114 &7158556048543223871
 MonoBehaviour:
