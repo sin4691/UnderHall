@@ -6,6 +6,9 @@ public class EnemyBase : MonoBehaviour
 {
     [SerializeField] private EnemyData enemyData;
 
+    public float detectRange = 10f;
+    public float attaclRange = 2f;
+
     private NavMeshAgent agent;
     private Animator anim;
     private Transform target;
@@ -38,19 +41,26 @@ public class EnemyBase : MonoBehaviour
 
         float dist = Vector3.Distance(transform.position, target.position);
 
-        if (dist <= enemyData.attackRange + 0.5f)
+        if (dist <= enemyData.detectionRange)
         {
-            agent.isStopped = true;
-            Attack();
+            if (dist <= enemyData.attackRange + 0.5f)
+            {
+                agent.isStopped = true;
+                Attack();
+            }
+            else
+            {
+                agent.isStopped = false;
+                agent.SetDestination(target.position);
+            }
         }
         else
         {
-            agent.isStopped = false;
-            agent.SetDestination(target.position);
+            agent.isStopped = true;
         }
 
         float speed = agent.isStopped ? 0 : agent.velocity.magnitude;
-        anim.SetFloat("MoveSpeed", speed);
+        anim.SetFloat("MoveSpeed", speed, 0.1f, Time.deltaTime);
     }
 
     void Attack()
@@ -78,10 +88,28 @@ public class EnemyBase : MonoBehaviour
         {
             if (hasHitPlayer) break;
 
-            if (hit.CompareTag("Player"))
+            if (hit.gameObject.CompareTag("Player"))
             {
-                Debug.Log($"<color=red>플레이어 히트! 데미지: {enemyData.damage}</color>");
+                Player player = hit.GetComponent<Player>();
+                if (player != null)
+                {
+                    player.TakeDamage(enemyData.damage);
+                }
                 hasHitPlayer = true;
+            }
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (isDead) return;
+
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Player player = collision.gameObject.GetComponent<Player>();
+            if (player != null)
+            {
+                player.TakeDamage(enemyData.damage);
             }
         }
     }
@@ -89,8 +117,6 @@ public class EnemyBase : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-
-        Debug.Log($"몬스터 피격! 들어온 데미지: {damage} / 남은 체력: {currentHealth}");
 
         if (currentHealth <= 0)
         {
@@ -120,8 +146,12 @@ public class EnemyBase : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         if (enemyData == null) return;
+
         Gizmos.color = Color.red;
         Vector3 hitPosition = transform.position + transform.forward * hitOffset;
         Gizmos.DrawWireSphere(hitPosition, hitRadius);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, enemyData.detectionRange);
     }
 }
