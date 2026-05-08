@@ -62,4 +62,15 @@ public class PlayerData : ScriptableObject
     [Tooltip("피격 후 무적 시간 (초)")]
     [Range(0.1f, 2f)]
     public float hitInvincibilityTime = 0.5f;
+
+    [Header("===== 부활 (죽음 도전) =====")]
+    [Tooltip("최대 부활 가능 횟수")]
+    public int maxResurrectionCount = 1;
+
+    [Tooltip("부활 시 회복될 체력 비율 (0.2 = 20%)")]
+    [Range(0.1f, 1f)]
+    public float resurrectionHealthPercent = 0.2f;
+
+    [Tooltip("부활 직후 무적 시간")]
+    public float resurrectionInvincibilityTime = 2f;
 }

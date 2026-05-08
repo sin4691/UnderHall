@@ -5284,8 +5284,8 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Damage_Front_Small_ver_D
-  m_Speed: 1
+  m_Name: Hit
+  m_Speed: 0.2
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours: []
@@ -7286,7 +7286,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Damage_Front_Small_ver_E
+  m_Name: 1
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -8089,7 +8089,7 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 1102318837065337370}
-    m_Position: {x: 1200, y: 492, z: 0}
+    m_Position: {x: 1200, y: 490, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102838572358824280}
     m_Position: {x: 1200, y: 552, z: 0}
@@ -8140,7 +8140,7 @@ AnimatorStateMachine:
     m_Position: {x: 1440, y: 588, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102625737450243232}
-    m_Position: {x: 1440, y: 636, z: 0}
+    m_Position: {x: 930, y: 380, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102887316814182772}
     m_Position: {x: 1440, y: 684, z: 0}
@@ -8991,7 +8991,7 @@ AnimatorStateMachine:
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
-  m_AnyStatePosition: {x: 480, y: 460, z: 0}
+  m_AnyStatePosition: {x: 1270, y: 400, z: 0}
   m_EntryPosition: {x: 50, y: 120, z: 0}
   m_ExitPosition: {x: 50, y: 160, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
