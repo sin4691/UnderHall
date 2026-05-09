@@ -1,0 +1,287 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>
+/// VFX 통합 매니저 (오브젝트 풀링 적용)
+/// 씬에 빈 오브젝트 만들고 이 스크립트 붙이면 됨
+/// 이름: VFXManager
+///
+/// [플레이어 담당]
+/// 검 휘두를 때:    VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, weaponVFXPoint.forward);
+/// 스킬 쓸 때:      VFXManager.Instance.PlayWeaponSkill(weaponVFXPoint.position, weaponVFXPoint.forward);
+/// 공격 맞았을 때:  VFXManager.Instance.PlayAttackHit(hitPos, hitNormal);
+/// 대시 시작할 때:  VFXManager.Instance.PlayDash(transform.position, dashDirection);
+/// 플레이어 피격:   VFXManager.Instance.PlayPlayerHit(transform.position, hitNormal, gameObject);
+/// 플레이어 사망:   VFXManager.Instance.PlayPlayerDeath(transform.position, gameObject);
+///
+/// [몬스터 담당]
+/// 몬스터 피격:     VFXManager.Instance.PlayMonsterHit(transform.position, hitNormal, gameObject);
+/// 몬스터 사망:     VFXManager.Instance.PlayMonsterDeath(transform.position, gameObject);
+/// </summary>
+public class VFXManager : MonoBehaviour
+{
+    public static VFXManager Instance { get; private set; }
+
+    [Header("─ 검/무기 이펙트 ─")]
+    [SerializeField] GameObject weaponSwingPrefab;
+    [SerializeField] GameObject weaponSkillPrefab;
+
+    [Header("─ 타격 이펙트 ─")]
+    [SerializeField] GameObject attackHitSparkPrefab;
+    [SerializeField] GameObject attackImpactPrefab;
+
+    [Header("─ 대시 이펙트 ─")]
+    [SerializeField] GameObject dashStartPrefab;      // 대시 시작 잔상
+    [SerializeField] GameObject dashTrailPrefab;      // 대시 중 궤적
+    [SerializeField] GameObject dashEndPrefab;        // 대시 끝 잔상
+
+    [Header("─ 플레이어 피격/사망 ─")]
+    [SerializeField] GameObject playerHitPrefab;
+    [SerializeField] GameObject playerDeathPrefab;
+
+    [Header("─ 몬스터 피격/사망 ─")]
+    [SerializeField] GameObject monsterHitPrefab;
+    [SerializeField] GameObject monsterDeathPrefab;
+    [SerializeField] GameObject monsterDeathSmokePrefab;
+
+    [Header("─ 풀링 설정 ─")]
+    [SerializeField] int poolSizePerPrefab = 5;
+
+    [Header("─ 피격 플래시 설정 ─")]
+    [SerializeField] Color playerHitColor  = new Color(1f, 0.15f, 0.15f, 1f);
+    [SerializeField] Color monsterHitColor = new Color(1f, 0.3f,  0.1f,  1f);
+    [SerializeField] float hitFlashDuration = 0.12f;
+
+    [Header("─ 사망 Dissolve 설정 ─")]
+    [SerializeField] float dissolveDuration = 1.2f;
+
+    Dictionary<GameObject, Queue<GameObject>> pool
+        = new Dictionary<GameObject, Queue<GameObject>>();
+    Transform poolRoot;
+
+    static readonly int HitBlendID   = Shader.PropertyToID("_HitEffectBlend");
+    static readonly int HitColorID   = Shader.PropertyToID("_HitColor");
+    static readonly int FadeAmountID = Shader.PropertyToID("_FadeAmount");
+
+    // ─────────────────────────────────────────
+    // 초기화
+    // ─────────────────────────────────────────
+
+    void Awake()
+    {
+        if (Instance != null) { Destroy(gameObject); return; }
+        Instance = this;
+
+        poolRoot = new GameObject("VFX_Pool").transform;
+        poolRoot.SetParent(transform);
+
+        PrewarmPool(weaponSwingPrefab);
+        PrewarmPool(weaponSkillPrefab);
+        PrewarmPool(attackHitSparkPrefab);
+        PrewarmPool(attackImpactPrefab);
+        PrewarmPool(dashStartPrefab);
+        PrewarmPool(dashTrailPrefab);
+        PrewarmPool(dashEndPrefab);
+        PrewarmPool(playerHitPrefab);
+        PrewarmPool(playerDeathPrefab);
+        PrewarmPool(monsterHitPrefab);
+        PrewarmPool(monsterDeathPrefab);
+        PrewarmPool(monsterDeathSmokePrefab);
+    }
+
+    void PrewarmPool(GameObject prefab)
+    {
+        if (prefab == null) return;
+        pool[prefab] = new Queue<GameObject>();
+        for (int i = 0; i < poolSizePerPrefab; i++)
+            pool[prefab].Enqueue(CreatePoolObject(prefab));
+    }
+
+    GameObject CreatePoolObject(GameObject prefab)
+    {
+        var go = Instantiate(prefab, poolRoot);
+        go.SetActive(false);
+        return go;
+    }
+
+    // ─────────────────────────────────────────
+    // 풀 관리
+    // ─────────────────────────────────────────
+
+    GameObject GetFromPool(GameObject prefab, Vector3 position, Vector3 direction)
+    {
+        if (prefab == null) return null;
+        if (!pool.ContainsKey(prefab))
+            pool[prefab] = new Queue<GameObject>();
+
+        GameObject go = pool[prefab].Count > 0
+            ? pool[prefab].Dequeue()
+            : CreatePoolObject(prefab);
+
+        go.transform.position = position;
+        go.transform.rotation = direction != Vector3.zero
+            ? Quaternion.LookRotation(direction)
+            : Quaternion.identity;
+        go.SetActive(true);
+
+        var ps = go.GetComponent<ParticleSystem>();
+        if (ps != null) ps.Play();
+
+        float duration = ps != null
+            ? ps.main.duration + ps.main.startLifetime.constantMax
+            : 2f;
+        StartCoroutine(ReturnToPool(go, prefab, duration));
+        return go;
+    }
+
+    IEnumerator ReturnToPool(GameObject go, GameObject prefab, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (go == null) yield break;
+        go.SetActive(false);
+        go.transform.SetParent(poolRoot);
+        if (pool.ContainsKey(prefab))
+            pool[prefab].Enqueue(go);
+    }
+
+    // ─────────────────────────────────────────
+    // 무기 이펙트
+    // ─────────────────────────────────────────
+
+    public void PlayWeaponSwing(Vector3 position, Vector3 direction)
+    {
+        GetFromPool(weaponSwingPrefab, position, direction);
+    }
+
+    public void PlayWeaponSkill(Vector3 position, Vector3 direction)
+    {
+        GetFromPool(weaponSkillPrefab, position, direction);
+    }
+
+    // ─────────────────────────────────────────
+    // 타격 이펙트
+    // ─────────────────────────────────────────
+
+    public void PlayAttackHit(Vector3 position, Vector3 normal)
+    {
+        GetFromPool(attackHitSparkPrefab, position, normal);
+        GetFromPool(attackImpactPrefab,   position, normal);
+    }
+
+    // ─────────────────────────────────────────
+    // 대시 이펙트
+    // ─────────────────────────────────────────
+
+    /// <summary>대시 시작/중/끝 이펙트 — PlayerDash에서 호출</summary>
+    public void PlayDash(Vector3 position, Vector3 direction, float dashDuration)
+    {
+        // 대시 시작 잔상
+        GetFromPool(dashStartPrefab, position, direction);
+        // 대시 중 궤적 (대시 지속시간동안 반복 스폰)
+        StartCoroutine(DashTrailRoutine(position, direction, dashDuration));
+    }
+
+    IEnumerator DashTrailRoutine(Vector3 startPos, Vector3 direction, float dashDuration)
+    {
+        // 대시 중 플레이어 Transform 추적을 위해 PlayerDash에서 transform 넘겨받기
+        // 여기선 시작 위치 기준으로 궤적 생성
+        float elapsed = 0f;
+        float interval = 0.05f; // 0.05초마다 잔상 생성
+
+        while (elapsed < dashDuration)
+        {
+            GetFromPool(dashTrailPrefab, startPos, direction);
+            yield return new WaitForSeconds(interval);
+            elapsed += interval;
+        }
+
+        // 대시 끝 잔상
+        GetFromPool(dashEndPrefab, startPos, direction);
+    }
+
+    // ─────────────────────────────────────────
+    // 플레이어 피격/사망
+    // ─────────────────────────────────────────
+
+    public void PlayPlayerHit(Vector3 position, Vector3 normal, GameObject playerObj)
+    {
+        GetFromPool(playerHitPrefab, position, normal);
+        StartCoroutine(FlashRoutine(playerObj, playerHitColor));
+    }
+
+    public void PlayPlayerDeath(Vector3 position, GameObject playerObj)
+    {
+        GetFromPool(playerDeathPrefab, position, Vector3.up);
+        StartCoroutine(DissolveRoutine(playerObj));
+    }
+
+    // ─────────────────────────────────────────
+    // 몬스터 피격/사망
+    // ─────────────────────────────────────────
+
+    public void PlayMonsterHit(Vector3 position, Vector3 normal, GameObject monsterObj)
+    {
+        GetFromPool(monsterHitPrefab, position, normal);
+        StartCoroutine(FlashRoutine(monsterObj, monsterHitColor));
+    }
+
+    public void PlayMonsterDeath(Vector3 position, GameObject monsterObj)
+    {
+        GetFromPool(monsterDeathPrefab,      position, Vector3.up);
+        GetFromPool(monsterDeathSmokePrefab, position, Vector3.up);
+        StartCoroutine(DissolveRoutine(monsterObj));
+    }
+
+    // ─────────────────────────────────────────
+    // 내부 코루틴
+    // ─────────────────────────────────────────
+
+    IEnumerator FlashRoutine(GameObject target, Color color)
+    {
+        if (target == null) yield break;
+        var mats = GetMaterials(target);
+        foreach (var m in mats)
+        {
+            if (m.HasProperty(HitColorID)) m.SetColor(HitColorID, color);
+            if (m.HasProperty(HitBlendID)) m.SetFloat(HitBlendID, 1f);
+        }
+        yield return new WaitForSeconds(hitFlashDuration);
+        if (target == null) yield break;
+        foreach (var m in mats)
+            if (m.HasProperty(HitBlendID))
+                m.SetFloat(HitBlendID, 0f);
+    }
+
+    IEnumerator DissolveRoutine(GameObject target)
+    {
+        if (target == null) yield break;
+        var mats = GetMaterials(target);
+        float elapsed = 0f;
+        while (elapsed < dissolveDuration)
+        {
+            if (target == null) yield break;
+            float t = elapsed / dissolveDuration;
+            foreach (var m in mats)
+                if (m.HasProperty(FadeAmountID))
+                    m.SetFloat(FadeAmountID, t);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        foreach (var m in mats)
+            if (m.HasProperty(FadeAmountID))
+                m.SetFloat(FadeAmountID, 1f);
+        yield return new WaitForSeconds(0.1f);
+        Destroy(target);
+    }
+
+    Material[] GetMaterials(GameObject target)
+    {
+        var renderers = target.GetComponentsInChildren<Renderer>();
+        var list = new List<Material>();
+        foreach (var r in renderers)
+            foreach (var m in r.materials)
+                list.Add(m);
+        return list.ToArray();
+    }
+}
