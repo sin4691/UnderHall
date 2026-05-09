@@ -9,6 +9,11 @@ public enum PlayerState { Idle, Move, Attack, Dash, SpecialAttack, Dead, Resurre
 [RequireComponent(typeof(PlayerDash))]
 public class Player : MonoBehaviour
 {
+    //VFX 위치 지정용
+    [Header("VFX")]
+    public Transform vfxPoint;
+    //// VFXPoint_Body 드래그
+
     [Header("Camera Zoom Settings")]
     public CinemachineCamera virtualCamera; 
     public float zoomInFOV = 30f;  
@@ -30,13 +35,6 @@ public class Player : MonoBehaviour
     private float currentHealth;
     private Vector2 inputVector;
 
-    private void OnTriggerEnter(Collider other)
-    {
-        HadesHitVFX vfx = other.GetComponent<HadesHitVFX>();
-        if (vfx != null)
-            vfx.SpawnHitVFX(other.transform.position,
-                            (other.transform.position - transform.position).normalized);
-    }
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -88,6 +86,10 @@ public class Player : MonoBehaviour
         currentHealth -= damage;
 
         Debug.Log($"플레이어 피격! 남은 체력: {currentHealth}");
+
+        //창우_피격 이펙트
+        VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
+        //창우_피격 이펙트는 VFXManager에서 구현한 PlayPlayerHit 함수를 호출하여 재생합니다. 이 함수는 피격 위치와 방향, 그리고 플레이어 객체를 인자로 받아서 적절한 피격 이펙트를 생성합니다.
 
         if (currentHealth <= 0)
         {
@@ -163,6 +165,14 @@ public class Player : MonoBehaviour
     private void Die()
     {
         if (CurrentState == PlayerState.Dead) return;
+
+        //창우_사망 시 이펙트 재생
+        VFXManager.Instance.PlayPlayerDeath(vfxPoint.position, gameObject);
+
+        ChangeState(PlayerState.Dead);
+        attack.CancelAttack();
+        //창우_사망 시 이동과 공격을 즉시 멈추고 입력을 무시하도록 설정, 창현씨가 영상올려주신 한번 부활? 하는 기능을 구현할때는 지워도 될 듯 합니다.
+
 
         ChangeState(PlayerState.Dead);
         attack.CancelAttack();
