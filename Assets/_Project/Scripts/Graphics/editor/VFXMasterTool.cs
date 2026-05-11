@@ -5,7 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// VFX Master Tool — VFXManager 전용 에디터 유틸리티
-/// 경로: Assets/Editor/VFXMasterTool.cs
+/// 
 ///
 /// 기능:
 ///  - 등록된 VFX 프리팹 목록 표시 + 씬 프리뷰
@@ -145,7 +145,7 @@ public class VFXMasterTool : EditorWindow
     {
         using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
         {
-            GUILayout.Label("Aeterna — VFX Master Tool", EditorStyles.boldLabel);
+            GUILayout.Label("VFX Master Tool", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
 
             if (GUILayout.Button("새로고침", EditorStyles.toolbarButton, GUILayout.Width(64)))
