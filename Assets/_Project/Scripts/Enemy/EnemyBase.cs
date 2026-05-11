@@ -21,7 +21,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] private float hitRadius = 1.5f;
     [SerializeField] private float hitOffset = 1.5f;
 
-    void Start()
+    protected virtual void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
@@ -35,7 +35,7 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if (isDead || target == null || enemyData == null || !agent.isOnNavMesh) return;
 

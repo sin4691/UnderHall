@@ -22,17 +22,46 @@ public class EnemyRange : EnemyBase
 
     private float rangeTimer;
 
+    private bool isAppeared = false;
+
+    protected override void Update()
+    {
+        if (target == null) return;
+
+        if (!isAppeared)
+        {
+            float dist = Vector3.Distance(transform.position, target.position);
+
+            if (dist <= detectRange)
+            {
+                isAppeared = true; 
+                anim.SetTrigger("Appear"); 
+
+                if (agent != null) agent.isStopped = true;
+
+                Invoke("StartMoving", 2.0f);
+            }
+
+            return;
+        }
+
+        base.Update();
+    }
+
+    private void StartMoving()
+    {
+        if (agent != null) agent.isStopped = false;
+    }
+
     protected override void Attack()
     {
-        // [추가] 공격 사거리 안에서 멈췄을 때 플레이어를 부드럽게 쳐다보게 함
         if (target != null)
         {
             Vector3 lookDir = (target.position - transform.position).normalized;
-            lookDir.y = 0; // 몬스터가 위아래로 기우뚱하지 않게 Y축만 회전
+            lookDir.y = 0; 
 
             if (lookDir != Vector3.zero)
             {
-                // 15f는 회전 속도입니다. 더 빨리 돌게 하고 싶으면 숫자를 키우세요!
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 15f);
             }
         }
@@ -50,10 +79,8 @@ public class EnemyRange : EnemyBase
     {
         if (target == null || firePoint == null) return;
 
-        // 플레이어의 허리 높이 조준
         Vector3 targetPostion = target.position + Vector3.up * 1f;
 
-        // 입(firePoint)에서 타겟을 향하는 대각선 방향 계산
         Vector3 centerDirection = (targetPostion - firePoint.position).normalized;
 
         float startAngle = -spreadAngle * (projectileCount - 1) / 2f;
@@ -62,7 +89,6 @@ public class EnemyRange : EnemyBase
         {
             float currentAngle = startAngle + (spreadAngle * i);
 
-            // 기준 방향을 Y축으로 회전시켜 부채꼴 형성
             Vector3 finalDirection = Quaternion.Euler(0, currentAngle, 0) * centerDirection;
 
             ProjectileManager.Instance.FireProjectile(

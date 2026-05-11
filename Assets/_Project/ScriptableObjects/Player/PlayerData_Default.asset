@@ -34,5 +34,5 @@ MonoBehaviour:
   levelATK: 0
   levelDash: 0
   levelGold: 0
-  levelRevive: 0
+  levelRevive: 1
   acquiredGifts: 07000000
