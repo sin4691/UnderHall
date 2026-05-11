@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 using Unity.Cinemachine;
@@ -9,10 +9,10 @@ public enum PlayerState { Idle, Move, Attack, Dash, SpecialAttack, Dead, Resurre
 [RequireComponent(typeof(PlayerDash))]
 public class Player : MonoBehaviour
 {
-    //VFX À§Ä¡ ÁöÁ¤¿ë
+    //VFX ìœ„ì¹˜ ì§€ì •ìš©
     [Header("VFX")]
     public Transform vfxPoint;
-    //// VFXPoint_Body µå·¡±×
+    //// VFXPoint_Body ë“œë˜ê·¸
 
     [Header("Camera Zoom Settings")]
     public CinemachineCamera virtualCamera; 
@@ -85,11 +85,11 @@ public class Player : MonoBehaviour
 
         currentHealth -= damage;
 
-        Debug.Log($"ÇÃ·¹ÀÌ¾î ÇÇ°İ! ³²Àº Ã¼·Â: {currentHealth}");
+        Debug.Log($"í”Œë ˆì´ì–´ í”¼ê²©! ë‚¨ì€ ì²´ë ¥: {currentHealth}");
 
-        //Ã¢¿ì_ÇÇ°İ ÀÌÆåÆ®
+        //ì°½ìš°_í”¼ê²© ì´í™íŠ¸
         VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
-        //Ã¢¿ì_ÇÇ°İ ÀÌÆåÆ®´Â VFXManager¿¡¼­ ±¸ÇöÇÑ PlayPlayerHit ÇÔ¼ö¸¦ È£ÃâÇÏ¿© Àç»ıÇÕ´Ï´Ù. ÀÌ ÇÔ¼ö´Â ÇÇ°İ À§Ä¡¿Í ¹æÇâ, ±×¸®°í ÇÃ·¹ÀÌ¾î °´Ã¼¸¦ ÀÎÀÚ·Î ¹Ş¾Æ¼­ ÀûÀıÇÑ ÇÇ°İ ÀÌÆåÆ®¸¦ »ı¼ºÇÕ´Ï´Ù.
+        //ì°½ìš°_í”¼ê²© ì´í™íŠ¸ëŠ” VFXManagerì—ì„œ êµ¬í˜„í•œ PlayPlayerHit í•¨ìˆ˜ë¥¼ í˜¸ì¶œí•˜ì—¬ ì¬ìƒí•©ë‹ˆë‹¤. ì´ í•¨ìˆ˜ëŠ” í”¼ê²© ìœ„ì¹˜ì™€ ë°©í–¥, ê·¸ë¦¬ê³  í”Œë ˆì´ì–´ ê°ì²´ë¥¼ ì¸ìë¡œ ë°›ì•„ì„œ ì ì ˆí•œ í”¼ê²© ì´í™íŠ¸ë¥¼ ìƒì„±í•©ë‹ˆë‹¤.
 
         if (currentHealth <= 0)
         {
@@ -120,6 +120,10 @@ public class Player : MonoBehaviour
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
         Time.timeScale = 0.1f;
 
+        //ì°½ìš°_ë¶€í™œ ì‹œì‘ ì´í™íŠ¸  ì“°ëŸ¬ì§€ëŠ” ìˆœê°„ (ìŠ¬ë¡œìš°ëª¨ì…˜ ì§„ì… ì§í›„)
+        VFXManager.Instance.PlayPlayerResurrectStart(vfxPoint.position);
+
+
         StartCoroutine(CameraZoomRoutine(zoomInFOV, zoomDuration));
 
         yield return new WaitForSecondsRealtime(4f);
@@ -131,6 +135,9 @@ public class Player : MonoBehaviour
         animator.updateMode = AnimatorUpdateMode.Normal;
 
         StartCoroutine(CameraZoomRoutine(originalFOV, 0.2f));
+
+        //ë¶€í™œ ì™„ë£Œ ì´í™íŠ¸  ì¼ì–´ë‚˜ëŠ” ìˆœê°„ (íƒ€ì„ìŠ¤ì¼€ì¼ ë³µêµ¬ ì§í›„)
+        VFXManager.Instance.PlayPlayerResurrectEnd(vfxPoint.position);
 
         animator.SetBool("isMoving", false);
         animator.CrossFade("idle", 0.1f);
@@ -166,12 +173,12 @@ public class Player : MonoBehaviour
     {
         if (CurrentState == PlayerState.Dead) return;
 
-        //Ã¢¿ì_»ç¸Á ½Ã ÀÌÆåÆ® Àç»ı
+        //ì°½ìš°_ì‚¬ë§ ì‹œ ì´í™íŠ¸ ì¬ìƒ
         VFXManager.Instance.PlayPlayerDeath(vfxPoint.position, gameObject);
 
         ChangeState(PlayerState.Dead);
         attack.CancelAttack();
-        //Ã¢¿ì_»ç¸Á ½Ã ÀÌµ¿°ú °ø°İÀ» Áï½Ã ¸ØÃß°í ÀÔ·ÂÀ» ¹«½ÃÇÏµµ·Ï ¼³Á¤, Ã¢Çö¾¾°¡ ¿µ»ó¿Ã·ÁÁÖ½Å ÇÑ¹ø ºÎÈ°? ÇÏ´Â ±â´ÉÀ» ±¸ÇöÇÒ¶§´Â Áö¿öµµ µÉ µí ÇÕ´Ï´Ù.
+        //ì°½ìš°_ì‚¬ë§ ì‹œ ì´ë™ê³¼ ê³µê²©ì„ ì¦‰ì‹œ ë©ˆì¶”ê³  ì…ë ¥ì„ ë¬´ì‹œí•˜ë„ë¡ ì„¤ì •, ì°½í˜„ì”¨ê°€ ì˜ìƒì˜¬ë ¤ì£¼ì‹  í•œë²ˆ ë¶€í™œ? í•˜ëŠ” ê¸°ëŠ¥ì„ êµ¬í˜„í• ë•ŒëŠ” ì§€ì›Œë„ ë  ë“¯ í•©ë‹ˆë‹¤.
 
 
         ChangeState(PlayerState.Dead);
