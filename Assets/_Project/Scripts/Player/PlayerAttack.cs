@@ -18,6 +18,10 @@ public class PlayerAttack : MonoBehaviour
     private bool isSpecialAttackOnCooldown = false;
     private bool isSpinning = false;
 
+    [Header("VFX")]
+    public Transform weaponVFXPoint; //창우_VFXPoint_Weapon 드래그
+    public Transform skillVFXPoint;  //창우_VFXPoint_Body 드래그
+
     private Collider[] hitColliders = new Collider[10];
 
     private void Awake() => player = GetComponent<Player>();
@@ -76,6 +80,10 @@ public class PlayerAttack : MonoBehaviour
             player.animator.CrossFade("attack" + currentCombo, 0.02f);
             yield return new WaitForSeconds(0.05f);
 
+            // 기본 공격 이펙트
+            VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, weaponVFXPoint.forward);
+            // 공격 범위 내 적들에게 데미지 판정
+
             ExecuteHitDetection(transform.position + transform.forward * (player.playerData.attackRange * 0.5f),
                                 player.playerData.attackRange * 0.5f, 1f);
 
@@ -118,6 +126,11 @@ public class PlayerAttack : MonoBehaviour
             if (tickTimer >= tickRate)
             {
                 ExecuteHitDetection(transform.position, player.playerData.attackRange, player.playerData.specialAttackMultiplier);
+
+                //창우_스킬 이펙트
+                VFXManager.Instance.PlayWeaponSkill(skillVFXPoint.position, skillVFXPoint.forward);
+                //창우_이펙트가 너무 자주 나오는 것을 방지하기 위해 tickRate마다 한 번씩만 재생
+
                 tickTimer = 0f;
             }
             yield return null;
@@ -149,6 +162,11 @@ public class PlayerAttack : MonoBehaviour
                 float finalDamage = player.playerData.damage * damageMultiplier;
                 target.TakeDamage(finalDamage);
             }
+
+            //창우_데미지 들어갈 때 타격 이펙트
+            Vector3 hitNormal = (col.transform.position - transform.position).normalized;
+            VFXManager.Instance.PlayAttackHit(col.transform.position, hitNormal);
+            //창우_타격 이펙트가 너무 자주 나오는 것을 방지하기 위해 일정 시간 동안 같은 콜라이더에 대한 이펙트 재생을 제한할 수 있음
         }
     }
 

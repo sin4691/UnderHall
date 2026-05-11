@@ -119,6 +119,17 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &591485 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9172275626997765464, guid: 4cd19b94934416742b7b3c983a4843e7, type: 3}
+  m_PrefabInstance: {fileID: 1689933411}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
 --- !u!1 &251512898
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,6 +243,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &955154019 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6581191435777932757, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
+  m_PrefabInstance: {fileID: 1005967995}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1005967995
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -240,10 +256,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 453329555883639114, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
+      propertyPath: dashVFXPoint
+      value: 
+      objectReference: {fileID: 2073736283}
     - target: {fileID: 2772393662749966190, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 7158556048543223871, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
+      propertyPath: skillVFXPoint
+      value: 
+      objectReference: {fileID: 955154019}
+    - target: {fileID: 7158556048543223871, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
+      propertyPath: weaponVFXPoint
+      value: 
+      objectReference: {fileID: 955154019}
     - target: {fileID: 7817026909752936775, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.649109
@@ -284,6 +312,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9028523370062418071, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
+      propertyPath: virtualCamera
+      value: 
+      objectReference: {fileID: 591485}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -641,6 +673,72 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &1956936501
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1956936503}
+  - component: {fileID: 1956936502}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1956936502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1956936501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7256f9a94fa4a1b4e9fdea62fb24c0a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VFXManager
+  weaponSwingPrefab: {fileID: 0}
+  weaponSkillPrefab: {fileID: 0}
+  attackHitSparkPrefab: {fileID: 0}
+  attackImpactPrefab: {fileID: 0}
+  dashStartPrefab: {fileID: 0}
+  dashTrailPrefab: {fileID: 0}
+  dashEndPrefab: {fileID: 0}
+  playerHitPrefab: {fileID: 0}
+  playerDeathPrefab: {fileID: 0}
+  monsterHitPrefab: {fileID: 0}
+  monsterDeathPrefab: {fileID: 0}
+  monsterDeathSmokePrefab: {fileID: 0}
+  poolSizePerPrefab: 5
+  playerHitColor: {r: 1, g: 0.15, b: 0.15, a: 1}
+  monsterHitColor: {r: 1, g: 0.3, b: 0.1, a: 1}
+  hitFlashDuration: 0.12
+  dissolveDuration: 1.2
+--- !u!4 &1956936503
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1956936501}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.52199, y: 0.87539, z: -12.45754}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &2073736283 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7817026909752936775, guid: 3a2b91265b4e40b42a136b3c7259d361, type: 3}
+  m_PrefabInstance: {fileID: 1005967995}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -650,3 +748,4 @@ SceneRoots:
   - {fileID: 251512902}
   - {fileID: 1689933411}
   - {fileID: 1005967995}
+  - {fileID: 1956936503}
