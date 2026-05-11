@@ -65,12 +65,26 @@ public class PlayerData : ScriptableObject
 
     [Header("===== 부활 (죽음 도전) =====")]
     [Tooltip("최대 부활 가능 횟수")]
-    public int maxResurrectionCount = 1;
+    public int maxResurrectionCount = 0;
 
     [Tooltip("부활 시 회복될 체력 비율 (0.2 = 20%)")]
     [Range(0.1f, 1f)]
-    public float resurrectionHealthPercent = 0.2f;
+    public float resurrectionHealthPercent = 0f;
 
     [Tooltip("부활 직후 무적 시간")]
     public float resurrectionInvincibilityTime = 2f;
+
+    [Header("===== 재화 및 메타 강화 =====")]
+    [Tooltip("현재 보유 중인 골드")]
+    public int currentGold = 5000; 
+
+    [Tooltip("골드 획득량 배율 (기본 1.0 = 100%)")]
+    public float goldGainMultiplier = 1.0f;
+
+    [Header("강화 레벨 (0이 기본상태)")]
+    public int levelHP = 0;     
+    public int levelATK = 0;    
+    public int levelDash = 0;   
+    public int levelGold = 0;   
+    public int levelRevive = 0; 
 }

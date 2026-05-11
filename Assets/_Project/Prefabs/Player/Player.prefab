@@ -818,6 +818,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b68114481eee94b86c8db0f31b94d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
+  vfxPoint: {fileID: 7817026909752936775}
   virtualCamera: {fileID: 0}
   zoomInFOV: 30
   zoomDuration: 0.5
@@ -834,6 +835,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae4837dd6f0c1d04a81a067993076b61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
+  weaponVFXPoint: {fileID: 7817026909752936775}
+  skillVFXPoint: {fileID: 7817026909752936775}
 --- !u!114 &5286484660427528926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -859,6 +862,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa181db6fce4b694790b3be4813f5150, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDash
+  dashVFXPoint: {fileID: 7817026909752936775}
 --- !u!1 &2803449379989224043
 GameObject:
   m_ObjectHideFlags: 0

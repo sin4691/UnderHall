@@ -25,3 +25,13 @@ MonoBehaviour:
   dashCooldown: 1
   dashInvincibilityTime: 0.2
   hitInvincibilityTime: 0.5
+  maxResurrectionCount: 0
+  resurrectionHealthPercent: 0
+  resurrectionInvincibilityTime: 2
+  currentGold: 1600
+  goldGainMultiplier: 1
+  levelHP: 0
+  levelATK: 0
+  levelDash: 0
+  levelGold: 0
+  levelRevive: 0
