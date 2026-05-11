@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Reflection; // EnemyBase 강제 접근(처형)을 위해 필요함
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -19,10 +20,13 @@ public class PlayerAttack : MonoBehaviour
     private bool isSpinning = false;
 
     [Header("VFX")]
-    public Transform weaponVFXPoint; //창우_VFXPoint_Weapon 드래그
-    public Transform skillVFXPoint;  //창우_VFXPoint_Body 드래그
+    public Transform weaponVFXPoint; // 창우_VFXPoint_Weapon 드래그
+    public Transform skillVFXPoint;  // 창우_VFXPoint_Body 드래그
 
     private Collider[] hitColliders = new Collider[10];
+
+    // 각성(대시 후 다음 공격 2배) 버프 상태
+    public bool isAwakened = false;
 
     private void Awake() => player = GetComponent<Player>();
 
@@ -64,7 +68,6 @@ public class PlayerAttack : MonoBehaviour
             player.ChangeState(PlayerState.Idle);
     }
 
-
     // 기본 공격 콤보 루틴
     private IEnumerator ComboAttackRoutine()
     {
@@ -72,28 +75,32 @@ public class PlayerAttack : MonoBehaviour
         player.animator.SetBool("isMoving", false);
         currentCombo = 1;
 
+        // [연격] 기본 공격 속도 +25%
+        if (player.playerData.acquiredGifts.Contains(GiftType.Combo))
+            player.animator.speed = 1.25f;
+
         while (currentCombo <= maxCombo)
         {
             isNextAttackBuffered = false;
             LookAtMouse();
 
             player.animator.CrossFade("attack" + currentCombo, 0.02f);
-            yield return new WaitForSeconds(0.05f);
+            yield return new WaitForSeconds(0.05f / player.animator.speed);
 
             // 기본 공격 이펙트
             VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, weaponVFXPoint.forward);
-            // 공격 범위 내 적들에게 데미지 판정
 
             ExecuteHitDetection(transform.position + transform.forward * (player.playerData.attackRange * 0.5f),
-                                player.playerData.attackRange * 0.5f, 1f);
+                                player.playerData.attackRange * 0.5f, 1f, false);
 
             AnimatorStateInfo stateInfo = player.animator.GetCurrentAnimatorStateInfo(0);
-            yield return new WaitForSeconds(stateInfo.length * 0.5f);
+            yield return new WaitForSeconds((stateInfo.length * 0.5f) / player.animator.speed);
 
             if (isNextAttackBuffered) currentCombo++;
             else break;
         }
 
+        player.animator.speed = 1f; // 공속 복구
         currentCombo = 0;
         player.animator.CrossFade("idle", 0.15f);
         player.ChangeState(PlayerState.Idle);
@@ -117,7 +124,7 @@ public class PlayerAttack : MonoBehaviour
             if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting)
             {
                 isSpinning = false;
-                break; 
+                break;
             }
 
             timer += Time.deltaTime;
@@ -125,11 +132,19 @@ public class PlayerAttack : MonoBehaviour
 
             if (tickTimer >= tickRate)
             {
-                ExecuteHitDetection(transform.position, player.playerData.attackRange, player.playerData.specialAttackMultiplier);
+                // [폭발] 로직 : 타격 범위 반경 증가
+                float currentRadius = player.playerData.attackRange;
+                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
+                {
+                    // 기프트 보유 시 공격 반경 1.5배 증가
+                    currentRadius *= 1.5f;
+                }
 
-                //창우_스킬 이펙트
+                // 변경된 Radius를 적용하여 데미지 판정 (isSpecial = true)
+                ExecuteHitDetection(transform.position, currentRadius, player.playerData.specialAttackMultiplier, true);
+
+                // 스킬 이펙트 재생 (비주얼 크기는 인스펙터의 프리팹에서 조절 필요)
                 VFXManager.Instance.PlayWeaponSkill(skillVFXPoint.position, skillVFXPoint.forward);
-                //창우_이펙트가 너무 자주 나오는 것을 방지하기 위해 tickRate마다 한 번씩만 재생
 
                 tickTimer = 0f;
             }
@@ -146,10 +161,19 @@ public class PlayerAttack : MonoBehaviour
     }
 
     // 통합 데미지 판정 시스템
-    private void ExecuteHitDetection(Vector3 center, float radius, float damageMultiplier)
+    private void ExecuteHitDetection(Vector3 center, float radius, float damageMultiplier, bool isSpecial)
     {
         center.y += 1f;
+        // 변경된 radius 값이 Physics.OverlapSphereNonAlloc에 적용됩니다.
         int hitCount = Physics.OverlapSphereNonAlloc(center, radius, hitColliders);
+
+        // [각성] 버프 사용 여부 확인
+        bool useAwakening = false;
+        if (isAwakened)
+        {
+            useAwakening = true;
+            isAwakened = false; // 한 번 쓰면 바로 버프 소모
+        }
 
         for (int i = 0; i < hitCount; i++)
         {
@@ -157,15 +181,81 @@ public class PlayerAttack : MonoBehaviour
             if (col.gameObject == player.gameObject) continue;
 
             var target = col.GetComponentInParent<EnemyBase>();
-            if (target != null)
+
+            // 몬스터가 존재하고 아직 콜라이더가 켜져있다면 (살아있다면)
+            if (target != null && col.enabled)
             {
                 float finalDamage = player.playerData.damage * damageMultiplier;
+
+                // [패시브 계열]
+                // [광폭] 내 체력이 50% 이하면 데미지 +40%
+                if (player.playerData.acquiredGifts.Contains(GiftType.Berserk) &&
+                   (player.CurrentHealth <= player.playerData.maxHealth * 0.5f))
+                    finalDamage *= 1.4f;
+
+                // [각성] 대시 직후라면 데미지 2배
+                if (useAwakening) finalDamage *= 2f;
+
+                // [일반 공격 계열]
+                if (!isSpecial)
+                {
+                    // [처형] 리플렉션으로 EnemyBase의 private 체력 읽어오기
+                    if (player.playerData.acquiredGifts.Contains(GiftType.Execution))
+                    {
+                        FieldInfo healthField = typeof(EnemyBase).GetField("currentHealth", BindingFlags.NonPublic | BindingFlags.Instance);
+                        FieldInfo dataField = typeof(EnemyBase).GetField("enemyData", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                        if (healthField != null && dataField != null)
+                        {
+                            float enemyCurrentHP = (float)healthField.GetValue(target);
+                            var enemyData = dataField.GetValue(target);
+
+                            FieldInfo maxHpField = enemyData.GetType().GetField("maxHealth", BindingFlags.Public | BindingFlags.Instance);
+                            if (maxHpField != null)
+                            {
+                                float enemyMaxHP = (float)maxHpField.GetValue(enemyData);
+
+                                // 체력이 20% 이하면 데미지 2배!
+                                if (enemyCurrentHP <= enemyMaxHP * 0.2f) finalDamage *= 2f;
+                            }
+                        }
+                    }
+
+                    // [치명타] 15% 확률로 2배
+                    if (player.playerData.acquiredGifts.Contains(GiftType.Critical) && Random.value <= 0.15f)
+                    {
+                        finalDamage *= 2f;
+                        Debug.Log("크리티컬 터짐!");
+                    }
+                }
+                // [특수 공격 계열]
+                else
+                {
+                    // [지속력] 특수공격 데미지 30% 증가
+                    if (player.playerData.acquiredGifts.Contains(GiftType.Endurance))
+                        finalDamage *= 1.3f;
+
+                    // [수정됨] 폭발(Explosion)의 데미지 증폭 로직을 제거했습니다.
+                }
+
+                // 타격 직전의 콜라이더 상태 저장
+                bool wasAlive = col.enabled;
+
+                string attackType = isSpecial ? "특수공격" : "기본공격";
+                Debug.Log($"[데미지 판정] {attackType} 명중! 최종 데미지: {finalDamage}");
+
+                // 데미지 적용
                 target.TakeDamage(finalDamage);
 
-                //창우_데미지 들어갈 때 타격 이펙트
+                // [흡혈] 때린 직후에 콜라이더가 꺼졌다? = 적이 죽었다!
+                if (wasAlive && !col.enabled && player.playerData.acquiredGifts.Contains(GiftType.Vampirism))
+                {
+                    player.Heal(5f);
+                }
+
+                // 데미지 들어갈 때 타격 이펙트
                 Vector3 hitNormal = (col.transform.position - transform.position).normalized;
                 VFXManager.Instance.PlayAttackHit(col.transform.position, hitNormal);
-                //창우_타격 이펙트가 너무 자주 나오는 것을 방지하기 위해 일정 시간 동안 같은 콜라이더에 대한 이펙트 재생을 제한할 수 있음
             }
         }
     }
@@ -191,7 +281,13 @@ public class PlayerAttack : MonoBehaviour
     private IEnumerator SpecialCooldownRoutine()
     {
         isSpecialAttackOnCooldown = true;
-        yield return new WaitForSeconds(player.playerData.specialAttackCooldown);
+        float finalCooldown = player.playerData.specialAttackCooldown;
+
+        // [속사] 특수공격 쿨타임 -30%
+        if (player.playerData.acquiredGifts.Contains(GiftType.RapidFire))
+            finalCooldown *= 0.7f;
+
+        yield return new WaitForSeconds(finalCooldown);
         isSpecialAttackOnCooldown = false;
     }
 
@@ -203,5 +299,4 @@ public class PlayerAttack : MonoBehaviour
         gizmoPos.y += 1f;
         Gizmos.DrawWireSphere(gizmoPos, player.playerData.attackRange * 0.5f);
     }
-
 }
