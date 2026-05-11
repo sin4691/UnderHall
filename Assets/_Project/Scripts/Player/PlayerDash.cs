@@ -3,6 +3,9 @@ using System.Collections;
 
 public class PlayerDash : MonoBehaviour
 {
+    [Header("VFX")]
+    public Transform dashVFXPoint; // VFXPoint_Dash 드래그
+
     private Player player;
     private readonly int doDashHash = Animator.StringToHash("doDash");
 
@@ -67,6 +70,15 @@ public class PlayerDash : MonoBehaviour
         {
             dashDirection = transform.forward;
         }
+
+        //창우_대시 VFX 재생
+        VFXManager.Instance.PlayDash
+        (
+          dashVFXPoint.position,
+          dashDirection,
+          player.playerData.dashDuration
+        );
+        //창우_대시
 
         float startTime = Time.time;
         while (Time.time < startTime + player.playerData.dashDuration)
