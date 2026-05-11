@@ -161,12 +161,12 @@ public class PlayerAttack : MonoBehaviour
             {
                 float finalDamage = player.playerData.damage * damageMultiplier;
                 target.TakeDamage(finalDamage);
-            }
 
-            //창우_데미지 들어갈 때 타격 이펙트
-            Vector3 hitNormal = (col.transform.position - transform.position).normalized;
-            VFXManager.Instance.PlayAttackHit(col.transform.position, hitNormal);
-            //창우_타격 이펙트가 너무 자주 나오는 것을 방지하기 위해 일정 시간 동안 같은 콜라이더에 대한 이펙트 재생을 제한할 수 있음
+                //창우_데미지 들어갈 때 타격 이펙트
+                Vector3 hitNormal = (col.transform.position - transform.position).normalized;
+                VFXManager.Instance.PlayAttackHit(col.transform.position, hitNormal);
+                //창우_타격 이펙트가 너무 자주 나오는 것을 방지하기 위해 일정 시간 동안 같은 콜라이더에 대한 이펙트 재생을 제한할 수 있음
+            }
         }
     }
 
