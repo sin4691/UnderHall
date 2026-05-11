@@ -8,16 +8,18 @@ using UnityEngine;
 /// 이름: VFXManager
 ///
 /// [플레이어 담당]
-/// 검 휘두를 때:    VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, weaponVFXPoint.forward);
-/// 스킬 쓸 때:      VFXManager.Instance.PlayWeaponSkill(weaponVFXPoint.position, weaponVFXPoint.forward);
+/// 검 휘두를 때:    VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, transform.forward);
+/// 스킬 쓸 때:      VFXManager.Instance.PlayWeaponSkill(skillVFXPoint.position, transform.forward);
 /// 공격 맞았을 때:  VFXManager.Instance.PlayAttackHit(hitPos, hitNormal);
-/// 대시 시작할 때:  VFXManager.Instance.PlayDash(transform.position, dashDirection);
-/// 플레이어 피격:   VFXManager.Instance.PlayPlayerHit(transform.position, hitNormal, gameObject);
-/// 플레이어 사망:   VFXManager.Instance.PlayPlayerDeath(transform.position, gameObject);
+/// 대시 시작할 때:  VFXManager.Instance.PlayDash(dashVFXPoint.position, dashDirection, dashDuration);
+/// 플레이어 피격:   VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
+/// 플레이어 사망:   VFXManager.Instance.PlayPlayerDeath(vfxPoint.position, gameObject);
+/// 부활 시작:       VFXManager.Instance.PlayPlayerResurrectStart(vfxPoint.position);
+/// 부활 완료:       VFXManager.Instance.PlayPlayerResurrectEnd(vfxPoint.position);
 ///
 /// [몬스터 담당]
-/// 몬스터 피격:     VFXManager.Instance.PlayMonsterHit(transform.position, hitNormal, gameObject);
-/// 몬스터 사망:     VFXManager.Instance.PlayMonsterDeath(transform.position, gameObject);
+/// 몬스터 피격:     VFXManager.Instance.PlayMonsterHit(vfxPoint.position, Vector3.up, gameObject);
+/// 몬스터 사망:     VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);
 /// </summary>
 public class VFXManager : MonoBehaviour
 {
@@ -32,13 +34,17 @@ public class VFXManager : MonoBehaviour
     [SerializeField] GameObject attackImpactPrefab;
 
     [Header("─ 대시 이펙트 ─")]
-    [SerializeField] GameObject dashStartPrefab;      // 대시 시작 잔상
-    [SerializeField] GameObject dashTrailPrefab;      // 대시 중 궤적
-    [SerializeField] GameObject dashEndPrefab;        // 대시 끝 잔상
+    [SerializeField] GameObject dashStartPrefab;
+    [SerializeField] GameObject dashTrailPrefab;
+    [SerializeField] GameObject dashEndPrefab;
 
     [Header("─ 플레이어 피격/사망 ─")]
     [SerializeField] GameObject playerHitPrefab;
     [SerializeField] GameObject playerDeathPrefab;
+
+    [Header("─ 플레이어 부활 ─")]
+    [SerializeField] GameObject playerResurrectStartPrefab; // 쓰러지는 순간
+    [SerializeField] GameObject playerResurrectEndPrefab;   // 일어나는 순간
 
     [Header("─ 몬스터 피격/사망 ─")]
     [SerializeField] GameObject monsterHitPrefab;
@@ -49,8 +55,8 @@ public class VFXManager : MonoBehaviour
     [SerializeField] int poolSizePerPrefab = 5;
 
     [Header("─ 피격 플래시 설정 ─")]
-    [SerializeField] Color playerHitColor  = new Color(1f, 0.15f, 0.15f, 1f);
-    [SerializeField] Color monsterHitColor = new Color(1f, 0.3f,  0.1f,  1f);
+    [SerializeField] Color playerHitColor = new Color(1f, 0.15f, 0.15f, 1f);
+    [SerializeField] Color monsterHitColor = new Color(1f, 0.3f, 0.1f, 1f);
     [SerializeField] float hitFlashDuration = 0.12f;
 
     [Header("─ 사망 Dissolve 설정 ─")]
@@ -60,8 +66,8 @@ public class VFXManager : MonoBehaviour
         = new Dictionary<GameObject, Queue<GameObject>>();
     Transform poolRoot;
 
-    static readonly int HitBlendID   = Shader.PropertyToID("_HitEffectBlend");
-    static readonly int HitColorID   = Shader.PropertyToID("_HitColor");
+    static readonly int HitBlendID = Shader.PropertyToID("_HitEffectBlend");
+    static readonly int HitColorID = Shader.PropertyToID("_HitColor");
     static readonly int FadeAmountID = Shader.PropertyToID("_FadeAmount");
 
     // ─────────────────────────────────────────
@@ -70,8 +76,18 @@ public class VFXManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null) { Destroy(gameObject); return; }
-        Instance = this;
+        //if (Instance != null) { Destroy(gameObject); return; }
+        //Instance = this;
+
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
 
         poolRoot = new GameObject("VFX_Pool").transform;
         poolRoot.SetParent(transform);
@@ -85,6 +101,8 @@ public class VFXManager : MonoBehaviour
         PrewarmPool(dashEndPrefab);
         PrewarmPool(playerHitPrefab);
         PrewarmPool(playerDeathPrefab);
+        PrewarmPool(playerResurrectStartPrefab);
+        PrewarmPool(playerResurrectEndPrefab);
         PrewarmPool(monsterHitPrefab);
         PrewarmPool(monsterDeathPrefab);
         PrewarmPool(monsterDeathSmokePrefab);
@@ -166,37 +184,29 @@ public class VFXManager : MonoBehaviour
     public void PlayAttackHit(Vector3 position, Vector3 normal)
     {
         GetFromPool(attackHitSparkPrefab, position, normal);
-        GetFromPool(attackImpactPrefab,   position, normal);
+        GetFromPool(attackImpactPrefab, position, normal);
     }
 
     // ─────────────────────────────────────────
     // 대시 이펙트
     // ─────────────────────────────────────────
 
-    /// <summary>대시 시작/중/끝 이펙트 — PlayerDash에서 호출</summary>
     public void PlayDash(Vector3 position, Vector3 direction, float dashDuration)
     {
-        // 대시 시작 잔상
         GetFromPool(dashStartPrefab, position, direction);
-        // 대시 중 궤적 (대시 지속시간동안 반복 스폰)
         StartCoroutine(DashTrailRoutine(position, direction, dashDuration));
     }
 
     IEnumerator DashTrailRoutine(Vector3 startPos, Vector3 direction, float dashDuration)
     {
-        // 대시 중 플레이어 Transform 추적을 위해 PlayerDash에서 transform 넘겨받기
-        // 여기선 시작 위치 기준으로 궤적 생성
         float elapsed = 0f;
-        float interval = 0.05f; // 0.05초마다 잔상 생성
-
+        float interval = 0.05f;
         while (elapsed < dashDuration)
         {
             GetFromPool(dashTrailPrefab, startPos, direction);
             yield return new WaitForSeconds(interval);
             elapsed += interval;
         }
-
-        // 대시 끝 잔상
         GetFromPool(dashEndPrefab, startPos, direction);
     }
 
@@ -217,6 +227,22 @@ public class VFXManager : MonoBehaviour
     }
 
     // ─────────────────────────────────────────
+    // 플레이어 부활
+    // ─────────────────────────────────────────
+
+    /// <summary>부활 시작 — 쓰러지는 순간 호출</summary>
+    public void PlayPlayerResurrectStart(Vector3 position)
+    {
+        GetFromPool(playerResurrectStartPrefab, position, Vector3.up);
+    }
+
+    /// <summary>부활 완료 — 일어나는 순간 호출</summary>
+    public void PlayPlayerResurrectEnd(Vector3 position)
+    {
+        GetFromPool(playerResurrectEndPrefab, position, Vector3.up);
+    }
+
+    // ─────────────────────────────────────────
     // 몬스터 피격/사망
     // ─────────────────────────────────────────
 
@@ -228,7 +254,7 @@ public class VFXManager : MonoBehaviour
 
     public void PlayMonsterDeath(Vector3 position, GameObject monsterObj)
     {
-        GetFromPool(monsterDeathPrefab,      position, Vector3.up);
+        GetFromPool(monsterDeathPrefab, position, Vector3.up);
         GetFromPool(monsterDeathSmokePrefab, position, Vector3.up);
         StartCoroutine(DissolveRoutine(monsterObj));
     }
