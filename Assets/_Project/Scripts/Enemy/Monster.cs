@@ -23,7 +23,7 @@ public class Monster : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            Player player = collision.gameObject.GetComponent<Player>();
+            Player player = collision.gameObject.GetComponent<Player>(); 
 
             if (player != null)
             {
