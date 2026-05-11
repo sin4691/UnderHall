@@ -4,18 +4,18 @@ using UnityEngine.AI;
 
 public class EnemyBase : MonoBehaviour
 {
-    [SerializeField] private EnemyData enemyData;
+    [SerializeField] protected EnemyData enemyData;
 
     public float detectRange = 10f;
-    public float attaclRange = 2f;
+    public float attackRange = 2f; 
 
-    private NavMeshAgent agent;
-    private Animator anim;
-    private Transform target;
+    protected NavMeshAgent agent;
+    protected Animator anim;
+    protected Transform target;
 
     private float currentHealth;
     private float timer;
-    private bool isDead = false;
+    protected bool isDead = false; 
 
     [SerializeField] private float hitDelay = 0.5f;
     [SerializeField] private float hitRadius = 1.5f;
@@ -63,13 +63,14 @@ public class EnemyBase : MonoBehaviour
         anim.SetFloat("MoveSpeed", speed, 0.1f, Time.deltaTime);
     }
 
-    void Attack()
+    protected virtual void Attack()
     {
         timer += Time.deltaTime;
         if (timer >= enemyData.attackCooldown)
         {
             anim.SetTrigger("Attack");
             timer = 0;
+
             StartCoroutine(DealDamageCoroutine());
         }
     }
