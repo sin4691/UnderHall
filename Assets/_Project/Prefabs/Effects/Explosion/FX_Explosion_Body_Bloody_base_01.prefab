@@ -56,7 +56,7 @@ GameObject:
   - component: {fileID: 198355779183106702}
   - component: {fileID: 199298478915647496}
   m_Layer: 0
-  m_Name: FX_Explosion_Body_Bloody_01
+  m_Name: FX_Explosion_Body_Bloody_base_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

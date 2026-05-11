@@ -10009,7 +10009,7 @@ GameObject:
   - component: {fileID: 3563469976464276729}
   - component: {fileID: 3563469976464276728}
   m_Layer: 0
-  m_Name: FX_splash_blood_air
+  m_Name: FX_splash_blood_air_base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
