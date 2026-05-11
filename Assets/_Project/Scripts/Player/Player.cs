@@ -18,7 +18,8 @@ public class Player : MonoBehaviour
     public CinemachineCamera virtualCamera; 
     public float zoomInFOV = 30f;  
     public float zoomDuration = 0.5f;  
-    private float originalFOV;     
+    private float originalFOV;
+    public float CurrentHealth => currentHealth;
 
     public PlayerData playerData;
     public PlayerState CurrentState { get; private set; }
@@ -106,6 +107,14 @@ public class Player : MonoBehaviour
         {
             GrantInvincibility(playerData.hitInvincibilityTime);
         }
+    }
+
+    public void Heal(float amount)
+    {
+        if (CurrentState == PlayerState.Dead) return;
+        currentHealth += amount;
+        if (currentHealth > playerData.maxHealth) currentHealth = playerData.maxHealth;
+        Debug.Log($"[흡혈] 체력 회복! 현재 체력: {currentHealth}");
     }
 
     private IEnumerator ResurrectRoutine()

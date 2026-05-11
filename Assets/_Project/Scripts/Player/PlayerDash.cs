@@ -10,7 +10,8 @@ public class PlayerDash : MonoBehaviour
     private readonly int doDashHash = Animator.StringToHash("doDash");
 
     private int currentDashCount;
-    private Coroutine cooldownCoroutine; 
+    private Coroutine cooldownCoroutine;
+    private Coroutine awakeningCoroutine;
 
     private void Awake()
     {
@@ -39,8 +40,7 @@ public class PlayerDash : MonoBehaviour
             StopCoroutine(cooldownCoroutine);
         }
         cooldownCoroutine = StartCoroutine(DashCooldownRoutine());
-
-        if (player.CurrentState == PlayerState.Attack)
+        if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
         {
             player.attack.CancelAttack();
         }
@@ -90,11 +90,25 @@ public class PlayerDash : MonoBehaviour
         player.rb.linearVelocity = Vector3.zero;
         player.animator.CrossFade("idle", 0.1f);
         player.ChangeState(PlayerState.Idle);
+
+        if (player.playerData.acquiredGifts.Contains(GiftType.Awakening))
+        {
+            if (awakeningCoroutine != null) StopCoroutine(awakeningCoroutine);
+            awakeningCoroutine = StartCoroutine(AwakeningTimerRoutine());
+        }
     }
 
     private IEnumerator DashCooldownRoutine()
     {
         yield return new WaitForSeconds(player.playerData.dashCooldown);
         currentDashCount = player.playerData.maxDashCount;
+    }
+
+
+    private IEnumerator AwakeningTimerRoutine()
+    {
+        player.attack.isAwakened = true; // 공격 스크립트에 버프 ON
+        yield return new WaitForSeconds(1f);
+        player.attack.isAwakened = false; // 1초 뒤 버프 OFF
     }
 }

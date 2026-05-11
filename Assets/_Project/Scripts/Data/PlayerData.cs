@@ -86,5 +86,8 @@ public class PlayerData : ScriptableObject
     public int levelATK = 0;    
     public int levelDash = 0;   
     public int levelGold = 0;   
-    public int levelRevive = 0; 
+    public int levelRevive = 0;
+
+    [Header("===== 인게임 획득 기프트 (현재 런) =====")]
+    public System.Collections.Generic.List<GiftType> acquiredGifts = new System.Collections.Generic.List<GiftType>();
 }

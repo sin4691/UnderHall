@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 533338edfcbfec445bfa5616bde10c0f, type: 3}
   m_Name: PlayerData_Default
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
-  maxHealth: 100
-  damage: 10
+  maxHealth: 170
+  damage: 25
   moveSpeed: 5
   attackCooldown: 0.3
   attackRange: 1.8
@@ -21,17 +21,18 @@ MonoBehaviour:
   specialAttackCooldown: 5
   dashSpeed: 20
   dashDuration: 0.2
-  maxDashCount: 2
+  maxDashCount: 3
   dashCooldown: 1
   dashInvincibilityTime: 0.2
   hitInvincibilityTime: 0.5
-  maxResurrectionCount: 0
-  resurrectionHealthPercent: 0
+  maxResurrectionCount: 1
+  resurrectionHealthPercent: 1
   resurrectionInvincibilityTime: 2
-  currentGold: 1600
-  goldGainMultiplier: 1
+  currentGold: 95100
+  goldGainMultiplier: 2
   levelHP: 0
   levelATK: 0
   levelDash: 0
   levelGold: 0
   levelRevive: 0
+  acquiredGifts: 07000000
