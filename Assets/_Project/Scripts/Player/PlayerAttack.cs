@@ -139,6 +139,7 @@ public class PlayerAttack : MonoBehaviour
                 if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
                 {
                     // 기프트 보유 시 공격 반경 1.5배 증가
+                    VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint.position, skillVFXPoint.forward);
                     currentRadius *= 1.5f;
                 }
 
