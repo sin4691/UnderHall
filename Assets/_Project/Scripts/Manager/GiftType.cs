@@ -1,12 +1,12 @@
 public enum GiftType
 {
-    Execution,  // 1. Ã³Çü
-    Combo,      // 2. ¿¬°İ
-    Critical,   // 3. Ä¡¸íÅ¸
-    Explosion,  // 4. Æø¹ß
-    RapidFire,  // 5. ¼Ó»ç
-    Endurance,  // 6. Áö¼Ó·Â
-    Awakening,  // 8. °¢¼º
-    Vampirism,  // 9. ÈíÇ÷
-    Berserk     // 10. ±¤Æø
+    Execution,  // 1. ì²˜í˜•
+    Combo,      // 2. ì—°ê²©
+    Critical,   // 3. ì¹˜ëª…íƒ€
+    Explosion,  // 4. í­ë°œ
+    RapidFire,  // 5. ì†ì‚¬
+    Endurance,  // 6. ì§€ì†ë ¥
+    Awakening,  // 8. ê°ì„±
+    Vampirism,  // 9. í¡í˜ˆ
+    Berserk     // 10. ê´‘í­
 }
