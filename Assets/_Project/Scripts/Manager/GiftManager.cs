@@ -16,28 +16,28 @@ public class GiftManager : MonoBehaviour
 {
     public PlayerData playerData;
 
-    [Header("UI ¿¬°á (Canvas)")]
-    public GameObject giftUIPanel; // ±âÇÁÆ® ¼±ÅÃÃ¢ ÀüÃ¼ ÆĞ³Î
-    public Button[] giftButtons;   // 3°³ÀÇ ¼±ÅÃ ¹öÆ°
+    [Header("UI ì—°ê²° (Canvas)")]
+    public GameObject giftUIPanel; // ê¸°í”„íŠ¸ ì„ íƒì°½ ì „ì²´ íŒ¨ë„
+    public Button[] giftButtons;   // 3ê°œì˜ ì„ íƒ ë²„íŠ¼
     public TextMeshProUGUI[] giftNameTexts;
     public TextMeshProUGUI[] giftDescTexts;
 
-    [Header("ÀüÃ¼ ±âÇÁÆ® µ¥ÀÌÅÍº£ÀÌ½º")]
+    [Header("ì „ì²´ ê¸°í”„íŠ¸ ë°ì´í„°ë² ì´ìŠ¤")]
     public List<GiftInfo> allGifts = new List<GiftInfo>();
 
     private void Awake()
     {
         if (allGifts.Count == 0)
         {
-            //allGifts.Add(new GiftInfo { type = GiftType.Execution, giftName = "Ã³Çü", description = "Ã¼·Â 20% ÀÌÇÏ Àû¿¡°Ô µ¥¹ÌÁö 2¹è" });
-            //allGifts.Add(new GiftInfo { type = GiftType.Combo, giftName = "¿¬°İ", description = "±âº»°ø°İ ¼Óµµ +25%" });
-            //allGifts.Add(new GiftInfo { type = GiftType.Critical, giftName = "Ä¡¸íÅ¸", description = "±âº»°ø°İ 15% È®·ü·Î µ¥¹ÌÁö 2¹è" });
-            //allGifts.Add(new GiftInfo { type = GiftType.Explosion, giftName = "Æø¹ß", description = "Æ¯¼ö°ø°İ ÂøÅº ½Ã ¹üÀ§ µ¥¹ÌÁö" });
-            //allGifts.Add(new GiftInfo { type = GiftType.RapidFire, giftName = "¼Ó»ç", description = "Æ¯¼ö°ø°İ Äğ´Ù¿î -30%" });
-            //allGifts.Add(new GiftInfo { type = GiftType.Endurance, giftName = "Áö¼Ó·Â", description = "Æ¯¼ö°ø°İ µ¥¹ÌÁö +30%" });
-            //allGifts.Add(new GiftInfo { type = GiftType.Awakening, giftName = "°¢¼º", description = "´ë½¬ Á÷ÈÄ 1ÃÊ°£ ´ÙÀ½ °ø°İ 2¹è" });
-            //allGifts.Add(new GiftInfo { type = GiftType.Vampirism, giftName = "ÈíÇ÷", description = "Àû Ã³Ä¡ ½Ã Ã¼·Â 5È¸º¹" });
-            //allGifts.Add(new GiftInfo { type = GiftType.Berserk, giftName = "±¤Æø", description = "Ã¼·Â 50% ÀÌÇÏÀÏ ¶§ µ¥¹ÌÁö +40%" });
+            //allGifts.Add(new GiftInfo { type = GiftType.Execution, giftName = "ì²˜í˜•", description = "ì²´ë ¥ 20% ì´í•˜ ì ì—ê²Œ ë°ë¯¸ì§€ 2ë°°" });
+            //allGifts.Add(new GiftInfo { type = GiftType.Combo, giftName = "ì—°ê²©", description = "ê¸°ë³¸ê³µê²© ì†ë„ +25%" });
+            //allGifts.Add(new GiftInfo { type = GiftType.Critical, giftName = "ì¹˜ëª…íƒ€", description = "ê¸°ë³¸ê³µê²© 15% í™•ë¥ ë¡œ ë°ë¯¸ì§€ 2ë°°" });
+            //allGifts.Add(new GiftInfo { type = GiftType.Explosion, giftName = "í­ë°œ", description = "íŠ¹ìˆ˜ê³µê²© ì°©íƒ„ ì‹œ ë²”ìœ„ ë°ë¯¸ì§€" });
+            //allGifts.Add(new GiftInfo { type = GiftType.RapidFire, giftName = "ì†ì‚¬", description = "íŠ¹ìˆ˜ê³µê²© ì¿¨ë‹¤ìš´ -30%" });
+            //allGifts.Add(new GiftInfo { type = GiftType.Endurance, giftName = "ì§€ì†ë ¥", description = "íŠ¹ìˆ˜ê³µê²© ë°ë¯¸ì§€ +30%" });
+            //allGifts.Add(new GiftInfo { type = GiftType.Awakening, giftName = "ê°ì„±", description = "ëŒ€ì‰¬ ì§í›„ 1ì´ˆê°„ ë‹¤ìŒ ê³µê²© 2ë°°" });
+            //allGifts.Add(new GiftInfo { type = GiftType.Vampirism, giftName = "í¡í˜ˆ", description = "ì  ì²˜ì¹˜ ì‹œ ì²´ë ¥ 5íšŒë³µ" });
+            //allGifts.Add(new GiftInfo { type = GiftType.Berserk, giftName = "ê´‘í­", description = "ì²´ë ¥ 50% ì´í•˜ì¼ ë•Œ ë°ë¯¸ì§€ +40%" });
 
             allGifts.Add(new GiftInfo { type = GiftType.Execution, giftName = "Execution", description = "Deal 2x damage to enemies below 20% HP" });
             allGifts.Add(new GiftInfo { type = GiftType.Combo, giftName = "Combo", description = "Basic attack speed +25%" });
@@ -53,16 +53,16 @@ public class GiftManager : MonoBehaviour
 
     public void OpenGiftUI()
     {
-        // ÀÌ¹Ì È¹µæÇÑ ½ºÅ³ °É·¯³»±â
+        // ì´ë¯¸ íšë“í•œ ìŠ¤í‚¬ ê±¸ëŸ¬ë‚´ê¸°
         List<GiftInfo> availableGifts = allGifts.Where(g => !playerData.acquiredGifts.Contains(g.type)).ToList();
 
         if (availableGifts.Count == 0)
         {
-            Debug.Log("´õ ÀÌ»ó È¹µæÇÒ ±âÇÁÆ®°¡ ¾ø½À´Ï´Ù!");
+            Debug.Log("ë” ì´ìƒ íšë“í•  ê¸°í”„íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
-
-        // ³²Àº ½ºÅ³µé ¼ø¼­¸¦ ·£´ıÇÏ°Ô ¼¯±â
+        
+        // ë‚¨ì€ ìŠ¤í‚¬ë“¤ ìˆœì„œë¥¼ ëœë¤í•˜ê²Œ ì„ê¸°
         for (int i = 0; i < availableGifts.Count; i++)
         {
             GiftInfo temp = availableGifts[i];
@@ -71,10 +71,10 @@ public class GiftManager : MonoBehaviour
             availableGifts[randomIndex] = temp;
         }
 
-        // ¾Õ¿¡¼­ºÎÅÍ ÃÖ´ë 3°³ »Ì±â
+        // ì•ì—ì„œë¶€í„° ìµœëŒ€ 3ê°œ ë½‘ê¸°
         int optionsCount = Mathf.Min(3, availableGifts.Count);
 
-        // UI ÅØ½ºÆ® ÀÔÈ÷°í ¹öÆ° ±â´É ¿¬°áÇÏ±â
+        // UI í…ìŠ¤íŠ¸ ì…íˆê³  ë²„íŠ¼ ê¸°ëŠ¥ ì—°ê²°í•˜ê¸°
         for (int i = 0; i < 3; i++)
         {
             if (i < optionsCount)
@@ -83,30 +83,30 @@ public class GiftManager : MonoBehaviour
                 giftNameTexts[i].text = availableGifts[i].giftName;
                 giftDescTexts[i].text = availableGifts[i].description;
 
-                // ¹öÆ° ÀÌº¥Æ® ÃÊ±âÈ­ ÈÄ, »õ ½ºÅ³ ºÎ¿© ÀÌº¥Æ® ´Ş¾ÆÁÖ±â
+                // ë²„íŠ¼ ì´ë²¤íŠ¸ ì´ˆê¸°í™” í›„, ìƒˆ ìŠ¤í‚¬ ë¶€ì—¬ ì´ë²¤íŠ¸ ë‹¬ì•„ì£¼ê¸°
                 giftButtons[i].onClick.RemoveAllListeners();
-                GiftType selectedType = availableGifts[i].type; // Å¬·ÎÀú ÀÌ½´ ¹æÁö
+                GiftType selectedType = availableGifts[i].type; // í´ë¡œì € ì´ìŠˆ ë°©ì§€
                 giftButtons[i].onClick.AddListener(() => SelectGift(selectedType));
             }
             else
             {
-                // ³²Àº ½ºÅ³ÀÌ ºÎÁ·ÇÏ¸é ³²´Â ¹öÆ°Àº ¼û±è
+                // ë‚¨ì€ ìŠ¤í‚¬ì´ ë¶€ì¡±í•˜ë©´ ë‚¨ëŠ” ë²„íŠ¼ì€ ìˆ¨ê¹€
                 giftButtons[i].gameObject.SetActive(false);
             }
         }
 
-        // °ÔÀÓ ½Ã°£ Á¤Áö ¹× UI È°¼ºÈ­
+        // ê²Œì„ ì‹œê°„ ì •ì§€ ë° UI í™œì„±í™”
         Time.timeScale = 0f;
         giftUIPanel.SetActive(true);
     }
 
-    /// <summary> ¹öÆ°À» Å¬¸¯ÇØ¼­ ±âÇÁÆ®¸¦ ¼±ÅÃÇßÀ» ¶§ </summary>
+    /// <summary> ë²„íŠ¼ì„ í´ë¦­í•´ì„œ ê¸°í”„íŠ¸ë¥¼ ì„ íƒí–ˆì„ ë•Œ </summary>
     public void SelectGift(GiftType type)
     {
         playerData.acquiredGifts.Add(type);
         giftUIPanel.SetActive(false);
         Time.timeScale = 1f;
 
-        // 3. (¼±ÅÃ »çÇ×) ¿¬°İ(°ø¼Ó)ÀÌ³ª ¼Ó»ç(ÄğÅ¸ÀÓ) °°Àº ½ºÅÈ·ù´Â ¿©±â¼­ ¹Ù·Î ½ºÅÈÀ» º¯°æÇØ ÁÖ¸é ÁÁ½À´Ï´Ù!
+        // 3. (ì„ íƒ ì‚¬í•­) ì—°ê²©(ê³µì†)ì´ë‚˜ ì†ì‚¬(ì¿¨íƒ€ì„) ê°™ì€ ìŠ¤íƒ¯ë¥˜ëŠ” ì—¬ê¸°ì„œ ë°”ë¡œ ìŠ¤íƒ¯ì„ ë³€ê²½í•´ ì£¼ë©´ ì¢‹ìŠµë‹ˆë‹¤!
     }
 }
