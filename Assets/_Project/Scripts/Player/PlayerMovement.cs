@@ -66,7 +66,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyMovement()
     {
-        player.rb.linearVelocity = moveDirection * player.playerData.moveSpeed;
+        Vector3 targetVelocity = moveDirection * player.playerData.moveSpeed;
+        targetVelocity.y = player.rb.linearVelocity.y;
+        player.rb.linearVelocity = targetVelocity;
 
         if (moveDirection != Vector3.zero)
         {
@@ -79,7 +81,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void StopMovement()
     {
-        player.rb.linearVelocity = Vector3.zero;
+        player.rb.linearVelocity = new Vector3(0f, player.rb.linearVelocity.y, 0f);
 
         if (player.CurrentState == PlayerState.Idle)
         {

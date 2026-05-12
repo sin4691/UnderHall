@@ -9,7 +9,8 @@ public class GameManager : MonoBehaviour
     [Header("Player & UI")]
     public GameObject player;                 
     public CanvasGroup fadeCanvasGroup;  
-    public float fadeDuration = 1f;         
+    public float fadeDuration = 1f;
+    public float blackScreenDuration = 0.5f;
 
     [Header("Stage Settings")]
     public List<GameObject> normalRoomPrefabs; 
@@ -109,6 +110,8 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogWarning("새 맵 프리팹 안에 'SpawnPoint'라는 이름의 오브젝트가 없습니다!");
         }
+
+        yield return new WaitForSeconds(blackScreenDuration);
 
         yield return StartCoroutine(Fade(0f));
 
