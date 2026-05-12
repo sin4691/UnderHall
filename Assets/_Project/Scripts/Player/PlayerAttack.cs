@@ -128,6 +128,16 @@ public class PlayerAttack : MonoBehaviour
         float tickRate = 0.25f;
         float tickTimer = tickRate;
 
+
+        if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
+        {
+            VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint); // 커진 프리팹
+        }
+        else
+        {
+            VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint); // 기본 프리팹
+        }
+
         while (isSpinning && timer < maxDuration)
         {
             if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting)
@@ -146,15 +156,12 @@ public class PlayerAttack : MonoBehaviour
                 if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
                 {
                     // 기프트 보유 시 공격 반경 1.5배 증가
-                    VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint.position, skillVFXPoint.forward);
+                    //VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint.position, skillVFXPoint.forward);
                     currentRadius *= 1.5f;
                 }
 
                 // 변경된 Radius를 적용하여 데미지 판정 (isSpecial = true)
                 ExecuteHitDetection(transform.position, currentRadius, player.playerData.specialAttackMultiplier, true);
-
-                //[VFX/FEAT]창우_스킬 이펙트 재생
-                VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint.position, skillVFXPoint.forward);
 
                 tickTimer = 0f;
             }
@@ -248,8 +255,6 @@ public class PlayerAttack : MonoBehaviour
                     // [지속력] 특수공격 데미지 30% 증가
                     if (player.playerData.acquiredGifts.Contains(GiftType.Endurance))
                         finalDamage *= 1.3f;
-
-                    // [수정됨] 폭발(Explosion)의 데미지 증폭 로직을 제거했습니다.
                 }
 
                 // 타격 직전의 콜라이더 상태 저장
