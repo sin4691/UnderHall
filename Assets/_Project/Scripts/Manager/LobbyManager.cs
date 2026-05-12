@@ -5,18 +5,18 @@ public class LobbyManager : MonoBehaviour
     public static LobbyManager Instance { get; private set; }
     public PlayerData playerData;
 
-    [Header("°­È­ ºñ¿ë (°ñµå)")]
+    [Header("ê°•í™” ë¹„ìš© (ê³¨ë“œ)")]
     private readonly int[] cost5Levels = { 50, 100, 200, 400, 800 };
     private readonly int costDash = 300;
 
-    [Header("°­È­ ¼öÄ¡ (ÀÎµ¦½º 0Àº ±âº» »óÅÂ)")]
+    [Header("ê°•í™” ìˆ˜ì¹˜ (ì¸ë±ìŠ¤ 0ì€ ê¸°ë³¸ ìƒíƒœ)")]
     private readonly float[] bonusHP = { 0, 10, 20, 35, 50, 70 };
     private readonly float[] bonusATK = { 0, 2, 4, 7, 10, 15 };
     private readonly float[] bonusGold = { 0f, 0.1f, 0.2f, 0.3f, 0.5f, 1.0f };
 
     private readonly float[] setRevive = { 0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f };
 
-    [Header("±âº» ½ºÅÈ (±âÁØÁ¡)")]
+    [Header("ê¸°ë³¸ ìŠ¤íƒ¯ (ê¸°ì¤€ì )")]
     private readonly float baseMaxHealth = 100f;
     private readonly float baseDamage = 10f;
     private readonly int baseMaxDashCount = 2;
@@ -39,7 +39,7 @@ public class LobbyManager : MonoBehaviour
         ApplyAllUpgrades();
     }
 
-    // 1. °­ÀÎÇÑ ½ÅÃ¼ (HP)
+    // 1. ê°•ì¸í•œ ì‹ ì²´ (HP)
     public void BuyUpgradeHP()
     {
         if (playerData.levelHP < 5 && playerData.currentGold >= cost5Levels[playerData.levelHP])
@@ -47,13 +47,13 @@ public class LobbyManager : MonoBehaviour
             playerData.currentGold -= cost5Levels[playerData.levelHP];
             playerData.levelHP++;
             ApplyAllUpgrades();
-            Debug.Log($"[°­È­ ¼º°ø] Ã¼·Â Áõ°¡! (Lv.{playerData.levelHP}) ³²Àº °ñµå: {playerData.currentGold}");
+            Debug.Log($"[ê°•í™” ì„±ê³µ] ì²´ë ¥ ì¦ê°€! (Lv.{playerData.levelHP}) ë‚¨ì€ ê³¨ë“œ: {playerData.currentGold}");
             Debug.Log($"Max HP: {playerData.maxHealth} (Lv.{playerData.levelHP})");
         }
-        else Debug.LogWarning("°ñµå°¡ ºÎÁ·ÇÏ°Å³ª ÀÌ¹Ì ¸¸·¾ÀÔ´Ï´Ù!");
+        else Debug.LogWarning("ê³¨ë“œê°€ ë¶€ì¡±í•˜ê±°ë‚˜ ì´ë¯¸ ë§Œë ™ì…ë‹ˆë‹¤!");
     }
 
-    // 2. ³¯Ä«·Î¿î °Ë (ATK)
+    // 2. ë‚ ì¹´ë¡œìš´ ê²€ (ATK)
     public void BuyUpgradeATK()
     {
         if (playerData.levelATK < 5 && playerData.currentGold >= cost5Levels[playerData.levelATK])
@@ -61,13 +61,13 @@ public class LobbyManager : MonoBehaviour
             playerData.currentGold -= cost5Levels[playerData.levelATK];
             playerData.levelATK++;
             ApplyAllUpgrades();
-            Debug.Log($"[°­È­ ¼º°ø] °ø°İ·Â Áõ°¡! (Lv.{playerData.levelATK}) ³²Àº °ñµå: {playerData.currentGold}");
+            Debug.Log($"[ê°•í™” ì„±ê³µ] ê³µê²©ë ¥ ì¦ê°€! (Lv.{playerData.levelATK}) ë‚¨ì€ ê³¨ë“œ: {playerData.currentGold}");
             Debug.Log($"ATK: {playerData.damage} (Lv.{playerData.levelATK})");
         }
-        else Debug.LogWarning("°ñµå°¡ ºÎÁ·ÇÏ°Å³ª ÀÌ¹Ì ¸¸·¾ÀÔ´Ï´Ù!");
+        else Debug.LogWarning("ê³¨ë“œê°€ ë¶€ì¡±í•˜ê±°ë‚˜ ì´ë¯¸ ë§Œë ™ì…ë‹ˆë‹¤!");
     }
 
-    // 3. ÀÌÁß µµ¾à (DASH)
+    // 3. ì´ì¤‘ ë„ì•½ (DASH)
     public void BuyUpgradeDASH()
     {
         if (playerData.levelDash < 1 && playerData.currentGold >= costDash)
@@ -75,13 +75,13 @@ public class LobbyManager : MonoBehaviour
             playerData.currentGold -= costDash;
             playerData.levelDash++;
             ApplyAllUpgrades();
-            Debug.Log($"[°­È­ ¼º°ø] ÀÌÁß µµ¾à È¹µæ! (Lv.{playerData.levelDash}) ³²Àº °ñµå: {playerData.currentGold}");
+            Debug.Log($"[ê°•í™” ì„±ê³µ] ì´ì¤‘ ë„ì•½ íšë“! (Lv.{playerData.levelDash}) ë‚¨ì€ ê³¨ë“œ: {playerData.currentGold}");
             Debug.Log($"Dash Count: {playerData.maxDashCount} (Lv.{playerData.levelDash})");
         }
-        else Debug.LogWarning("°ñµå°¡ ºÎÁ·ÇÏ°Å³ª ÀÌ¹Ì ¸¸·¾ÀÔ´Ï´Ù!");
+        else Debug.LogWarning("ê³¨ë“œê°€ ë¶€ì¡±í•˜ê±°ë‚˜ ì´ë¯¸ ë§Œë ™ì…ë‹ˆë‹¤!");
     }
 
-    // 4. È²±İ ¼Õ±æ (GOLD)
+    // 4. í™©ê¸ˆ ì†ê¸¸ (GOLD)
     public void BuyUpgradeGOLD()
     {
         if (playerData.levelGold < 5 && playerData.currentGold >= cost5Levels[playerData.levelGold])
@@ -89,13 +89,13 @@ public class LobbyManager : MonoBehaviour
             playerData.currentGold -= cost5Levels[playerData.levelGold];
             playerData.levelGold++;
             ApplyAllUpgrades();
-            Debug.Log($"[°­È­ ¼º°ø] °ñµå È¹µæ·® Áõ°¡! (Lv.{playerData.levelGold}) ³²Àº °ñµå: {playerData.currentGold}");
+            Debug.Log($"[ê°•í™” ì„±ê³µ] ê³¨ë“œ íšë“ëŸ‰ ì¦ê°€! (Lv.{playerData.levelGold}) ë‚¨ì€ ê³¨ë“œ: {playerData.currentGold}");
             Debug.Log($"Gold Multiplier: x{playerData.goldGainMultiplier} (Lv.{playerData.levelGold})");
         }
-        else Debug.LogWarning("°ñµå°¡ ºÎÁ·ÇÏ°Å³ª ÀÌ¹Ì ¸¸·¾ÀÔ´Ï´Ù!");
+        else Debug.LogWarning("ê³¨ë“œê°€ ë¶€ì¡±í•˜ê±°ë‚˜ ì´ë¯¸ ë§Œë ™ì…ë‹ˆë‹¤!");
     }
 
-    // 5. ºÒ»çÀÇ °¡È£ (REVIVE)
+    // 5. ë¶ˆì‚¬ì˜ ê°€í˜¸ (REVIVE)
     public void BuyUpgradeREVIVE()
     {
         if (playerData.levelRevive < 5 && playerData.currentGold >= cost5Levels[playerData.levelRevive])
@@ -105,13 +105,13 @@ public class LobbyManager : MonoBehaviour
             
             ApplyAllUpgrades();
          
-            Debug.Log($"[°­È­ ¼º°ø] ºÎÈ° Ã¼·Â Áõ°¡! (Lv.{playerData.levelRevive}) ³²Àº °ñµå: {playerData.currentGold}");
+            Debug.Log($"[ê°•í™” ì„±ê³µ] ë¶€í™œ ì²´ë ¥ ì¦ê°€! (Lv.{playerData.levelRevive}) ë‚¨ì€ ê³¨ë“œ: {playerData.currentGold}");
             Debug.Log($"Revive HP: {playerData.resurrectionHealthPercent * 100}% (Lv.{playerData.levelRevive})");
         }
-        else Debug.LogWarning("°ñµå°¡ ºÎÁ·ÇÏ°Å³ª ÀÌ¹Ì ¸¸·¾ÀÔ´Ï´Ù!");
+        else Debug.LogWarning("ê³¨ë“œê°€ ë¶€ì¡±í•˜ê±°ë‚˜ ì´ë¯¸ ë§Œë ™ì…ë‹ˆë‹¤!");
     }
 
-    // ÀüÃ¼ ½ºÅÈ Àû¿ë (°­È­¸¦ ´©¸¦ ¶§¸¶´Ù ÃÖÁ¾ ½ºÅÈ °è»ê)
+    // ì „ì²´ ìŠ¤íƒ¯ ì ìš© (ê°•í™”ë¥¼ ëˆ„ë¥¼ ë•Œë§ˆë‹¤ ìµœì¢… ìŠ¤íƒ¯ ê³„ì‚°)
     private void ApplyAllUpgrades()
     {
         playerData.maxHealth = baseMaxHealth + bonusHP[playerData.levelHP];
@@ -122,7 +122,7 @@ public class LobbyManager : MonoBehaviour
         playerData.resurrectionHealthPercent = setRevive[playerData.levelRevive];
 
 
-        Debug.Log("==== ÇöÀç ÇÃ·¹ÀÌ¾î ½ºÅÈ ÇöÈ² ====");
+        Debug.Log("==== í˜„ì¬ í”Œë ˆì´ì–´ ìŠ¤íƒ¯ í˜„í™© ====");
         Debug.Log($"Max HP: {playerData.maxHealth} (Lv.{playerData.levelHP})");
         Debug.Log($"ATK: {playerData.damage} (Lv.{playerData.levelATK})");
         Debug.Log($"Dash Count: {playerData.maxDashCount} (Lv.{playerData.levelDash})");

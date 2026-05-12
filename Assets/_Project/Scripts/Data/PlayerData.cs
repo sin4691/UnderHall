@@ -3,91 +3,91 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "PlayerData", menuName = "Game/Player Data")]
 public class PlayerData : ScriptableObject
 {
-    [Header("===== ±âº» ½ºÅÈ =====")]
+    [Header("===== ê¸°ë³¸ ìŠ¤íƒ¯ =====")]
 
-    [Tooltip("ÃÖ´ë Ã¼·Â")]
+    [Tooltip("ìµœëŒ€ ì²´ë ¥")]
     [Range(50, 500)]
     public float maxHealth = 100f;
 
-    [Tooltip("±âº» °ø°İ µ¥¹ÌÁö")]
+    [Tooltip("ê¸°ë³¸ ê³µê²© ë°ë¯¸ì§€")]
     [Range(1, 100)]
     public float damage = 10f;
 
-    [Tooltip("ÀÌµ¿ ¼Óµµ")]
+    [Tooltip("ì´ë™ ì†ë„")]
     [Range(1, 20)]
     public float moveSpeed = 5f;
 
-    [Header("===== °ø°İ =====")]
+    [Header("===== ê³µê²© =====")]
 
-    [Tooltip("±âº» °ø°İ Äğ´Ù¿î (ÃÊ)")]
+    [Tooltip("ê¸°ë³¸ ê³µê²© ì¿¨ë‹¤ìš´ (ì´ˆ)")]
     [Range(0.1f, 3f)]
     public float attackCooldown = 0.5f;
 
-    [Tooltip("±âº» °ø°İ »ç°Å¸®")]
+    [Tooltip("ê¸°ë³¸ ê³µê²© ì‚¬ê±°ë¦¬")]
     [Range(0.5f, 10f)]
     public float attackRange = 1.5f;
 
-    [Tooltip("Æ¯¼ö °ø°İ µ¥¹ÌÁö ¹èÀ²")]
+    [Tooltip("íŠ¹ìˆ˜ ê³µê²© ë°ë¯¸ì§€ ë°°ìœ¨")]
     [Range(1f, 5f)]
     public float specialAttackMultiplier = 3f;
 
-    [Tooltip("Æ¯¼ö °ø°İ Äğ´Ù¿î (ÃÊ)")]
+    [Tooltip("íŠ¹ìˆ˜ ê³µê²© ì¿¨ë‹¤ìš´ (ì´ˆ)")]
     [Range(1f, 30f)]
     public float specialAttackCooldown = 5f;
 
-    [Header("===== ´ë½¬ =====")]
+    [Header("===== ëŒ€ì‰¬ =====")]
 
-    [Tooltip("´ë½¬ ¼Óµµ")]
+    [Tooltip("ëŒ€ì‰¬ ì†ë„")]
     [Range(5f, 30f)]
     public float dashSpeed = 15f;
 
-    [Tooltip("´ë½¬ Áö¼Ó ½Ã°£ (ÃÊ)")]
+    [Tooltip("ëŒ€ì‰¬ ì§€ì† ì‹œê°„ (ì´ˆ)")]
     [Range(0.1f, 1f)]
     public float dashDuration = 0.2f;
 
-    [Tooltip("´ë½¬ È½¼ö")]
+    [Tooltip("ëŒ€ì‰¬ íšŸìˆ˜")]
     [Range(1, 4)]
     public int maxDashCount = 2;
 
-    [Tooltip("´ë½¬ ÈÄ ´Ù½Ã »ç¿ë °¡´É±îÁö ½Ã°£ (ÃÊ)")]
+    [Tooltip("ëŒ€ì‰¬ í›„ ë‹¤ì‹œ ì‚¬ìš© ê°€ëŠ¥ê¹Œì§€ ì‹œê°„ (ì´ˆ)")]
     [Range(0.1f, 5f)]
     public float dashCooldown = 1f;
 
-    [Tooltip("´ë½¬ Áß ¹«Àû ½Ã°£ (ÃÊ)")]
+    [Tooltip("ëŒ€ì‰¬ ì¤‘ ë¬´ì  ì‹œê°„ (ì´ˆ)")]
     [Range(0.05f, 1f)]
     public float dashInvincibilityTime = 0.2f;
 
-    [Header("===== ÇÇ°İ =====")]
+    [Header("===== í”¼ê²© =====")]
 
-    [Tooltip("ÇÇ°İ ÈÄ ¹«Àû ½Ã°£ (ÃÊ)")]
+    [Tooltip("í”¼ê²© í›„ ë¬´ì  ì‹œê°„ (ì´ˆ)")]
     [Range(0.1f, 2f)]
     public float hitInvincibilityTime = 0.5f;
 
-    [Header("===== ºÎÈ° (Á×À½ µµÀü) =====")]
-    [Tooltip("ÃÖ´ë ºÎÈ° °¡´É È½¼ö")]
+    [Header("===== ë¶€í™œ (ì£½ìŒ ë„ì „) =====")]
+    [Tooltip("ìµœëŒ€ ë¶€í™œ ê°€ëŠ¥ íšŸìˆ˜")]
     public int maxResurrectionCount = 0;
 
-    [Tooltip("ºÎÈ° ½Ã È¸º¹µÉ Ã¼·Â ºñÀ² (0.2 = 20%)")]
+    [Tooltip("ë¶€í™œ ì‹œ íšŒë³µë  ì²´ë ¥ ë¹„ìœ¨ (0.2 = 20%)")]
     [Range(0.1f, 1f)]
     public float resurrectionHealthPercent = 0f;
 
-    [Tooltip("ºÎÈ° Á÷ÈÄ ¹«Àû ½Ã°£")]
+    [Tooltip("ë¶€í™œ ì§í›„ ë¬´ì  ì‹œê°„")]
     public float resurrectionInvincibilityTime = 2f;
 
-    [Header("===== ÀçÈ­ ¹× ¸ŞÅ¸ °­È­ =====")]
-    [Tooltip("ÇöÀç º¸À¯ ÁßÀÎ °ñµå")]
+    [Header("===== ì¬í™” ë° ë©”íƒ€ ê°•í™” =====")]
+    [Tooltip("í˜„ì¬ ë³´ìœ  ì¤‘ì¸ ê³¨ë“œ")]
     public int currentGold = 5000; 
 
-    [Tooltip("°ñµå È¹µæ·® ¹èÀ² (±âº» 1.0 = 100%)")]
+    [Tooltip("ê³¨ë“œ íšë“ëŸ‰ ë°°ìœ¨ (ê¸°ë³¸ 1.0 = 100%)")]
     public float goldGainMultiplier = 1.0f;
 
-    [Header("°­È­ ·¹º§ (0ÀÌ ±âº»»óÅÂ)")]
+    [Header("ê°•í™” ë ˆë²¨ (0ì´ ê¸°ë³¸ìƒíƒœ)")]
     public int levelHP = 0;     
     public int levelATK = 0;    
     public int levelDash = 0;   
     public int levelGold = 0;   
     public int levelRevive = 0;
 
-    [Header("===== ÀÎ°ÔÀÓ È¹µæ ±âÇÁÆ® (ÇöÀç ·±) =====")]
+    [Header("===== ì¸ê²Œì„ íšë“ ê¸°í”„íŠ¸ (í˜„ì¬ ëŸ°) =====")]
     public System.Collections.Generic.List<GiftType> acquiredGifts = new System.Collections.Generic.List<GiftType>();
 }

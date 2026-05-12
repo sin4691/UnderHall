@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("º¸½º Å¬¸®¾î! ´ÙÀ½ ½ºÅ×ÀÌÁö³ª ¿£µùÀ» ÁØºñÇÏ¼¼¿ä.");
+            Debug.Log("ë³´ìŠ¤ í´ë¦¬ì–´! ë‹¤ìŒ ìŠ¤í…Œì´ì§€ë‚˜ ì—”ë”©ì„ ì¤€ë¹„í•˜ì„¸ìš”.");
             return;
         }
 
@@ -92,7 +92,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("»õ ¸Ê ÇÁ¸®ÆÕ ¾È¿¡ 'SpawnPoint'¶ó´Â ÀÌ¸§ÀÇ ¿ÀºêÁ§Æ®°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogWarning("ìƒˆ ë§µ í”„ë¦¬íŒ¹ ì•ˆì— 'SpawnPoint'ë¼ëŠ” ì´ë¦„ì˜ ì˜¤ë¸Œì íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
         }
 
         yield return StartCoroutine(Fade(0f));
