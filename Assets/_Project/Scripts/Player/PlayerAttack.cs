@@ -59,6 +59,8 @@ public class PlayerAttack : MonoBehaviour
         if (attackCoroutine != null) StopCoroutine(attackCoroutine);
         if (specialAttackCoroutine != null) StopCoroutine(specialAttackCoroutine);
 
+        bool wasSpinning = isSpinning;
+
         isSpinning = false;
         //창우_마지막 잔상 즉시 제거
         VFXManager.Instance.StopWeaponSkillLoop();
@@ -68,6 +70,11 @@ public class PlayerAttack : MonoBehaviour
 
         if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
             player.ChangeState(PlayerState.Idle);
+
+        if (wasSpinning)
+        {
+            StartCoroutine(SpecialCooldownRoutine());
+        }
     }
 
     // 기본 공격 콤보 루틴
