@@ -32,6 +32,8 @@ public class VFXManager : MonoBehaviour
     [SerializeField] GameObject weaponSkillPrefab;
     [SerializeField] GameObject weaponSkillExplosionPrefab;
 
+    
+
     [Header("─ 타격 이펙트 ─")]
     [SerializeField] GameObject attackHitSparkPrefab;
     [SerializeField] GameObject attackImpactPrefab;
@@ -201,15 +203,16 @@ public class VFXManager : MonoBehaviour
     /// 스킬 루프 이펙트 — SpinRoutine tickTimer마다 호출.
     /// 직전 인스턴스를 즉시 풀로 반환하고 새 인스턴스를 스폰해서 잔상을 제거합니다.
     /// </summary>
+    /// 
+    private GameObject activeWeaponSkillPrefab;
+
     public void PlayWeaponSkillLoop(Transform targetTransform)
     {
-        if (activeWeaponSkillInstance != null)
-        {
-            ReturnObject(activeWeaponSkillInstance, weaponSkillPrefab);
-            activeWeaponSkillInstance = null;
-        }
+        StopWeaponSkillLoop();
 
+        activeWeaponSkillPrefab = weaponSkillPrefab;
         activeWeaponSkillInstance = GetFromPool(weaponSkillPrefab, targetTransform.position, targetTransform.forward);
+
         if (activeWeaponSkillInstance != null)
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
@@ -229,8 +232,20 @@ public class VFXManager : MonoBehaviour
     }
 
     /// <summary>스킬 종료 폭발 이펙트 — 우클릭을 떼는 순간 1회 호출</summary>
-    public void PlayWeaponSkillExplosion(Vector3 position, Vector3 direction)
-        => GetFromPool(weaponSkillExplosionPrefab, position, direction);
+    public void PlayWeaponSkillExplosion(Transform targetTransform)
+    {
+        StopWeaponSkillLoop();
+
+        activeWeaponSkillPrefab = weaponSkillExplosionPrefab;
+        activeWeaponSkillInstance = GetFromPool(weaponSkillExplosionPrefab, targetTransform.position, targetTransform.forward);
+
+        if (activeWeaponSkillInstance != null)
+        {
+            activeWeaponSkillInstance.transform.SetParent(targetTransform);
+            activeWeaponSkillInstance.transform.localPosition = Vector3.zero;
+            activeWeaponSkillInstance.transform.localRotation = Quaternion.identity;
+        }
+    }
 
     // ─────────────────────────────────────────
     // 타격 이펙트
