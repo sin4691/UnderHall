@@ -3,41 +3,41 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Game/Enemy Data")]
 public class EnemyData : ScriptableObject
 {
-    [Header("===== ±âº» Á¤º¸ =====")]
+    [Header("===== ê¸°ë³¸ ì •ë³´ =====")]
 
-    [Tooltip("Àû ÀÌ¸§")]
+    [Tooltip("ì  ì´ë¦„")]
     public string enemyName;
-
-    [Tooltip("Àû Å¸ÀÔ (ºĞ·ù¿ë)")]
+    
+    [Tooltip("ì  íƒ€ì… (ë¶„ë¥˜ìš©)")]
     public EnemyType enemyType;
 
-    [Header("===== ½ºÅÈ =====")]
+    [Header("===== ìŠ¤íƒ¯ =====")]
 
-    [Tooltip("ÃÖ´ë Ã¼·Â")]
+    [Tooltip("ìµœëŒ€ ì²´ë ¥")]
     [Range(1, 500)]
     public float maxHealth = 30f;
 
-    [Tooltip("ÀÌµ¿ ¼Óµµ")]
+    [Tooltip("ì´ë™ ì†ë„")]
     [Range(0.5f, 10f)]
     public float moveSpeed = 3f;
 
-    [Header("===== °ø°İ =====")]
+    [Header("===== ê³µê²© =====")]
 
-    [Tooltip("°ø°İ µ¥¹ÌÁö")]
+    [Tooltip("ê³µê²© ë°ë¯¸ì§€")]
     [Range(1, 50)]
     public float damage = 5f;
 
-    [Tooltip("°ø°İ »ç°Å¸®")]
+    [Tooltip("ê³µê²© ì‚¬ê±°ë¦¬")]
     [Range(0.5f, 20f)]
     public float attackRange = 1.5f;
 
-    [Tooltip("°ø°İ Äğ´Ù¿î (ÃÊ)")]
+    [Tooltip("ê³µê²© ì¿¨ë‹¤ìš´ (ì´ˆ)")]
     [Range(0.5f, 5f)]
     public float attackCooldown = 1f;
 
     [Header("===== AI =====")]
 
-    [Tooltip("ÇÃ·¹ÀÌ¾î °¨Áö °Å¸®")]
+    [Tooltip("í”Œë ˆì´ì–´ ê°ì§€ ê±°ë¦¬")]
     [Range(1, 30)]
     public float detectionRange = 10f;
 
@@ -45,9 +45,9 @@ public class EnemyData : ScriptableObject
 
 public enum EnemyType
 {
-    // ¿¹½Ã¶ó ¼öÁ¤ ÇÏ¼ÅµµµË´Ï´Ù
-    Melee,      // ±ÙÁ¢
-    Ranged,     // ¿ø°Å¸®
-    Charger,    // µ¹Áø
-    Elite       // ¿¤¸®Æ®
+    // ì˜ˆì‹œë¼ ìˆ˜ì • í•˜ì…”ë„ë©ë‹ˆë‹¤
+    Melee,      // ê·¼ì ‘
+    Ranged,     // ì›ê±°ë¦¬
+    Charger,    // ëŒì§„
+    Elite       // ì—˜ë¦¬íŠ¸
 }

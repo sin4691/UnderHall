@@ -9,12 +9,12 @@ public class Monster : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-
-        Debug.Log($"¸ó½ºÅÍ ÇÇ°İ! µé¾î¿Â µ¥¹ÌÁö: {damage} / ³²Àº Ã¼·Â: {currentHealth}");
+        
+        Debug.Log($"ëª¬ìŠ¤í„° í”¼ê²©! ë“¤ì–´ì˜¨ ë°ë¯¸ì§€: {damage} / ë‚¨ì€ ì²´ë ¥: {currentHealth}");
 
         if (currentHealth <= 0)
         {
-            Debug.Log("¸ó½ºÅÍ Ã³Ä¡µÊ!");
+            Debug.Log("ëª¬ìŠ¤í„° ì²˜ì¹˜ë¨!");
             Destroy(gameObject);
         }
     }
@@ -27,7 +27,7 @@ public class Monster : MonoBehaviour
 
             if (player != null)
             {
-                Debug.Log($"Å×½ºÆ® ¸ó½ºÅÍ°¡ ÇÃ·¹ÀÌ¾î¿¡°Ô {touchDamage}ÀÇ µ¥¹ÌÁö¸¦ Áİ´Ï´Ù!");
+                Debug.Log($"í…ŒìŠ¤íŠ¸ ëª¬ìŠ¤í„°ê°€ í”Œë ˆì´ì–´ì—ê²Œ {touchDamage}ì˜ ë°ë¯¸ì§€ë¥¼ ì¤ë‹ˆë‹¤!");
                 player.TakeDamage(touchDamage);
             }
         }
