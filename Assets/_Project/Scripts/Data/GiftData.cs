@@ -3,53 +3,53 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GiftData", menuName = "Game/Gift Data")]
 public class GiftData : ScriptableObject
 {
-    // È®Á¤ ¾Æ´Ô!
-    [Header("===== ±âº» Á¤º¸ =====")]
+    // í™•ì • ì•„ë‹˜!
+    [Header("===== ê¸°ë³¸ ì •ë³´ =====")]
 
-    [Tooltip("ÀºÇı ÀÌ¸§")]
+    [Tooltip("ì€í˜œ ì´ë¦„")]
     public string giftName;
 
-    [Tooltip("È¿°ú ¼³¸í (UI¿¡ Ç¥½Ã)")]
+    [Tooltip("íš¨ê³¼ ì„¤ëª… (UIì— í‘œì‹œ)")]
     [TextArea(2, 4)]
     public string description;
 
-    [Tooltip("¾ÆÀÌÄÜ")]
+    [Tooltip("ì•„ì´ì½˜")]
     public Sprite icon;
 
-    [Header("===== ºĞ·ù =====")]
+    [Header("===== ë¶„ë¥˜ =====")]
 
-    [Tooltip("¾î¶² Çàµ¿¿¡ Àû¿ëµÇ´ÂÁö")]
+    [Tooltip("ì–´ë–¤ í–‰ë™ì— ì ìš©ë˜ëŠ”ì§€")]
     public GiftCategory category;
 
-    [Header("===== È¿°ú =====")]
+    [Header("===== íš¨ê³¼ =====")]
 
-    [Tooltip("È¿°ú Á¾·ù")]
+    [Tooltip("íš¨ê³¼ ì¢…ë¥˜")]
     public GiftEffect effect;
 
-    [Tooltip("È¿°ú ¼öÄ¡ (% ¶Ç´Â Àı´ë°ª)")]
+    [Tooltip("íš¨ê³¼ ìˆ˜ì¹˜ (% ë˜ëŠ” ì ˆëŒ€ê°’)")]
     public float value;
 }
 
-public enum GiftCategory
+public enum GiftCategorys
 {
-    Attack,      // °ø°İ
-    Dash,        // ´ë½¬
-    Passive      // ÆĞ½Ãºê
+    Attack,      // ê³µê²©
+    Dash,        // ëŒ€ì‰¬
+    Passive      // íŒ¨ì‹œë¸Œ
 }
 
 public enum GiftEffect
 {
-    // °ø°İ
+    // ê³µê²©
     DamageIncrease,
     AttackSpeedIncrease,
     AttackRangeIncrease,
 
-    // ´ë½¬
+    // ëŒ€ì‰¬
     DashCooldownReduce,
     DashDamage,
     DashCountIncrease,
 
-    // ÆĞ½Ãºê
+    // íŒ¨ì‹œë¸Œ
     MaxHealthIncrease,
     MoveSpeedIncrease,
     GoldGainIncrease,
