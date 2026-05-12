@@ -2,21 +2,21 @@ using UnityEngine;
 
 public class EnemyRange : EnemyBase
 {
-    [Header("===== ¿ø°Å¸® (Åº¸·) °³º° ¼³Á¤ =====")]
-    [Tooltip("ÀÎ½ºÆåÅÍ¿¡¼­ Á÷Á¢ Á¶ÀıÇÏ´Â °ø°İ ÄğÅ¸ÀÓ")]
+    [Header("===== ì›ê±°ë¦¬ (íƒ„ë§‰) ê°œë³„ ì„¤ì • =====")]
+    [Tooltip("ì¸ìŠ¤í™í„°ì—ì„œ ì§ì ‘ ì¡°ì ˆí•˜ëŠ” ê³µê²© ì¿¨íƒ€ì„")]
     public float rangeAttackCooldown = 1.5f;
 
-    [Tooltip("Åõ»çÃ¼ ³¯¾Æ°¡´Â ¼Óµµ")]
+    [Tooltip("íˆ¬ì‚¬ì²´ ë‚ ì•„ê°€ëŠ” ì†ë„")]
     public float projectileSpeed = 8f;
 
-    [Tooltip("Åõ»çÃ¼°¡ ¹ß»çµÉ À§Ä¡")]
+    [Tooltip("íˆ¬ì‚¬ì²´ê°€ ë°œì‚¬ë  ìœ„ì¹˜")]
     public Transform firePoint;
 
-    [Tooltip("ÇÑ ¹ø¿¡ ¹ß»çÇÒ ÃÑ¾Ë °³¼ö")]
+    [Tooltip("í•œ ë²ˆì— ë°œì‚¬í•  ì´ì•Œ ê°œìˆ˜")]
     [Range(1, 15)]
     public int projectileCount = 1;
 
-    [Tooltip("ÃÑ¾ËÀÌ ÆÛÁö´Â °¢µµ")]
+    [Tooltip("ì´ì•Œì´ í¼ì§€ëŠ” ê°ë„")]
     [Range(0f, 90f)]
     public float spreadAngle = 15f;
 
@@ -26,31 +26,24 @@ public class EnemyRange : EnemyBase
 
     protected override void Update()
     {
-        if (target == null) return;
+        if (target == null || isDead) return;
+
+        float dist = Vector3.Distance(transform.position, target.position);
 
         if (!isAppeared)
         {
-            float dist = Vector3.Distance(transform.position, target.position);
-
             if (dist <= detectRange)
             {
-                isAppeared = true; 
-                anim.SetTrigger("Appear"); 
-
-                if (agent != null) agent.isStopped = true;
-
-                Invoke("StartMoving", 2.0f);
+                isAppeared = true;
+                anim.SetTrigger("Appear");
             }
-
             return;
         }
 
-        base.Update();
-    }
-
-    private void StartMoving()
-    {
-        if (agent != null) agent.isStopped = false;
+        if (dist <= detectRange)
+        {
+            Attack();
+        }
     }
 
     protected override void Attack()
@@ -58,7 +51,7 @@ public class EnemyRange : EnemyBase
         if (target != null)
         {
             Vector3 lookDir = (target.position - transform.position).normalized;
-            lookDir.y = 0; 
+            lookDir.y = 0;
 
             if (lookDir != Vector3.zero)
             {

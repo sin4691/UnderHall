@@ -3,8 +3,8 @@ using UnityEngine;
 public class ProjectileManager : MonoBehaviour
 {
     public static ProjectileManager Instance;
-
-    [Header("Åõ»çÃ¼ ÇÁ¸®ÆÕ")]
+    
+    [Header("íˆ¬ì‚¬ì²´ í”„ë¦¬íŒ¹")]
     public GameObject rangeEnemyProjectilePrefab; 
 
     private void Awake()

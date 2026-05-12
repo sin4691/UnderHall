@@ -33,7 +33,7 @@ public class EnemyManager : MonoBehaviour
         activeEnemies.Remove(enemy);
         if(activeEnemies.Count <= 0)
         {
-            Debug.Log("¸ó½ºÅÍ ¸ðµÎ Ã³Ä¡");
+            Debug.Log("ëª¬ìŠ¤í„° ëª¨ë‘ ì²˜ì¹˜");
         }
     }
 
