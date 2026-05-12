@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
-using System.Reflection; // EnemyBase °­Á¦ Á¢±Ù(Ã³Çü)À» À§ÇØ ÇÊ¿äÇÔ
+using System.Reflection; // EnemyBase ê°•ì œ ì ‘ê·¼(ì²˜í˜•)ì„ ìœ„í•´ í•„ìš”í•¨
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -20,17 +20,17 @@ public class PlayerAttack : MonoBehaviour
     private bool isSpinning = false;
 
     [Header("VFX")]
-    public Transform weaponVFXPoint; // Ã¢¿ì_VFXPoint_Weapon µå·¡±×
-    public Transform skillVFXPoint;  // Ã¢¿ì_VFXPoint_Body µå·¡±×
+    public Transform weaponVFXPoint; // ì°½ìš°_VFXPoint_Weapon ë“œë˜ê·¸
+    public Transform skillVFXPoint;  // ì°½ìš°_VFXPoint_Body ë“œë˜ê·¸
 
     private Collider[] hitColliders = new Collider[10];
 
-    // °¢¼º(´ë½Ã ÈÄ ´ÙÀ½ °ø°İ 2¹è) ¹öÇÁ »óÅÂ
+    // ê°ì„±(ëŒ€ì‹œ í›„ ë‹¤ìŒ ê³µê²© 2ë°°) ë²„í”„ ìƒíƒœ
     public bool isAwakened = false;
 
     private void Awake() => player = GetComponent<Player>();
 
-    // ¸¶¿ì½º ÁÂÅ¬¸¯: ±âº» °ø°İ
+    // ë§ˆìš°ìŠ¤ ì¢Œí´ë¦­: ê¸°ë³¸ ê³µê²©
     public void ExecuteAttack()
     {
         if (isAttackOnCooldown || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
@@ -41,7 +41,7 @@ public class PlayerAttack : MonoBehaviour
             isNextAttackBuffered = true;
     }
 
-    // ¸¶¿ì½º ¿ìÅ¬¸¯ ´©¸§: ½ºÅ³ ½ÃÀÛ
+    // ë§ˆìš°ìŠ¤ ìš°í´ë¦­ ëˆ„ë¦„: ìŠ¤í‚¬ ì‹œì‘
     public void StartSpecialAttack()
     {
         if (isSpecialAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
@@ -50,16 +50,18 @@ public class PlayerAttack : MonoBehaviour
             specialAttackCoroutine = StartCoroutine(SpinRoutine());
     }
 
-    // ¸¶¿ì½º ¿ìÅ¬¸¯ ¶À: ½ºÅ³ ÁßÁö
+    // ë§ˆìš°ìŠ¤ ìš°í´ë¦­ ë—Œ: ìŠ¤í‚¬ ì¤‘ì§€
     public void StopSpecialAttack() => isSpinning = false;
 
-    // ´ë½Ã µîÀ¸·Î ÀÎÇÑ °­Á¦ Ãë¼Ò
+    // ëŒ€ì‹œ ë“±ìœ¼ë¡œ ì¸í•œ ê°•ì œ ì·¨ì†Œ
     public void CancelAttack()
     {
         if (attackCoroutine != null) StopCoroutine(attackCoroutine);
         if (specialAttackCoroutine != null) StopCoroutine(specialAttackCoroutine);
 
         isSpinning = false;
+        //ì°½ìš°_ë§ˆì§€ë§‰ ì”ìƒ ì¦‰ì‹œ ì œê±°
+        VFXManager.Instance.StopWeaponSkillLoop();
         currentCombo = 0;
         isNextAttackBuffered = false;
         isAttackOnCooldown = false;
@@ -68,14 +70,14 @@ public class PlayerAttack : MonoBehaviour
             player.ChangeState(PlayerState.Idle);
     }
 
-    // ±âº» °ø°İ ÄŞº¸ ·çÆ¾
+    // ê¸°ë³¸ ê³µê²© ì½¤ë³´ ë£¨í‹´
     private IEnumerator ComboAttackRoutine()
     {
         player.ChangeState(PlayerState.Attack);
         player.animator.SetBool("isMoving", false);
         currentCombo = 1;
 
-        // [¿¬°İ] ±âº» °ø°İ ¼Óµµ +25%
+        // [ì—°ê²©] ê¸°ë³¸ ê³µê²© ì†ë„ +25%
         if (player.playerData.acquiredGifts.Contains(GiftType.Combo))
             player.animator.speed = 1.25f;
 
@@ -87,7 +89,7 @@ public class PlayerAttack : MonoBehaviour
             player.animator.CrossFade("attack" + currentCombo, 0.02f);
             yield return new WaitForSeconds(0.05f / player.animator.speed);
 
-            // ±âº» °ø°İ ÀÌÆåÆ®
+            // ê¸°ë³¸ ê³µê²© ì´í™íŠ¸
             VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, weaponVFXPoint.forward);
 
             ExecuteHitDetection(transform.position + transform.forward * (player.playerData.attackRange * 0.5f),
@@ -100,14 +102,14 @@ public class PlayerAttack : MonoBehaviour
             else break;
         }
 
-        player.animator.speed = 1f; // °ø¼Ó º¹±¸
+        player.animator.speed = 1f; // ê³µì† ë³µêµ¬
         currentCombo = 0;
         player.animator.CrossFade("idle", 0.15f);
         player.ChangeState(PlayerState.Idle);
         StartCoroutine(AttackCooldownRoutine());
     }
 
-    // Æ¯¼ö °ø°İ (°¡·» E ½ºÅ¸ÀÏ) ·çÆ¾
+    // íŠ¹ìˆ˜ ê³µê²© (ê°€ë Œ E ìŠ¤íƒ€ì¼) ë£¨í‹´
     private IEnumerator SpinRoutine()
     {
         isSpinning = true;
@@ -132,19 +134,19 @@ public class PlayerAttack : MonoBehaviour
 
             if (tickTimer >= tickRate)
             {
-                // [Æø¹ß] ·ÎÁ÷ : Å¸°İ ¹üÀ§ ¹İ°æ Áõ°¡
+                // [í­ë°œ] ë¡œì§ : íƒ€ê²© ë²”ìœ„ ë°˜ê²½ ì¦ê°€
                 float currentRadius = player.playerData.attackRange;
                 if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
                 {
-                    // ±âÇÁÆ® º¸À¯ ½Ã °ø°İ ¹İ°æ 1.5¹è Áõ°¡
+                    // ê¸°í”„íŠ¸ ë³´ìœ  ì‹œ ê³µê²© ë°˜ê²½ 1.5ë°° ì¦ê°€
                     currentRadius *= 1.5f;
                 }
 
-                // º¯°æµÈ Radius¸¦ Àû¿ëÇÏ¿© µ¥¹ÌÁö ÆÇÁ¤ (isSpecial = true)
+                // ë³€ê²½ëœ Radiusë¥¼ ì ìš©í•˜ì—¬ ë°ë¯¸ì§€ íŒì • (isSpecial = true)
                 ExecuteHitDetection(transform.position, currentRadius, player.playerData.specialAttackMultiplier, true);
 
-                // ½ºÅ³ ÀÌÆåÆ® Àç»ı (ºñÁÖ¾ó Å©±â´Â ÀÎ½ºÆåÅÍÀÇ ÇÁ¸®ÆÕ¿¡¼­ Á¶Àı ÇÊ¿ä)
-                VFXManager.Instance.PlayWeaponSkill(skillVFXPoint.position, skillVFXPoint.forward);
+                //[VFX/FEAT]ì°½ìš°_ìŠ¤í‚¬ ì´í™íŠ¸ ì¬ìƒ
+                VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint.position, skillVFXPoint.forward);
 
                 tickTimer = 0f;
             }
@@ -152,6 +154,10 @@ public class PlayerAttack : MonoBehaviour
         }
 
         isSpinning = false;
+
+        //[VFX/FEAT]ì°½ìš°_ë§ˆì§€ë§‰ ì”ìƒ ì¦‰ì‹œ ì œê±°
+        VFXManager.Instance.StopWeaponSkillLoop();
+
         if (player.CurrentState == PlayerState.SpecialAttack)
         {
             player.animator.CrossFade("idle", 0.15f);
@@ -160,19 +166,19 @@ public class PlayerAttack : MonoBehaviour
         StartCoroutine(SpecialCooldownRoutine());
     }
 
-    // ÅëÇÕ µ¥¹ÌÁö ÆÇÁ¤ ½Ã½ºÅÛ
+    // í†µí•© ë°ë¯¸ì§€ íŒì • ì‹œìŠ¤í…œ
     private void ExecuteHitDetection(Vector3 center, float radius, float damageMultiplier, bool isSpecial)
     {
         center.y += 1f;
-        // º¯°æµÈ radius °ªÀÌ Physics.OverlapSphereNonAlloc¿¡ Àû¿ëµË´Ï´Ù.
+        // ë³€ê²½ëœ radius ê°’ì´ Physics.OverlapSphereNonAllocì— ì ìš©ë©ë‹ˆë‹¤.
         int hitCount = Physics.OverlapSphereNonAlloc(center, radius, hitColliders);
 
-        // [°¢¼º] ¹öÇÁ »ç¿ë ¿©ºÎ È®ÀÎ
+        // [ê°ì„±] ë²„í”„ ì‚¬ìš© ì—¬ë¶€ í™•ì¸
         bool useAwakening = false;
         if (isAwakened)
         {
             useAwakening = true;
-            isAwakened = false; // ÇÑ ¹ø ¾²¸é ¹Ù·Î ¹öÇÁ ¼Ò¸ğ
+            isAwakened = false; // í•œ ë²ˆ ì“°ë©´ ë°”ë¡œ ë²„í”„ ì†Œëª¨
         }
 
         for (int i = 0; i < hitCount; i++)
@@ -182,24 +188,24 @@ public class PlayerAttack : MonoBehaviour
 
             var target = col.GetComponentInParent<EnemyBase>();
 
-            // ¸ó½ºÅÍ°¡ Á¸ÀçÇÏ°í ¾ÆÁ÷ Äİ¶óÀÌ´õ°¡ ÄÑÁ®ÀÖ´Ù¸é (»ì¾ÆÀÖ´Ù¸é)
+            // ëª¬ìŠ¤í„°ê°€ ì¡´ì¬í•˜ê³  ì•„ì§ ì½œë¼ì´ë”ê°€ ì¼œì ¸ìˆë‹¤ë©´ (ì‚´ì•„ìˆë‹¤ë©´)
             if (target != null && col.enabled)
             {
                 float finalDamage = player.playerData.damage * damageMultiplier;
 
-                // [ÆĞ½Ãºê °è¿­]
-                // [±¤Æø] ³» Ã¼·ÂÀÌ 50% ÀÌÇÏ¸é µ¥¹ÌÁö +40%
+                // [íŒ¨ì‹œë¸Œ ê³„ì—´]
+                // [ê´‘í­] ë‚´ ì²´ë ¥ì´ 50% ì´í•˜ë©´ ë°ë¯¸ì§€ +40%
                 if (player.playerData.acquiredGifts.Contains(GiftType.Berserk) &&
                    (player.CurrentHealth <= player.playerData.maxHealth * 0.5f))
                     finalDamage *= 1.4f;
 
-                // [°¢¼º] ´ë½Ã Á÷ÈÄ¶ó¸é µ¥¹ÌÁö 2¹è
+                // [ê°ì„±] ëŒ€ì‹œ ì§í›„ë¼ë©´ ë°ë¯¸ì§€ 2ë°°
                 if (useAwakening) finalDamage *= 2f;
 
-                // [ÀÏ¹İ °ø°İ °è¿­]
+                // [ì¼ë°˜ ê³µê²© ê³„ì—´]
                 if (!isSpecial)
                 {
-                    // [Ã³Çü] ¸®ÇÃ·º¼ÇÀ¸·Î EnemyBaseÀÇ private Ã¼·Â ÀĞ¾î¿À±â
+                    // [ì²˜í˜•] ë¦¬í”Œë ‰ì…˜ìœ¼ë¡œ EnemyBaseì˜ private ì²´ë ¥ ì½ì–´ì˜¤ê¸°
                     if (player.playerData.acquiredGifts.Contains(GiftType.Execution))
                     {
                         FieldInfo healthField = typeof(EnemyBase).GetField("currentHealth", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -215,45 +221,45 @@ public class PlayerAttack : MonoBehaviour
                             {
                                 float enemyMaxHP = (float)maxHpField.GetValue(enemyData);
 
-                                // Ã¼·ÂÀÌ 20% ÀÌÇÏ¸é µ¥¹ÌÁö 2¹è!
+                                // ì²´ë ¥ì´ 20% ì´í•˜ë©´ ë°ë¯¸ì§€ 2ë°°!
                                 if (enemyCurrentHP <= enemyMaxHP * 0.2f) finalDamage *= 2f;
                             }
                         }
                     }
 
-                    // [Ä¡¸íÅ¸] 15% È®·ü·Î 2¹è
+                    // [ì¹˜ëª…íƒ€] 15% í™•ë¥ ë¡œ 2ë°°
                     if (player.playerData.acquiredGifts.Contains(GiftType.Critical) && Random.value <= 0.15f)
                     {
                         finalDamage *= 2f;
-                        Debug.Log("Å©¸®Æ¼ÄÃ ÅÍÁü!");
+                        Debug.Log("í¬ë¦¬í‹°ì»¬ í„°ì§!");
                     }
                 }
-                // [Æ¯¼ö °ø°İ °è¿­]
+                // [íŠ¹ìˆ˜ ê³µê²© ê³„ì—´]
                 else
                 {
-                    // [Áö¼Ó·Â] Æ¯¼ö°ø°İ µ¥¹ÌÁö 30% Áõ°¡
+                    // [ì§€ì†ë ¥] íŠ¹ìˆ˜ê³µê²© ë°ë¯¸ì§€ 30% ì¦ê°€
                     if (player.playerData.acquiredGifts.Contains(GiftType.Endurance))
                         finalDamage *= 1.3f;
 
-                    // [¼öÁ¤µÊ] Æø¹ß(Explosion)ÀÇ µ¥¹ÌÁö ÁõÆø ·ÎÁ÷À» Á¦°ÅÇß½À´Ï´Ù.
+                    // [ìˆ˜ì •ë¨] í­ë°œ(Explosion)ì˜ ë°ë¯¸ì§€ ì¦í­ ë¡œì§ì„ ì œê±°í–ˆìŠµë‹ˆë‹¤.
                 }
 
-                // Å¸°İ Á÷ÀüÀÇ Äİ¶óÀÌ´õ »óÅÂ ÀúÀå
+                // íƒ€ê²© ì§ì „ì˜ ì½œë¼ì´ë” ìƒíƒœ ì €ì¥
                 bool wasAlive = col.enabled;
 
-                string attackType = isSpecial ? "Æ¯¼ö°ø°İ" : "±âº»°ø°İ";
-                Debug.Log($"[µ¥¹ÌÁö ÆÇÁ¤] {attackType} ¸íÁß! ÃÖÁ¾ µ¥¹ÌÁö: {finalDamage}");
+                string attackType = isSpecial ? "íŠ¹ìˆ˜ê³µê²©" : "ê¸°ë³¸ê³µê²©";
+                Debug.Log($"[ë°ë¯¸ì§€ íŒì •] {attackType} ëª…ì¤‘! ìµœì¢… ë°ë¯¸ì§€: {finalDamage}");
 
-                // µ¥¹ÌÁö Àû¿ë
+                // ë°ë¯¸ì§€ ì ìš©
                 target.TakeDamage(finalDamage);
 
-                // [ÈíÇ÷] ¶§¸° Á÷ÈÄ¿¡ Äİ¶óÀÌ´õ°¡ ²¨Á³´Ù? = ÀûÀÌ Á×¾ú´Ù!
+                // [í¡í˜ˆ] ë•Œë¦° ì§í›„ì— ì½œë¼ì´ë”ê°€ êº¼ì¡Œë‹¤? = ì ì´ ì£½ì—ˆë‹¤!
                 if (wasAlive && !col.enabled && player.playerData.acquiredGifts.Contains(GiftType.Vampirism))
                 {
                     player.Heal(5f);
                 }
 
-                // µ¥¹ÌÁö µé¾î°¥ ¶§ Å¸°İ ÀÌÆåÆ®
+                // ë°ë¯¸ì§€ ë“¤ì–´ê°ˆ ë•Œ íƒ€ê²© ì´í™íŠ¸
                 Vector3 hitNormal = (col.transform.position - transform.position).normalized;
                 VFXManager.Instance.PlayAttackHit(col.transform.position, hitNormal);
             }
@@ -283,7 +289,7 @@ public class PlayerAttack : MonoBehaviour
         isSpecialAttackOnCooldown = true;
         float finalCooldown = player.playerData.specialAttackCooldown;
 
-        // [¼Ó»ç] Æ¯¼ö°ø°İ ÄğÅ¸ÀÓ -30%
+        // [ì†ì‚¬] íŠ¹ìˆ˜ê³µê²© ì¿¨íƒ€ì„ -30%
         if (player.playerData.acquiredGifts.Contains(GiftType.RapidFire))
             finalCooldown *= 0.7f;
 
