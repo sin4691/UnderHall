@@ -33,7 +33,7 @@ public class PlayerAttack : MonoBehaviour
     // 마우스 좌클릭: 기본 공격
     public void ExecuteAttack()
     {
-        if (isAttackOnCooldown || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
+        if (isAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.SpecialAttack || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
 
         if (player.CurrentState != PlayerState.Attack)
             attackCoroutine = StartCoroutine(ComboAttackRoutine());
