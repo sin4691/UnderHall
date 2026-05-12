@@ -217,17 +217,19 @@ public class VFXManager : MonoBehaviour
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
             activeWeaponSkillInstance.transform.localPosition = Vector3.zero;
-            activeWeaponSkillInstance.transform.localRotation = Quaternion.identity;
+            activeWeaponSkillInstance.transform.localRotation = weaponSkillPrefab.transform.localRotation;
         }
+       
     }
 
     /// <summary>스킬 종료 시 마지막 잔상까지 즉시 제거 — SpinRoutine 끝/CancelAttack에서 호출</summary>
     public void StopWeaponSkillLoop()
     {
-        if (activeWeaponSkillInstance != null)
+        if (activeWeaponSkillInstance != null && activeWeaponSkillPrefab != null)
         {
-            ReturnObject(activeWeaponSkillInstance, weaponSkillPrefab);
+            ReturnObject(activeWeaponSkillInstance, activeWeaponSkillPrefab);
             activeWeaponSkillInstance = null;
+            activeWeaponSkillPrefab = null;
         }
     }
 
@@ -243,7 +245,7 @@ public class VFXManager : MonoBehaviour
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
             activeWeaponSkillInstance.transform.localPosition = Vector3.zero;
-            activeWeaponSkillInstance.transform.localRotation = Quaternion.identity;
+            activeWeaponSkillInstance.transform.localRotation = weaponSkillExplosionPrefab.transform.localRotation;
         }
     }
 
