@@ -135,7 +135,7 @@ public class PlayerAttack : MonoBehaviour
             if (tickTimer >= tickRate)
             {
                 // [폭발] 로직 : 타격 범위 반경 증가
-                float currentRadius = player.playerData.attackRange;
+                float currentRadius = player.playerData.specialAttackRange;
                 if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
                 {
                     // 기프트 보유 시 공격 반경 1.5배 증가
