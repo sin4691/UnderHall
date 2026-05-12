@@ -75,19 +75,34 @@ public class GameManager : MonoBehaviour
         Transform spawnPoint = currentMapInstance.transform.Find("SpawnPoint");
         if (spawnPoint != null)
         {
-            Rigidbody rb = player.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
+            UnityEngine.AI.NavMeshAgent agent = player.GetComponent<UnityEngine.AI.NavMeshAgent>();
 
-                rb.position = spawnPoint.position;
-                rb.rotation = spawnPoint.rotation;
+            if (agent != null)
+            {
+                // NavMeshAgent가 있으면 Warp 사용
+                bool warped = agent.Warp(spawnPoint.position);
+                if (!warped)
+                {
+                    Debug.LogWarning("Warp 실패! SpawnPoint가 NavMesh 위에 있는지 확인하세요.");
+                }
+                player.transform.rotation = spawnPoint.rotation;
             }
             else
             {
-                player.transform.position = spawnPoint.position;
-                player.transform.rotation = spawnPoint.rotation;
+                // Fallback: 기존 Rigidbody 이동
+                Rigidbody rb = player.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                    rb.position = spawnPoint.position;
+                    rb.rotation = spawnPoint.rotation;
+                }
+                else
+                {
+                    player.transform.position = spawnPoint.position;
+                    player.transform.rotation = spawnPoint.rotation;
+                }
             }
         }
         else
