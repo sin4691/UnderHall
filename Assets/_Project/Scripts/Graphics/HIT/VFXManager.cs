@@ -201,15 +201,21 @@ public class VFXManager : MonoBehaviour
     /// 스킬 루프 이펙트 — SpinRoutine tickTimer마다 호출.
     /// 직전 인스턴스를 즉시 풀로 반환하고 새 인스턴스를 스폰해서 잔상을 제거합니다.
     /// </summary>
-    public void PlayWeaponSkillLoop(Vector3 position, Vector3 direction)
+    public void PlayWeaponSkillLoop(Transform targetTransform)
     {
-        // 직전 이펙트 즉시 강제 반환
         if (activeWeaponSkillInstance != null)
         {
             ReturnObject(activeWeaponSkillInstance, weaponSkillPrefab);
             activeWeaponSkillInstance = null;
         }
-        activeWeaponSkillInstance = GetFromPool(weaponSkillPrefab, position, direction);
+
+        activeWeaponSkillInstance = GetFromPool(weaponSkillPrefab, targetTransform.position, targetTransform.forward);
+        if (activeWeaponSkillInstance != null)
+        {
+            activeWeaponSkillInstance.transform.SetParent(targetTransform);
+            activeWeaponSkillInstance.transform.localPosition = Vector3.zero;
+            activeWeaponSkillInstance.transform.localRotation = Quaternion.identity;
+        }
     }
 
     /// <summary>스킬 종료 시 마지막 잔상까지 즉시 제거 — SpinRoutine 끝/CancelAttack에서 호출</summary>
