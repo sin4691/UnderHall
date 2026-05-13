@@ -4,14 +4,14 @@ using UnityEngine;
 public class BossDragon : EnemyBase
 {
     [Header("Boss Attack Settings")]
-    public float attackCooldown = 3f; 
+    public float attackCooldown = 3f;
 
-    private bool isAttacking = false; 
+    private bool isAttacking = false;
 
     protected override void Start()
     {
-        base.Start(); 
-        StartCoroutine(BossThinkRoutine()); 
+        base.Start();
+        StartCoroutine(BossThinkRoutine());
     }
 
     // 보스 AI 상태 판단 루틴
@@ -19,7 +19,7 @@ public class BossDragon : EnemyBase
     {
         while (!isDead)
         {
-            yield return new WaitForSeconds(0.2f); 
+            yield return new WaitForSeconds(0.2f);
 
             if (isAttacking || target == null || !agent.isOnNavMesh) continue;
 
@@ -55,11 +55,19 @@ public class BossDragon : EnemyBase
         if (patternIndex == 0)
         {
             anim.SetTrigger("Attack"); // 일반 공격
+
+            //  보스 일반 공격 VFX 실행
+            VFXManager.Instance.PlayBossAttack(transform.position, transform.forward);
+
             yield return new WaitForSeconds(2.0f); // 애니메이션 시간 대기
         }
         else
         {
             anim.SetTrigger("BreatheFire"); // 브레스 공격
+
+            // 보스 브레스 VFX 실행
+            VFXManager.Instance.PlayBossBreath(transform.position, transform.forward);
+
             yield return new WaitForSeconds(3.5f); // 애니메이션 시간 대기
         }
 
