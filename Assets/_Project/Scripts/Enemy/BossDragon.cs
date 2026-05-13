@@ -6,6 +6,11 @@ public class BossDragon : EnemyBase
     [Header("Boss Attack Settings")]
     public float attackCooldown = 3f;
 
+    [Header("Phase 2 Settings")]
+    public float flyHeight = 5f;
+    public float dashSpeed = 35f;
+    private bool isPhase2 = false;
+    private bool isFlying = false;
     private bool isAttacking = false;
 
     protected override void Start()
@@ -14,67 +19,236 @@ public class BossDragon : EnemyBase
         StartCoroutine(BossThinkRoutine());
     }
 
-    // 보스 AI 상태 판단 루틴
+    protected override void Attack() { }
+
+    public override void TakeDamage(float damage)
+    {
+        if (isDead || isFlying) return;
+
+        currentHealth -= damage;
+
+        if (currentHealth <= 0)
+        {
+            Die(); // 여기서 즉시 Die 호출
+        }
+        else
+        {
+            anim.SetTrigger("Hurt");
+            if (vfxPoint != null)
+                VFXManager.Instance.PlayMonsterHit(vfxPoint.position, Vector3.up, gameObject);
+        }
+    }
+
+    private void Die()
+    {
+        if (isDead) return;
+        isDead = true; // 1순위: 사망 플래그부터 세우기
+
+        StopAllCoroutines(); // 2순위: 모든 행동 즉시 정지
+
+        // 3순위: 모든 물리/AI 컴포넌트 즉시 파괴/비활성화
+        agent.isStopped = true;
+        agent.enabled = false;
+
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        // 4순위: 애니메이터 초기화 (공격 트리거가 남아있을 수 있으므로 리셋)
+        anim.ResetTrigger("Attack");
+        anim.ResetTrigger("BreatheFire");
+        anim.SetTrigger("Death");
+        anim.SetFloat("MoveSpeed", 0);
+
+        if (vfxPoint != null)
+            VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);
+    }
+
     IEnumerator BossThinkRoutine()
     {
-        while (!isDead)
+        while (!isDead) // 죽으면 이 루프 자체가 끝남
         {
             yield return new WaitForSeconds(0.2f);
+            if (isDead || isAttacking || target == null || !agent.isOnNavMesh) continue;
 
-            if (isAttacking || target == null || !agent.isOnNavMesh) continue;
+            if (!isPhase2 && currentHealth <= enemyData.maxHealth * 0.5f)
+                isPhase2 = true;
 
             float distance = Vector3.Distance(transform.position, target.position);
-
             if (distance <= attackRange)
             {
-                // 사거리 진입 시 즉시 정지 후 공격 시작
-                agent.isStopped = true;
                 StartCoroutine(ExecuteRandomAttack());
             }
             else
             {
-                // 사거리 밖일 경우 타겟 추적 재개
+                if (isFlying) continue;
                 agent.isStopped = false;
                 agent.SetDestination(target.position);
             }
         }
     }
 
-    // 랜덤 공격 패턴 실행
     IEnumerator ExecuteRandomAttack()
     {
+        // 시작하자마자 죽었는지 확인 (0.001초 차이 방어)
+        if (isDead || isAttacking) yield break;
+
         isAttacking = true;
         agent.isStopped = true;
 
-        // 공격 전 타겟 방향 응시
         Vector3 lookPos = new Vector3(target.position.x, transform.position.y, target.position.z);
         transform.LookAt(lookPos);
 
-        int patternIndex = Random.Range(0, 2);
-
-        if (patternIndex == 0)
+        if (!isFlying && !isDead)
         {
-            anim.SetTrigger("Attack"); // 일반 공격
+            int maxPattern = isPhase2 ? 3 : 2;
+            int patternIndex = Random.Range(0, maxPattern);
 
-            //  보스 일반 공격 VFX 실행
-            VFXManager.Instance.PlayBossAttack(transform.position, transform.forward);
-
-            yield return new WaitForSeconds(2.0f); // 애니메이션 시간 대기
+            if (patternIndex == 0)
+            {
+                anim.SetTrigger("Attack");
+                VFXManager.Instance.PlayBossAttack(transform.position, transform.forward);
+                yield return StartCoroutine(BossSingleHit(0.5f));
+            }
+            else if (patternIndex == 1)
+            {
+                anim.SetTrigger("BreatheFire");
+                VFXManager.Instance.PlayBossBreath(transform.position, transform.forward);
+                yield return StartCoroutine(BossBreathHit(0.5f, 3f));
+            }
+            else if (patternIndex == 2)
+            {
+                yield return StartCoroutine(DashAndSlamPattern());
+            }
         }
-        else
-        {
-            anim.SetTrigger("BreatheFire"); // 브레스 공격
 
-            // 보스 브레스 VFX 실행
-            VFXManager.Instance.PlayBossBreath(transform.position, transform.forward);
+        // 공격 시퀀스 끝난 직후에 죽었는지 또 확인!
+        if (isDead) yield break;
 
-            yield return new WaitForSeconds(3.5f); // 애니메이션 시간 대기
-        }
+        yield return new WaitForSeconds(1.0f); // 후딜레이
 
-        // 공격 상태 해제 및 이동 재개 준비
-        agent.isStopped = false;
         isAttacking = false;
+        agent.isStopped = false;
+        yield return new WaitForSeconds(attackCooldown);
+    }
 
-        yield return new WaitForSeconds(attackCooldown); // 다음 공격까지 대기
+    // --- (이하 패턴 코드는 동일하되 중간중간 isDead 체크 추가) ---
+
+    IEnumerator DashAndSlamPattern()
+    {
+        if (isDead) yield break;
+        isFlying = false;
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.isTrigger = true;
+
+        anim.CrossFade("Idle Takeoff", 0.2f);
+        yield return StartCoroutine(MoveTowardPlayerWithDamage(0.8f));
+        if (isDead) yield break;
+
+        yield return new WaitForSeconds(0.4f);
+        if (isDead) yield break;
+
+        anim.CrossFade("Idle Takeoff", 0.2f);
+        yield return StartCoroutine(MoveTowardPlayerWithDamage(0.8f));
+        if (isDead) yield break;
+
+        if (col != null) col.isTrigger = false;
+        isFlying = true;
+
+        while (agent.baseOffset < flyHeight + 3f)
+        {
+            if (isDead) yield break;
+            agent.baseOffset += Time.deltaTime * 12f;
+            yield return null;
+        }
+
+        anim.CrossFade("FlyDive", 0.1f);
+        while (agent.baseOffset > 0)
+        {
+            if (isDead) yield break;
+            agent.baseOffset -= Time.deltaTime * 25f;
+            yield return null;
+        }
+
+        agent.baseOffset = 0f;
+        if (isDead) yield break;
+
+        anim.CrossFade("Idle Landing", 0.1f);
+        VFXManager.Instance.PlayBossAttack(transform.position, transform.forward);
+        yield return StartCoroutine(BossSingleHit(0.1f));
+
+        yield return new WaitForSeconds(1.5f);
+        isFlying = false;
+        if (!isDead) anim.CrossFade("Idle", 0.2f);
+    }
+
+    // --- (나머지 MoveTowardPlayerWithDamage, BossSingleHit, BossBreathHit는 이전과 동일하나 상단에 if(isDead) yield break; 한 줄씩 추가) ---
+
+    IEnumerator BossSingleHit(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (isDead) yield break; // 죽었는데 때리기 금지
+        Vector3 hitPos = transform.position + (transform.forward * 2f) + (Vector3.up * 1.5f);
+        Collider[] hits = Physics.OverlapSphere(hitPos, 2f);
+        foreach (var hit in hits)
+        {
+            if (hit.CompareTag("Player"))
+            {
+                hit.GetComponent<Player>()?.TakeDamage(enemyData.damage);
+                break;
+            }
+        }
+    }
+
+    IEnumerator BossBreathHit(float delay, float duration)
+    {
+        yield return new WaitForSeconds(delay);
+        float timer = 0f;
+        while (timer < duration)
+        {
+            if (isDead) yield break; // 죽었는데 불 뿜기 금지
+            Vector3 hitPos = transform.position + (transform.forward * 3.5f) + (Vector3.up * 1.5f);
+            Collider[] hits = Physics.OverlapSphere(hitPos, 3f);
+            foreach (var hit in hits)
+            {
+                if (hit.CompareTag("Player"))
+                {
+                    hit.GetComponent<Player>()?.TakeDamage(enemyData.damage * 0.5f);
+                    break;
+                }
+            }
+            yield return new WaitForSeconds(0.5f);
+            timer += 0.5f;
+        }
+    }
+
+    IEnumerator MoveTowardPlayerWithDamage(float duration)
+    {
+        float t = 0;
+        bool hasHitThisDash = false;
+        while (t < duration)
+        {
+            if (isDead) yield break; // 죽었는데 돌진 금지
+            Vector3 dashDir = (target.position - transform.position).normalized;
+            if (dashDir != Vector3.zero)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dashDir), Time.deltaTime * 12f);
+
+            transform.position += transform.forward * dashSpeed * Time.deltaTime;
+
+            if (!hasHitThisDash)
+            {
+                Collider[] hits = Physics.OverlapSphere(transform.position + Vector3.up, 3f);
+                foreach (var hit in hits)
+                {
+                    if (hit.CompareTag("Player"))
+                    {
+                        hit.GetComponent<Player>()?.TakeDamage(enemyData.damage);
+                        hasHitThisDash = true;
+                        break;
+                    }
+                }
+            }
+            t += Time.deltaTime;
+            yield return null;
+        }
     }
 }
