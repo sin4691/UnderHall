@@ -48,20 +48,17 @@ public class Player : MonoBehaviour
     }
     private void Start()
     {
-        if (virtualCamera == null)
-        {
-            virtualCamera = FindAnyObjectByType<CinemachineCamera>(FindObjectsInactive.Exclude);
-        }
+        if (virtualCamera == null) virtualCamera = FindAnyObjectByType<CinemachineCamera>(FindObjectsInactive.Exclude);
+
         if (playerData != null)
         {
             currentHealth = playerData.maxHealth;
             remainingResurrections = playerData.maxResurrectionCount;
+
+            if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
         }
 
-        if (virtualCamera != null)
-        {
-            originalFOV = virtualCamera.Lens.FieldOfView;
-        }
+        if (virtualCamera != null) originalFOV = virtualCamera.Lens.FieldOfView;
     }
 
     public void ChangeState(PlayerState newState)
@@ -87,7 +84,7 @@ public class Player : MonoBehaviour
         currentHealth -= damage;
 
         Debug.Log($"플레이어 피격! 남은 체력: {currentHealth}");
-
+        if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
         //창우_피격 이펙트
         VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
         //창우_피격 이펙트는 VFXManager에서 구현한 PlayPlayerHit 함수를 호출하여 재생합니다. 이 함수는 피격 위치와 방향, 그리고 플레이어 객체를 인자로 받아서 적절한 피격 이펙트를 생성합니다.
@@ -115,6 +112,8 @@ public class Player : MonoBehaviour
         currentHealth += amount;
         if (currentHealth > playerData.maxHealth) currentHealth = playerData.maxHealth;
         Debug.Log($"[흡혈] 체력 회복! 현재 체력: {currentHealth}");
+
+        if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
     }
 
     private IEnumerator ResurrectRoutine()
@@ -139,6 +138,8 @@ public class Player : MonoBehaviour
 
         remainingResurrections--;
         currentHealth = playerData.maxHealth * playerData.resurrectionHealthPercent;
+
+        if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
 
         Time.timeScale = 1f;
         animator.updateMode = AnimatorUpdateMode.Normal;
@@ -201,7 +202,7 @@ public class Player : MonoBehaviour
         }
 
         animator.Play("death");
-        GetComponent<Collider>().enabled = false;
+        //GetComponent<Collider>().enabled = false;
     }
 
     public void OnDash(InputValue value)
