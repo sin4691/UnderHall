@@ -35,11 +35,9 @@ public class PlayerDash : MonoBehaviour
     {
         currentDashCount--;
 
-        if (cooldownCoroutine != null)
-        {
-            StopCoroutine(cooldownCoroutine);
-        }
+        if (cooldownCoroutine != null) StopCoroutine(cooldownCoroutine);
         cooldownCoroutine = StartCoroutine(DashCooldownRoutine());
+
         if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
         {
             player.attack.CancelAttack();
@@ -71,22 +69,36 @@ public class PlayerDash : MonoBehaviour
             dashDirection = transform.forward;
         }
 
-        //창우_대시 VFX 재생
-        VFXManager.Instance.PlayDash
-        (
-          dashVFXPoint.position,
-          dashDirection,
-          player.playerData.dashDuration
-        );
-        //창우_대시
+        // 대시 VFX 재생
+        VFXManager.Instance.PlayDash(dashVFXPoint.position, dashDirection, player.playerData.dashDuration);
 
         float startTime = Time.time;
         while (Time.time < startTime + player.playerData.dashDuration)
         {
-            player.rb.linearVelocity = dashDirection * player.playerData.dashSpeed;
+            Vector3 finalDashDirection = dashDirection;
+
+            // 1. 플레이어 살짝 위에서 바닥으로 레이저를 쏴서 땅의 각도(Normal)를 알아냅니다.
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit, 1f))
+            {
+                // 2. 바닥 경사면에 맞춰서 대시 방향을 비스듬하게 꺾어줍니다.
+                finalDashDirection = Vector3.ProjectOnPlane(dashDirection, hit.normal).normalized;
+            }
+
+            // 3. 꺾인 방향으로 이동 속도를 적용합니다.
+            Vector3 targetVelocity = finalDashDirection * player.playerData.dashSpeed;
+
+            // 4. (물리 폭발 원인 제거) 평지일 때는 기존에 받던 중력(y값)을 그대로 존중해 줍니다.
+            if (Mathf.Abs(hit.normal.y - 1f) < 0.01f)
+            {
+                targetVelocity.y = player.rb.linearVelocity.y;
+            }
+
+            player.rb.linearVelocity = targetVelocity;
             yield return null;
         }
 
+        // 대시 종료 후 안전하게 상태 복구
         player.rb.linearVelocity = Vector3.zero;
         player.animator.CrossFade("idle", 0.1f);
         player.ChangeState(PlayerState.Idle);
