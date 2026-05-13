@@ -692,7 +692,6 @@ GameObject:
   - component: {fileID: 4394449443969025134}
   - component: {fileID: 5735173122560165123}
   - component: {fileID: 5400924627067883985}
-  - component: {fileID: 5441835183053727018}
   m_Layer: 0
   m_Name: Bruiser
   m_TagString: Untagged
@@ -811,24 +810,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &5441835183053727018
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 661432309084673054}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2245bf8a41e4ae84dadc5497f8fef541, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyBase
-  enemyData: {fileID: 11400000, guid: 16e5cc7d40ffcc541b8724400746797d, type: 2}
-  detectRange: 10
-  attackRange: 2
-  hitDelay: 0.5
-  hitRadius: 1.5
-  hitOffset: 1.5
 --- !u!1 &688939682041850152
 GameObject:
   m_ObjectHideFlags: 0
