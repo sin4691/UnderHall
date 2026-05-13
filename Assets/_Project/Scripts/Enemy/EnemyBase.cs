@@ -7,7 +7,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected EnemyData enemyData;
 
     public float detectRange = 10f;
-    public float attackRange = 2f; 
+    public float attackRange = 2f;
 
     protected NavMeshAgent agent;
     protected Animator anim;
@@ -15,11 +15,13 @@ public class EnemyBase : MonoBehaviour
 
     private float currentHealth;
     private float timer;
-    protected bool isDead = false; 
+    protected bool isDead = false;
 
+    [Header("Attack Settings")]
     [SerializeField] private float hitDelay = 0.5f;
     [SerializeField] private float hitRadius = 1.5f;
     [SerializeField] private float hitOffset = 1.5f;
+    [SerializeField] private float hitHeight = 1.5f;
 
     protected virtual void Start()
     {
@@ -31,7 +33,6 @@ public class EnemyBase : MonoBehaviour
         {
             currentHealth = enemyData.maxHealth;
             agent.speed = enemyData.moveSpeed;
-            agent.stoppingDistance = enemyData.attackRange;
         }
     }
 
@@ -43,9 +44,10 @@ public class EnemyBase : MonoBehaviour
 
         if (dist <= enemyData.detectionRange)
         {
-            if (dist <= enemyData.attackRange + 0.5f)
+            if (dist <= agent.stoppingDistance + 0.5f)
             {
                 agent.isStopped = true;
+                agent.velocity = Vector3.zero;
                 Attack();
             }
             else
@@ -59,12 +61,18 @@ public class EnemyBase : MonoBehaviour
             agent.isStopped = true;
         }
 
-        float speed = agent.isStopped ? 0 : agent.velocity.magnitude;
-        anim.SetFloat("MoveSpeed", speed, 0.1f, Time.deltaTime);
+        float speed = (agent.isStopped || agent.remainingDistance <= agent.stoppingDistance) ? 0f : agent.velocity.magnitude;
+        anim.SetFloat("MoveSpeed", speed, 0.05f, Time.deltaTime);
     }
 
     protected virtual void Attack()
     {
+        if (target != null)
+        {
+            Vector3 lookPos = new Vector3(target.position.x, transform.position.y, target.position.z);
+            transform.LookAt(lookPos);
+        }
+
         timer += Time.deltaTime;
         if (timer >= enemyData.attackCooldown)
         {
@@ -80,7 +88,7 @@ public class EnemyBase : MonoBehaviour
         yield return new WaitForSeconds(hitDelay);
         if (isDead) yield break;
 
-        Vector3 hitPosition = transform.position + transform.forward * hitOffset;
+        Vector3 hitPosition = transform.position + (transform.forward * hitOffset) + (Vector3.up * hitHeight);
         Collider[] hitColliders = Physics.OverlapSphere(hitPosition, hitRadius);
 
         bool hasHitPlayer = false;
@@ -149,7 +157,7 @@ public class EnemyBase : MonoBehaviour
         if (enemyData == null) return;
 
         Gizmos.color = Color.red;
-        Vector3 hitPosition = transform.position + transform.forward * hitOffset;
+        Vector3 hitPosition = transform.position + (transform.forward * hitOffset) + (Vector3.up * hitHeight);
         Gizmos.DrawWireSphere(hitPosition, hitRadius);
 
         Gizmos.color = Color.blue;

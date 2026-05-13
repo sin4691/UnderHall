@@ -837,6 +837,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
   weaponVFXPoint: {fileID: 7817026909752936775}
   skillVFXPoint: {fileID: 7817026909752936775}
+  isAwakened: 0
 --- !u!114 &5286484660427528926
 MonoBehaviour:
   m_ObjectHideFlags: 0
