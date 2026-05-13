@@ -7,20 +7,20 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Player & UI")]
-    public GameObject player;                 
-    public CanvasGroup fadeCanvasGroup;  
+    public GameObject player;
+    public CanvasGroup fadeCanvasGroup;
     public float fadeDuration = 1f;
     public float blackScreenDuration = 0.5f;
 
     [Header("Stage Settings")]
-    public List<GameObject> normalRoomPrefabs; 
-    public GameObject bossRoomPrefab;        
-    public int roomsBeforeBoss = 5;         
+    public List<GameObject> normalRoomPrefabs;
+    public GameObject bossRoomPrefab;
+    public int roomsBeforeBoss = 5;
 
     [Header("Current State")]
-    public GameObject currentMapInstance;    
-    private int currentRoomCount = 0;        
-    private bool isTransitioning = false;    
+    public GameObject currentMapInstance;
+    private int currentRoomCount = 0;
+    private bool isTransitioning = false;
 
     private void Awake()
     {
@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour
         if (currentMapInstance != null)
         {
             Destroy(currentMapInstance);
-            yield return null; 
+            yield return null;
         }
 
         currentMapInstance = Instantiate(nextMapPrefab, Vector3.zero, Quaternion.identity);
@@ -76,41 +76,31 @@ public class GameManager : MonoBehaviour
         Transform spawnPoint = currentMapInstance.transform.Find("SpawnPoint");
         if (spawnPoint != null)
         {
-            UnityEngine.AI.NavMeshAgent agent = player.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            Rigidbody rb = player.GetComponent<Rigidbody>();
 
-            if (agent != null)
+            Vector3 safePos = spawnPoint.position + new Vector3(0f, 1.0f, 0f);
+
+            if (rb != null)
             {
-                // NavMeshAgent가 있으면 Warp 사용
-                bool warped = agent.Warp(spawnPoint.position);
-                if (!warped)
-                {
-                    Debug.LogWarning("Warp 실패! SpawnPoint가 NavMesh 위에 있는지 확인하세요.");
-                }
-                player.transform.rotation = spawnPoint.rotation;
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+
+                player.transform.position = safePos;
+                rb.position = safePos;
+                rb.rotation = spawnPoint.rotation;
+                Physics.SyncTransforms();
             }
             else
             {
-                // Fallback: 기존 Rigidbody 이동
-                Rigidbody rb = player.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.linearVelocity = Vector3.zero;
-                    rb.angularVelocity = Vector3.zero;
-                    rb.position = spawnPoint.position;
-                    rb.rotation = spawnPoint.rotation;
-                }
-                else
-                {
-                    player.transform.position = spawnPoint.position;
-                    player.transform.rotation = spawnPoint.rotation;
-                }
+                player.transform.position = safePos;
+                player.transform.rotation = spawnPoint.rotation;
+                Physics.SyncTransforms();
             }
         }
         else
         {
             Debug.LogWarning("새 맵 프리팹 안에 'SpawnPoint'라는 이름의 오브젝트가 없습니다!");
         }
-
         yield return new WaitForSeconds(blackScreenDuration);
 
         yield return StartCoroutine(Fade(0f));
