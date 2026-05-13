@@ -59,6 +59,7 @@ sysinfo.txt
 *.apk
 *.aab
 *.unitypackage
+*.unitypackage.meta
 *.app
 
 # Crashlytics generated file
@@ -77,3 +78,4 @@ Thumbs.db
 
 # Visual Studio config
 *.vsconfig
+*.slnx

@@ -1,0 +1,321 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+using System.Collections;
+using System.Reflection; // EnemyBase 강제 접근(처형)을 위해 필요함
+
+public class PlayerAttack : MonoBehaviour
+{
+    private Player player;
+
+    [Header("Combo Settings")]
+    private int currentCombo = 0;
+    private bool isNextAttackBuffered = false;
+    private readonly int maxCombo = 3;
+    private Coroutine attackCoroutine;
+    private bool isAttackOnCooldown = false;
+
+    [Header("Special (Spin) Settings")]
+    private Coroutine specialAttackCoroutine;
+    private bool isSpecialAttackOnCooldown = false;
+    private bool isSpinning = false;
+
+    [Header("VFX")]
+    public Transform weaponVFXPoint; // 창우_VFXPoint_Weapon 드래그
+    public Transform skillVFXPoint;  // 창우_VFXPoint_Body 드래그
+
+    private Collider[] hitColliders = new Collider[10];
+
+    // 각성(대시 후 다음 공격 2배) 버프 상태
+    public bool isAwakened = false;
+
+    private void Awake() => player = GetComponent<Player>();
+
+    // 마우스 좌클릭: 기본 공격
+    public void ExecuteAttack()
+    {
+        if (isAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.SpecialAttack || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
+
+        if (player.CurrentState != PlayerState.Attack)
+            attackCoroutine = StartCoroutine(ComboAttackRoutine());
+        else if (currentCombo < maxCombo)
+            isNextAttackBuffered = true;
+    }
+
+    // 마우스 우클릭 누름: 스킬 시작
+    public void StartSpecialAttack()
+    {
+        if (isSpecialAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
+
+        if (player.CurrentState != PlayerState.Attack && player.CurrentState != PlayerState.SpecialAttack)
+            specialAttackCoroutine = StartCoroutine(SpinRoutine());
+    }
+
+    // 마우스 우클릭 뗌: 스킬 중지
+    public void StopSpecialAttack() => isSpinning = false;
+
+    // 대시 등으로 인한 강제 취소
+    public void CancelAttack()
+    {
+        if (attackCoroutine != null) StopCoroutine(attackCoroutine);
+        if (specialAttackCoroutine != null) StopCoroutine(specialAttackCoroutine);
+
+        bool wasSpinning = isSpinning;
+
+        isSpinning = false;
+        //창우_마지막 잔상 즉시 제거
+        VFXManager.Instance.StopWeaponSkillLoop();
+        currentCombo = 0;
+        isNextAttackBuffered = false;
+        isAttackOnCooldown = false;
+
+        if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
+            player.ChangeState(PlayerState.Idle);
+
+        if (wasSpinning)
+        {
+            StartCoroutine(SpecialCooldownRoutine());
+        }
+    }
+
+    // 기본 공격 콤보 루틴
+    private IEnumerator ComboAttackRoutine()
+    {
+        player.ChangeState(PlayerState.Attack);
+        player.animator.SetBool("isMoving", false);
+        currentCombo = 1;
+
+        // [연격] 기본 공격 속도 +25%
+        if (player.playerData.acquiredGifts.Contains(GiftType.Combo))
+            player.animator.speed = 1.25f;
+
+        while (currentCombo <= maxCombo)
+        {
+            isNextAttackBuffered = false;
+            LookAtMouse();
+
+            player.animator.CrossFade("attack" + currentCombo, 0.02f);
+            yield return new WaitForSeconds(0.05f / player.animator.speed);
+
+            // 기본 공격 이펙트
+            VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, weaponVFXPoint.forward);
+
+            ExecuteHitDetection(transform.position + transform.forward * (player.playerData.attackRange * 0.5f),
+                                player.playerData.attackRange * 0.5f, 1f, false);
+
+            AnimatorStateInfo stateInfo = player.animator.GetCurrentAnimatorStateInfo(0);
+            yield return new WaitForSeconds((stateInfo.length * 0.5f) / player.animator.speed);
+
+            if (isNextAttackBuffered) currentCombo++;
+            else break;
+        }
+
+        player.animator.speed = 1f; // 공속 복구
+        currentCombo = 0;
+        player.animator.CrossFade("idle", 0.15f);
+        player.ChangeState(PlayerState.Idle);
+        StartCoroutine(AttackCooldownRoutine());
+    }
+
+    // 특수 공격 (가렌 E 스타일) 루틴
+    private IEnumerator SpinRoutine()
+    {
+        isSpinning = true;
+        player.ChangeState(PlayerState.SpecialAttack);
+        player.animator.CrossFade("specialAttack", 0.1f);
+
+        float timer = 0f;
+        float maxDuration = 5f;
+        float tickRate = 0.25f;
+        float tickTimer = tickRate;
+
+
+        if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
+        {
+            VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint); // 커진 프리팹
+        }
+        else
+        {
+            VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint); // 기본 프리팹
+        }
+
+        while (isSpinning && timer < maxDuration)
+        {
+            if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting)
+            {
+                isSpinning = false;
+                break;
+            }
+
+            timer += Time.deltaTime;
+            tickTimer += Time.deltaTime;
+
+            if (tickTimer >= tickRate)
+            {
+                // [폭발] 로직 : 타격 범위 반경 증가
+                float currentRadius = player.playerData.specialAttackRange;
+                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
+                {
+                    // 기프트 보유 시 공격 반경 1.5배 증가
+                    //VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint.position, skillVFXPoint.forward);
+                    currentRadius *= 1.5f;
+                }
+
+                // 변경된 Radius를 적용하여 데미지 판정 (isSpecial = true)
+                ExecuteHitDetection(transform.position, currentRadius, player.playerData.specialAttackMultiplier, true);
+
+                tickTimer = 0f;
+            }
+            yield return null;
+        }
+
+        isSpinning = false;
+
+        //[VFX/FEAT]창우_마지막 잔상 즉시 제거
+        VFXManager.Instance.StopWeaponSkillLoop();
+
+        if (player.CurrentState == PlayerState.SpecialAttack)
+        {
+            player.animator.CrossFade("idle", 0.15f);
+            player.ChangeState(PlayerState.Idle);
+        }
+        StartCoroutine(SpecialCooldownRoutine());
+    }
+
+    // 통합 데미지 판정 시스템
+    private void ExecuteHitDetection(Vector3 center, float radius, float damageMultiplier, bool isSpecial)
+    {
+        center.y += 1f;
+        // 변경된 radius 값이 Physics.OverlapSphereNonAlloc에 적용됩니다.
+        int hitCount = Physics.OverlapSphereNonAlloc(center, radius, hitColliders);
+
+        // [각성] 버프 사용 여부 확인
+        bool useAwakening = false;
+        if (isAwakened)
+        {
+            useAwakening = true;
+            isAwakened = false; // 한 번 쓰면 바로 버프 소모
+        }
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            Collider col = hitColliders[i];
+            if (col.gameObject == player.gameObject) continue;
+
+            var target = col.GetComponentInParent<EnemyBase>();
+
+            // 몬스터가 존재하고 아직 콜라이더가 켜져있다면 (살아있다면)
+            if (target != null && col.enabled)
+            {
+                float finalDamage = player.playerData.damage * damageMultiplier;
+
+                // [패시브 계열]
+                // [광폭] 내 체력이 50% 이하면 데미지 +40%
+                if (player.playerData.acquiredGifts.Contains(GiftType.Berserk) &&
+                   (player.CurrentHealth <= player.playerData.maxHealth * 0.5f))
+                    finalDamage *= 1.4f;
+
+                // [각성] 대시 직후라면 데미지 2배
+                if (useAwakening) finalDamage *= 2f;
+
+                // [일반 공격 계열]
+                if (!isSpecial)
+                {
+                    // [처형] 리플렉션으로 EnemyBase의 private 체력 읽어오기
+                    if (player.playerData.acquiredGifts.Contains(GiftType.Execution))
+                    {
+                        FieldInfo healthField = typeof(EnemyBase).GetField("currentHealth", BindingFlags.NonPublic | BindingFlags.Instance);
+                        FieldInfo dataField = typeof(EnemyBase).GetField("enemyData", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                        if (healthField != null && dataField != null)
+                        {
+                            float enemyCurrentHP = (float)healthField.GetValue(target);
+                            var enemyData = dataField.GetValue(target);
+
+                            FieldInfo maxHpField = enemyData.GetType().GetField("maxHealth", BindingFlags.Public | BindingFlags.Instance);
+                            if (maxHpField != null)
+                            {
+                                float enemyMaxHP = (float)maxHpField.GetValue(enemyData);
+
+                                // 체력이 20% 이하면 데미지 2배!
+                                if (enemyCurrentHP <= enemyMaxHP * 0.2f) finalDamage *= 2f;
+                            }
+                        }
+                    }
+
+                    // [치명타] 15% 확률로 2배
+                    if (player.playerData.acquiredGifts.Contains(GiftType.Critical) && Random.value <= 0.15f)
+                    {
+                        finalDamage *= 2f;
+                        Debug.Log("크리티컬 터짐!");
+                    }
+                }
+                // [특수 공격 계열]
+                else
+                {
+                    // [지속력] 특수공격 데미지 30% 증가
+                    if (player.playerData.acquiredGifts.Contains(GiftType.Endurance))
+                        finalDamage *= 1.3f;
+                }
+
+                // 타격 직전의 콜라이더 상태 저장
+                bool wasAlive = col.enabled;
+
+                string attackType = isSpecial ? "특수공격" : "기본공격";
+                Debug.Log($"[데미지 판정] {attackType} 명중! 최종 데미지: {finalDamage}");
+
+                // 데미지 적용
+                target.TakeDamage(finalDamage);
+
+                // [흡혈] 때린 직후에 콜라이더가 꺼졌다? = 적이 죽었다!
+                if (wasAlive && !col.enabled && player.playerData.acquiredGifts.Contains(GiftType.Vampirism))
+                {
+                    player.Heal(5f);
+                }
+
+                // 데미지 들어갈 때 타격 이펙트
+                Vector3 hitNormal = (col.transform.position - transform.position).normalized;
+                VFXManager.Instance.PlayAttackHit(col.transform.position, hitNormal);
+            }
+        }
+    }
+
+    private void LookAtMouse()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (new Plane(Vector3.up, transform.position).Raycast(ray, out float enter))
+        {
+            Vector3 lookDir = (ray.GetPoint(enter) - transform.position).normalized;
+            lookDir.y = 0;
+            if (lookDir != Vector3.zero) transform.rotation = Quaternion.LookRotation(lookDir);
+        }
+    }
+
+    private IEnumerator AttackCooldownRoutine()
+    {
+        isAttackOnCooldown = true;
+        yield return new WaitForSeconds(player.playerData.attackCooldown);
+        isAttackOnCooldown = false;
+    }
+
+    private IEnumerator SpecialCooldownRoutine()
+    {
+        isSpecialAttackOnCooldown = true;
+        float finalCooldown = player.playerData.specialAttackCooldown;
+
+        // [속사] 특수공격 쿨타임 -30%
+        if (player.playerData.acquiredGifts.Contains(GiftType.RapidFire))
+            finalCooldown *= 0.7f;
+
+        yield return new WaitForSeconds(finalCooldown);
+        isSpecialAttackOnCooldown = false;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (player == null || player.playerData == null) return;
+        Gizmos.color = Color.red;
+        Vector3 gizmoPos = transform.position + transform.forward * (player.playerData.attackRange * 0.5f);
+        gizmoPos.y += 1f;
+        Gizmos.DrawWireSphere(gizmoPos, player.playerData.attackRange * 0.5f);
+    }
+}
