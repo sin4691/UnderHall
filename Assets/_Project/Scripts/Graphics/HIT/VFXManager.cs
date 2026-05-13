@@ -6,22 +6,15 @@ using UnityEngine;
 /// VFX 통합 매니저 (오브젝트 풀링 적용)
 /// 씬에 빈 오브젝트 만들고 이 스크립트 붙이면 됨
 /// 이름: VFXManager
-///
-/// [플레이어 담당]
-/// 검 휘두를 때:        VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, transform.forward);
-/// 스킬 루프 시작:      VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint.position, transform.forward);
-/// 스킬 루프 종료:      VFXManager.Instance.StopWeaponSkillLoop();
-/// 스킬 종료 폭발:      VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint.position, transform.forward);
-/// 공격 맞았을 때:      VFXManager.Instance.PlayAttackHit(hitPos, hitNormal);
-/// 대시 시작할 때:      VFXManager.Instance.PlayDash(dashVFXPoint.position, dashDirection, dashDuration);
-/// 플레이어 피격:       VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
-/// 플레이어 사망:       VFXManager.Instance.PlayPlayerDeath(vfxPoint.position, gameObject);
-/// 부활 시작:           VFXManager.Instance.PlayPlayerResurrectStart(vfxPoint.position);
-/// 부활 완료:           VFXManager.Instance.PlayPlayerResurrectEnd(vfxPoint.position);
-///
 /// [몬스터 담당]
 /// 몬스터 피격:         VFXManager.Instance.PlayMonsterHit(vfxPoint.position, Vector3.up, gameObject);
 /// 몬스터 사망:         VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);
+/// [보스 드래곤]
+/// 지상 공격:           VFXManager.Instance.PlayBossAttack(vfxPoint.position, transform.forward);
+/// 지상 브레스:         VFXManager.Instance.PlayBossBreath(vfxPoint.position, transform.forward);
+/// 공중 공격:           VFXManager.Instance.PlayBossFlyAttack(vfxPoint.position, transform.forward);
+/// 공중 브레스:         VFXManager.Instance.PlayBossFlyBreath(vfxPoint.position, transform.forward);
+/// 공중 다이브:         VFXManager.Instance.PlayBossDive(vfxPoint.position, transform.forward);
 /// </summary>
 public class VFXManager : MonoBehaviour
 {
@@ -31,8 +24,6 @@ public class VFXManager : MonoBehaviour
     [SerializeField] GameObject weaponSwingPrefab;
     [SerializeField] GameObject weaponSkillPrefab;
     [SerializeField] GameObject weaponSkillExplosionPrefab;
-
-    
 
     [Header("─ 타격 이펙트 ─")]
     [SerializeField] GameObject attackHitSparkPrefab;
@@ -51,10 +42,22 @@ public class VFXManager : MonoBehaviour
     [SerializeField] GameObject playerResurrectStartPrefab;
     [SerializeField] GameObject playerResurrectEndPrefab;
 
+    [Header("─ 몬스터 공격 이펙트 ─")]
+    [SerializeField] GameObject monsterAttackPrefab;
+
     [Header("─ 몬스터 피격/사망 ─")]
     [SerializeField] GameObject monsterHitPrefab;
     [SerializeField] GameObject monsterDeathPrefab;
     [SerializeField] GameObject monsterDeathSmokePrefab;
+
+    [Header("─ 보스 지상 이펙트 ─")]
+    [SerializeField] GameObject bossAttackPrefab;       // Attack / Attack02
+    [SerializeField] GameObject bossBreathPrefab;       // BreatheFire
+
+    [Header("─ 보스 공중 이펙트 ─")]
+    [SerializeField] GameObject bossFlyAttackPrefab;    // FlyAttack
+    [SerializeField] GameObject bossFlyBreathPrefab;    // FlyBreatheFire
+    [SerializeField] GameObject bossDivePrefab;         // FlyDive
 
     [Header("─ 풀링 설정 ─")]
     [SerializeField] int poolSizePerPrefab = 5;
@@ -94,6 +97,7 @@ public class VFXManager : MonoBehaviour
         poolRoot = new GameObject("VFX_Pool").transform;
         poolRoot.SetParent(transform);
 
+        PrewarmPool(monsterAttackPrefab);
         PrewarmPool(weaponSwingPrefab);
         PrewarmPool(weaponSkillPrefab);
         PrewarmPool(weaponSkillExplosionPrefab);
@@ -109,6 +113,11 @@ public class VFXManager : MonoBehaviour
         PrewarmPool(monsterHitPrefab);
         PrewarmPool(monsterDeathPrefab);
         PrewarmPool(monsterDeathSmokePrefab);
+        PrewarmPool(bossAttackPrefab);
+        PrewarmPool(bossBreathPrefab);
+        PrewarmPool(bossFlyAttackPrefab);
+        PrewarmPool(bossFlyBreathPrefab);
+        PrewarmPool(bossDivePrefab);
     }
 
     void PrewarmPool(GameObject prefab)
@@ -130,10 +139,6 @@ public class VFXManager : MonoBehaviour
     // 풀 관리
     // ─────────────────────────────────────────
 
-    /// <summary>
-    /// useUnscaledTime: true → WaitForSecondsRealtime 사용.
-    /// 슬로우모션(timeScale 변경) 중에도 이펙트가 정상 수명으로 재생되어야 할 때 true.
-    /// </summary>
     GameObject GetFromPool(GameObject prefab, Vector3 position, Vector3 direction, bool useUnscaledTime = false)
     {
         if (prefab == null) return null;
@@ -148,7 +153,6 @@ public class VFXManager : MonoBehaviour
         go.transform.rotation = direction != Vector3.zero
             ? Quaternion.LookRotation(direction) * prefab.transform.rotation
             : prefab.transform.rotation;
-
         go.SetActive(true);
 
         var ps = go.GetComponent<ParticleSystem>();
@@ -173,7 +177,7 @@ public class VFXManager : MonoBehaviour
 
     IEnumerator ReturnToPoolUnscaled(GameObject go, GameObject prefab, float delay)
     {
-        yield return new WaitForSecondsRealtime(delay); // timeScale 무시
+        yield return new WaitForSecondsRealtime(delay);
         ReturnObject(go, prefab);
     }
 
@@ -194,35 +198,25 @@ public class VFXManager : MonoBehaviour
         => GetFromPool(weaponSwingPrefab, position, direction);
 
     // ─────────────────────────────────────────
-    // 스킬 이펙트 (루프 + 잔상 즉시 제거)
+    // 스킬 이펙트
     // ─────────────────────────────────────────
 
     private GameObject activeWeaponSkillInstance;
-
-    /// <summary>
-    /// 스킬 루프 이펙트 — SpinRoutine tickTimer마다 호출.
-    /// 직전 인스턴스를 즉시 풀로 반환하고 새 인스턴스를 스폰해서 잔상을 제거합니다.
-    /// </summary>
-    /// 
     private GameObject activeWeaponSkillPrefab;
 
     public void PlayWeaponSkillLoop(Transform targetTransform)
     {
         StopWeaponSkillLoop();
-
         activeWeaponSkillPrefab = weaponSkillPrefab;
         activeWeaponSkillInstance = GetFromPool(weaponSkillPrefab, targetTransform.position, targetTransform.forward);
-
         if (activeWeaponSkillInstance != null)
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
             activeWeaponSkillInstance.transform.localPosition = Vector3.zero;
             activeWeaponSkillInstance.transform.localRotation = weaponSkillPrefab.transform.localRotation;
         }
-       
     }
 
-    /// <summary>스킬 종료 시 마지막 잔상까지 즉시 제거 — SpinRoutine 끝/CancelAttack에서 호출</summary>
     public void StopWeaponSkillLoop()
     {
         if (activeWeaponSkillInstance != null && activeWeaponSkillPrefab != null)
@@ -233,14 +227,11 @@ public class VFXManager : MonoBehaviour
         }
     }
 
-    /// <summary>스킬 종료 폭발 이펙트 — 우클릭을 떼는 순간 1회 호출</summary>
     public void PlayWeaponSkillExplosion(Transform targetTransform)
     {
         StopWeaponSkillLoop();
-
         activeWeaponSkillPrefab = weaponSkillExplosionPrefab;
         activeWeaponSkillInstance = GetFromPool(weaponSkillExplosionPrefab, targetTransform.position, targetTransform.forward);
-
         if (activeWeaponSkillInstance != null)
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
@@ -302,11 +293,9 @@ public class VFXManager : MonoBehaviour
     // 플레이어 부활
     // ─────────────────────────────────────────
 
-    /// <summary>부활 시작 — 슬로우모션 중이므로 UnscaledTime으로 수명 계산</summary>
     public void PlayPlayerResurrectStart(Vector3 position)
         => GetFromPool(playerResurrectStartPrefab, position, Vector3.up, useUnscaledTime: true);
 
-    /// <summary>부활 완료 — 타임스케일 복구 후 호출</summary>
     public void PlayPlayerResurrectEnd(Vector3 position)
         => GetFromPool(playerResurrectEndPrefab, position, Vector3.up);
 
@@ -326,6 +315,38 @@ public class VFXManager : MonoBehaviour
         GetFromPool(monsterDeathSmokePrefab, position, Vector3.up);
         StartCoroutine(DissolveRoutine(monsterObj));
     }
+
+    //-------------------------------------------------
+    // 몬스터 공격
+    //-------------------------------------------------
+    public void PlayMonsterAttack(Vector3 position, Vector3 direction)
+    {
+        GetFromPool(monsterAttackPrefab, position, direction);
+    }
+
+    // ─────────────────────────────────────────
+    // 보스 이펙트
+    // ─────────────────────────────────────────
+
+    /// <summary>지상 일반 공격 (Attack / Attack02) — BossDragon에서 호출</summary>
+    public void PlayBossAttack(Vector3 position, Vector3 direction)
+        => GetFromPool(bossAttackPrefab, position, direction);
+
+    /// <summary>지상 브레스 (BreatheFire) — BossDragon에서 호출</summary>
+    public void PlayBossBreath(Vector3 position, Vector3 direction)
+        => GetFromPool(bossBreathPrefab, position, direction);
+
+    /// <summary>공중 공격 (FlyAttack) — BossDragon에서 호출</summary>
+    public void PlayBossFlyAttack(Vector3 position, Vector3 direction)
+        => GetFromPool(bossFlyAttackPrefab, position, direction);
+
+    /// <summary>공중 브레스 (FlyBreatheFire) — BossDragon에서 호출</summary>
+    public void PlayBossFlyBreath(Vector3 position, Vector3 direction)
+        => GetFromPool(bossFlyBreathPrefab, position, direction);
+
+    /// <summary>공중 다이브 (FlyDive) — BossDragon에서 호출</summary>
+    public void PlayBossDive(Vector3 position, Vector3 direction)
+        => GetFromPool(bossDivePrefab, position, direction);
 
     // ─────────────────────────────────────────
     // 내부 코루틴
