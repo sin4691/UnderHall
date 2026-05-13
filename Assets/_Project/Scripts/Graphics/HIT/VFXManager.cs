@@ -286,7 +286,7 @@ public class VFXManager : MonoBehaviour
     public void PlayPlayerDeath(Vector3 position, GameObject playerObj)
     {
         GetFromPool(playerDeathPrefab, position, Vector3.up);
-        StartCoroutine(DissolveRoutine(playerObj));
+        //StartCoroutine(DissolveRoutine(playerObj));
     }
 
     // ─────────────────────────────────────────
