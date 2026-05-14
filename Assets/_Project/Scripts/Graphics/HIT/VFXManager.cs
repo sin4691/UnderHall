@@ -333,9 +333,15 @@ public class VFXManager : MonoBehaviour
         => GetFromPool(bossAttackPrefab, position, direction);
 
     /// <summary>지상 브레스 (BreatheFire) — BossDragon에서 호출</summary>
-    public void PlayBossBreath(Vector3 position, Vector3 direction)
-        => GetFromPool(bossBreathPrefab, position, direction);
-
+    //public void PlayBossBreath(Vector3 position, Vector3 direction)
+    //    => GetFromPool(bossBreathPrefab, position, direction);
+    public void PlayBossBreath(Transform head, Vector3 direction) // Vector3 대신 Transform을 받음
+    {
+        GameObject go = GetFromPool(bossBreathPrefab, head.position, direction);
+        go.transform.SetParent(head); // 머리에 부착
+        go.transform.localPosition = Vector3.zero; // 위치 초기화
+        go.transform.localRotation = Quaternion.identity; // 회전 초기화
+    }
     /// <summary>공중 공격 (FlyAttack) — BossDragon에서 호출</summary>
     public void PlayBossFlyAttack(Vector3 position, Vector3 direction)
         => GetFromPool(bossFlyAttackPrefab, position, direction);

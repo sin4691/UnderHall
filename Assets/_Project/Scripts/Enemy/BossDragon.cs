@@ -13,6 +13,10 @@ public class BossDragon : EnemyBase
     private bool isFlying = false;
     private bool isAttacking = false;
 
+    //[VFX/feat]창우_ Boss 전용 공격 이펙트 포인트 (머리)
+    [Header("Boss Bones")]
+    [SerializeField] private Transform headBone;
+
     protected override void Start()
     {
         base.Start();
@@ -112,7 +116,10 @@ public class BossDragon : EnemyBase
             else if (patternIndex == 1)
             {
                 anim.SetTrigger("BreatheFire");
-                VFXManager.Instance.PlayBossBreath(transform.position, transform.forward);
+
+                // [VFX/feat]창우_ 보스 불뿜기 패턴 이펙트 재생 (머리에서 앞으로)
+                VFXManager.Instance.PlayBossBreath(headBone, transform.forward);
+
                 yield return StartCoroutine(BossBreathHit(0.5f, 3f));
             }
             else if (patternIndex == 2)
