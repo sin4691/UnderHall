@@ -7208,6 +7208,14 @@ PrefabInstance:
       propertyPath: tierData
       value: 
       objectReference: {fileID: 11400000, guid: 6613dfdd3e1810c4a83ca7065c6d2148, type: 2}
+    - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
+      propertyPath: exitDoors.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
+      propertyPath: 'exitDoors.Array.data[0]'
+      value: 
+      objectReference: {fileID: 3793750495487772868}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
