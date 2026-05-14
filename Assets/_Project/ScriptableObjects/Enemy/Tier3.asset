@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4820979b2bee3d4d979198fde6083f0, type: 3}
+  m_Name: Tier3
+  m_EditorClassIdentifier: Assembly-CSharp::TierData
+  wave1:
+    spawnInfos:
+    - enemyPrefab: {fileID: 8734851924109653997, guid: 1d71361d821e1b5489f96ce05c6560bc, type: 3}
+      count: 2
+    - enemyPrefab: {fileID: 5927796510955152910, guid: b7aaecc0fbf131e44b70569e4b136de6, type: 3}
+      count: 4
+  wave2:
+    spawnInfos:
+    - enemyPrefab: {fileID: 8734851924109653997, guid: 1d71361d821e1b5489f96ce05c6560bc, type: 3}
+      count: 2
+    - enemyPrefab: {fileID: 5927796510955152910, guid: b7aaecc0fbf131e44b70569e4b136de6, type: 3}
+      count: 4
+  wave3:
+    spawnInfos:
+    - enemyPrefab: {fileID: 5927796510955152910, guid: b7aaecc0fbf131e44b70569e4b136de6, type: 3}
+      count: 4
