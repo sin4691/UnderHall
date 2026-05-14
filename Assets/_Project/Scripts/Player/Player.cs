@@ -35,6 +35,7 @@ public class Player : MonoBehaviour
     private int remainingResurrections;
     private float currentHealth;
     private Vector2 inputVector;
+    private Door nearbyDoor;
 
     private void Awake()
     {
@@ -242,6 +243,29 @@ public class Player : MonoBehaviour
         {
             attack.StopSpecialAttack();
         }
+    }
+   
+    public void OnInteract(InputValue value)
+    {
+        if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
+        if (!value.isPressed) return;
+
+        if (nearbyDoor != null && !nearbyDoor.IsLocked)
+        {
+            Debug.Log("[OnInteract] Interact 실행!");
+            nearbyDoor.Interact();
+        }
+    }
+
+    public void SetNearbyDoor(Door door)
+    {
+        nearbyDoor = door;
+    }
+
+    public void ClearNearbyDoor(Door door)
+    {
+        if (nearbyDoor == door)
+            nearbyDoor = null;
     }
 
     public Vector2 GetInputVector() => inputVector;
