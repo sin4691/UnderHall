@@ -1062,37 +1062,13 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1409890445}
     - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
-      propertyPath: bossRoomPrefab
-      value: 
-      objectReference: {fileID: 7305840450799742983, guid: 0c6402ca2b1d75d479aa2453c8aad3df, type: 3}
-    - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
       propertyPath: fadeCanvasGroup
       value: 
       objectReference: {fileID: 1066313936}
     - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
       propertyPath: currentMapInstance
       value: 
-      objectReference: {fileID: 2265946407195940390}
-    - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
-      propertyPath: normalRoomPrefabs.Array.size
-      value: 4
       objectReference: {fileID: 0}
-    - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
-      propertyPath: 'normalRoomPrefabs.Array.data[0]'
-      value: 
-      objectReference: {fileID: 16670643131154411, guid: 662f351f40e9d454995cd412a209da49, type: 3}
-    - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
-      propertyPath: 'normalRoomPrefabs.Array.data[1]'
-      value: 
-      objectReference: {fileID: 2045690587251079384, guid: d8ff087af51af314b9910f459194fee7, type: 3}
-    - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
-      propertyPath: 'normalRoomPrefabs.Array.data[2]'
-      value: 
-      objectReference: {fileID: 6215183832235281955, guid: dd37b9eb5671ea848bb60aa79240d310, type: 3}
-    - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
-      propertyPath: 'normalRoomPrefabs.Array.data[3]'
-      value: 
-      objectReference: {fileID: 6636622695884017984, guid: ffbe7c736c3c5d54f8fa7499f74bef38, type: 3}
     - target: {fileID: 8808918461723573687, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
       propertyPath: m_LocalPosition.x
       value: 5.11535
