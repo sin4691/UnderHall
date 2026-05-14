@@ -3159,6 +3159,8 @@ MonoBehaviour:
   hitDelay: 0.5
   hitRadius: 1.5
   hitOffset: 1.5
+  hitHeight: 1.5
+  vfxPoint: {fileID: 1529511831574506589}
 --- !u!195 &8150068543892678256
 NavMeshAgent:
   m_ObjectHideFlags: 0
