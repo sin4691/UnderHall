@@ -11,7 +11,7 @@ public class SpawnManager : MonoBehaviour
     public float spawnDelay = 1.5f;
 
     [Header("Room References")]
-    public Door exitDoor;
+    public Door[] exitDoors;
 
     private List<Transform> spawnPoints = new List<Transform>();
     private List<GameObject> activeEnemies = new List<GameObject>();
@@ -160,10 +160,21 @@ public class SpawnManager : MonoBehaviour
     private void ClearRoom()
     {
         isRoomCleared = true;
-        Debug.Log("[디버그 7] 모든 웨이브 클리어! 문을 엽니다.");
-        if (exitDoor != null)
+        Debug.Log("[디버그 7] 모든 웨이브 클리어! 등록된 모든 문을 엽니다.");
+
+        if (exitDoors != null && exitDoors.Length > 0)
         {
-            exitDoor.UnlockDoor();
+            foreach (Door door in exitDoors)
+            {
+                if (door != null)
+                {
+                    door.UnlockDoor();
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("열쇠가 될 문(Exit Doors)이 하나도 등록되어 있지 않습니다!");
         }
     }
 }
