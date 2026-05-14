@@ -124,14 +124,14 @@ public class SpawnManager : MonoBehaviour
 
             availablePoints.RemoveAt(randomIndex);
 
-            StartCoroutine(SpawnSingleEnemy(enemyPrefab, selectedPoint.position));
+            StartCoroutine(SpawnSingleEnemy(enemyPrefab, selectedPoint.position, selectedPoint.rotation));
         }
 
         yield return new WaitForSeconds(spawnDelay + 0.1f);
         isSpawning = false;
     }
 
-    private IEnumerator SpawnSingleEnemy(GameObject enemyPrefab, Vector3 spawnPos)
+    private IEnumerator SpawnSingleEnemy(GameObject enemyPrefab, Vector3 spawnPos, Quaternion spawnRot)
     {
         GameObject vfx = null;
         if (magicCircleVFX != null)
@@ -142,7 +142,7 @@ public class SpawnManager : MonoBehaviour
         yield return new WaitForSeconds(spawnDelay);
 
         if (vfx != null) Destroy(vfx);
-
+        Quaternion reversedRot = spawnRot * Quaternion.Euler(0f, -180f, 0f);
         if (spawnPoofVFX != null)
         {
             // (파티클 길이에 맞춰 2f 숫자를 조절하세요)
@@ -150,7 +150,7 @@ public class SpawnManager : MonoBehaviour
             Destroy(poof, 2f);
         }
 
-        GameObject spawnedEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+        GameObject spawnedEnemy = Instantiate(enemyPrefab, spawnPos, reversedRot);
         activeEnemies.Add(spawnedEnemy);
 
         // 디버그 6: 정상 스폰 확인
