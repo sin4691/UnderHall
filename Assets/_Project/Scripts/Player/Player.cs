@@ -82,7 +82,7 @@ public class Player : MonoBehaviour
     {
         if (IsInvincible || CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
 
-        currentHealth -= damage;
+        currentHealth = Mathf.Max(0, currentHealth - damage);
 
         Debug.Log($"플레이어 피격! 남은 체력: {currentHealth}");
         if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
