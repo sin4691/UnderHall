@@ -33,7 +33,46 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+    private void Start()
+    {
+        Debug.Log("[GameManager] 1. 게임 시작됨! 첫 번째 방을 확인합니다.");
 
+        // 1. 방을 잘 찾았는지 확인
+        if (currentMapInstance == null)
+        {
+            Debug.Log("[GameManager] 2. 인스펙터가 비어있어서 씬에서 직접 스폰 매니저를 찾습니다.");
+            SpawnManager foundManager = FindAnyObjectByType<SpawnManager>();
+
+            if (foundManager != null)
+            {
+                currentMapInstance = foundManager.transform.root.gameObject;
+                Debug.Log($"[GameManager] 3. 방을 자동으로 찾았습니다: {currentMapInstance.name}");
+            }
+            else
+            {
+                Debug.LogError("[GameManager] 씬 전체를 뒤졌는데 SpawnManager가 안 보입니다!");
+            }
+        }
+        else
+        {
+            Debug.Log($"[GameManager] 2. 인스펙터에 미리 등록된 방을 사용합니다: {currentMapInstance.name}");
+        }
+
+        // 2. 스폰 매니저에게 명령을 제대로 내리는지 확인
+        if (currentMapInstance != null)
+        {
+            SpawnManager spawnManager = currentMapInstance.GetComponentInChildren<SpawnManager>();
+            if (spawnManager != null)
+            {
+                Debug.Log("[GameManager] 4. 스폰 매니저를 찾았습니다! StartRoom 명령을 발사합니다!");
+                spawnManager.StartRoom();
+            }
+            else
+            {
+                Debug.LogError($"[GameManager] {currentMapInstance.name} 방 안에 SpawnManager 스크립트가 안 붙어있습니다!");
+            }
+        }
+    }
     public void GoToNextRoom()
     {
         if (isTransitioning) return;
@@ -109,6 +148,12 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(blackScreenDuration);
 
         yield return StartCoroutine(Fade(0f));
+
+        SpawnManager spawnManager = currentMapInstance.GetComponentInChildren<SpawnManager>();
+        if (spawnManager != null)
+        {
+            spawnManager.StartRoom();
+        }
 
         isTransitioning = false;
     }
