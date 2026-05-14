@@ -47,7 +47,6 @@ MonoBehaviour:
   player: {fileID: 0}
   fadeCanvasGroup: {fileID: 0}
   fadeDuration: 1
-  normalRoomPrefabs: []
-  bossRoomPrefab: {fileID: 0}
-  roomsBeforeBoss: 5
+  blackScreenDuration: 0.5
+  stageData: {fileID: 11400000, guid: 5a7f6a843b0361e4cbc13777573b6114, type: 2}
   currentMapInstance: {fileID: 0}
