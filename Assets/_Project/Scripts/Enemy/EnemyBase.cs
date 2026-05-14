@@ -157,8 +157,9 @@ public class EnemyBase : MonoBehaviour
 
         if (vfxPoint != null)
         {
-            VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);
+            VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);         
         }
+        Destroy(gameObject, 3f);
     }
 
     private void OnDrawGizmosSelected()
