@@ -43,6 +43,11 @@ public class BossDragon : EnemyBase
     {
         if (isDead) return;
 
+        if(isAttacking)
+        {
+            agent.velocity = Vector3.zero;
+            return;
+        }
         // 공격 중이거나 비행 중일 때는 부모의 로직(회전 등)을 완전 무시 (얼음 상태)
         if (isAttacking || isFlying)
         {
@@ -143,10 +148,13 @@ public class BossDragon : EnemyBase
 
         isAttacking = true;
         agent.isStopped = true;
+        agent.velocity = Vector3.zero;
 
         // 공격 시작 시 플레이어 방향을 한 번만 딱 바라봄 (이후에는 안 따라감)
         Vector3 lookPos = new Vector3(target.position.x, transform.position.y, target.position.z);
         transform.LookAt(lookPos);
+
+        agent.nextPosition = transform.position;
 
         if (!isFlying && !isDead)
         {
@@ -194,8 +202,8 @@ public class BossDragon : EnemyBase
     {
         if (isDead || headBone == null) return;
 
-        // [VFX/feat]창우_ 보스 불뿜기 패턴 이펙트 재생 (머리에서 앞으로)
-        VFXManager.Instance.PlayBossBreath(headBone, transform.forward);
+        // [수정 완료] 몸통 방향(transform.forward) 대신 지정된 뼈대 방향(headBone.forward)으로 발사
+        VFXManager.Instance.PlayBossBreath(headBone, headBone.forward);
     }
 
     IEnumerator DashAndSlamPattern()
