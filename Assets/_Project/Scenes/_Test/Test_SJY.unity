@@ -1161,6 +1161,10 @@ PrefabInstance:
       propertyPath: healthImage
       value: 
       objectReference: {fileID: 144713809}
+    - target: {fileID: 8783256870082313160, guid: 422cef5e8d21d8e46a3a0bc9e8fdf166, type: 3}
+      propertyPath: interactPromptUI
+      value: 
+      objectReference: {fileID: 658634701}
     - target: {fileID: 8866608274952476509, guid: 422cef5e8d21d8e46a3a0bc9e8fdf166, type: 3}
       propertyPath: m_Name
       value: UIManager
@@ -1245,6 +1249,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 598230349}
   m_CullTransparentMesh: 1
+--- !u!1 &658634701 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8414320944039556649, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
+  m_PrefabInstance: {fileID: 1526074253}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &796612344
 GameObject:
   m_ObjectHideFlags: 0
@@ -2808,6 +2817,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1867458917727065095, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
+      propertyPath: m_text
+      value: "[E]\uB85C \uC785\uC7A5"
+      objectReference: {fileID: 0}
     - target: {fileID: 3037978084025354609, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
       propertyPath: m_Pivot.x
       value: 0

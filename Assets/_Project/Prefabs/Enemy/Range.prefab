@@ -3478,6 +3478,8 @@ MonoBehaviour:
   hitDelay: 0.5
   hitRadius: 1.5
   hitOffset: 1.5
+  hitHeight: 1.5
+  vfxPoint: {fileID: 6908014425708556381}
   rangeAttackCooldown: 1.5
   projectileSpeed: 8
   firePoint: {fileID: 255182421157754999}

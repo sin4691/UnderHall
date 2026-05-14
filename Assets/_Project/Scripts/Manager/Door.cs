@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
-    public bool isLocked = true; 
+    private bool isLocked = true;
+    public bool IsLocked => isLocked;
 
     public void UnlockDoor()
     {
@@ -10,11 +11,36 @@ public class Door : MonoBehaviour
         Debug.Log("문이 열렸습니다!");
     }
 
+    public void Interact()
+    {
+        GameManager.Instance.GoToNextRoom();
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        if (!isLocked && other.CompareTag("Player"))
-        {
-            GameManager.Instance.GoToNextRoom();
-        }
+        if (!other.CompareTag("Player")) return;
+
+        Player player = other.GetComponent<Player>();
+        if (player != null) player.SetNearbyDoor(this);
+
+        if (!isLocked && UIManager.Instance != null)
+            UIManager.Instance.ShowInteractPrompt();
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        Player player = other.GetComponent<Player>();
+        if (player != null) player.ClearNearbyDoor(this);
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.HideInteractPrompt();
+    }
+
+    void OnDestroy()
+    {
+        if (UIManager.Instance != null)
+            UIManager.Instance.HideInteractPrompt();
     }
 }
