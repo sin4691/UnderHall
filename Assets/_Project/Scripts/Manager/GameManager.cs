@@ -63,6 +63,11 @@ public class GameManager : MonoBehaviour
     {
         isTransitioning = true;
 
+        Player p = player.GetComponent<Player>();
+        if (p != null)
+        {
+            p.attack.CancelAttack();
+        }
         yield return StartCoroutine(Fade(1f));
 
         if (currentMapInstance != null)
