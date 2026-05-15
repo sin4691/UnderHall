@@ -131,4 +131,18 @@ public class LobbyManager : MonoBehaviour
         Debug.Log($"Gold Multiplier: x{playerData.goldGainMultiplier} (Lv.{playerData.levelGold})");
         Debug.Log($"Revive HP: {playerData.resurrectionHealthPercent * 100}% (Lv.{playerData.levelRevive})");
     }
+
+    // === UI에서 값 읽기 위한 Getter ===
+    public int GetCost5Level(int currentLevel)
+    {
+        if (currentLevel < 0 || currentLevel >= cost5Levels.Length) return 0;
+        return cost5Levels[currentLevel];
+    }
+
+    public int GetCostDash() => costDash;
+
+    public float GetBonusHP(int level) => bonusHP[level];
+    public float GetBonusATK(int level) => bonusATK[level];
+    public float GetBonusGold(int level) => bonusGold[level];
+    public float GetSetRevive(int level) => setRevive[level];
 }
