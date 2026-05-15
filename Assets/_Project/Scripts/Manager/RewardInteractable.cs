@@ -34,7 +34,6 @@ public class RewardInteractable : MonoBehaviour
         {
             player.playerData.maxHealth += 25f;
             player.Heal(25f);
-            Debug.Log("최대 체력 증가!");
         }
         else if (rewardType == RewardType.Gift)
         {
@@ -43,10 +42,9 @@ public class RewardInteractable : MonoBehaviour
         }
         else if (rewardType == RewardType.Gold)
         {
-            int goldAmount = 100; // 기본 골드
+            int goldAmount = 100; 
             goldAmount = Mathf.RoundToInt(goldAmount * player.playerData.goldGainMultiplier);
-            player.playerData.currentGold += goldAmount;
-            Debug.Log($"골드 획득! +{goldAmount} (총 {player.playerData.currentGold})");
+            player.AddGold(goldAmount);
         }
     }
 

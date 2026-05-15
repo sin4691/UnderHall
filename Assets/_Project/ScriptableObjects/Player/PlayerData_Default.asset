@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 533338edfcbfec445bfa5616bde10c0f, type: 3}
   m_Name: PlayerData_Default
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
-  maxHealth: 100
+  maxHealth: 125
   damage: 10
   moveSpeed: 5
   attackCooldown: 0.3
@@ -36,4 +36,4 @@ MonoBehaviour:
   levelDash: 0
   levelGold: 0
   levelRevive: 1
-  acquiredGifts: 
+  acquiredGifts: 0300000005000000
