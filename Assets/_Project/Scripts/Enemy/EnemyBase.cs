@@ -14,7 +14,7 @@ public class EnemyBase : MonoBehaviour
     protected Transform target;
 
     protected float currentHealth; // 자식 클래스에서 접근 가능하도록 변경
-    private float timer;
+    protected float timer;
     protected bool isDead = false;
 
     [Header("Attack Settings")]

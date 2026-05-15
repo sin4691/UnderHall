@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 1837250232964476417}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.82583, y: 0.000010433799, z: 114.89803}
+  m_LocalPosition: {x: 16.28026, y: 0.000011239956, z: 76.76047}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -145,7 +145,7 @@ MonoBehaviour:
   enemyData: {fileID: 11400000, guid: 16e5cc7d40ffcc541b8724400746797d, type: 2}
   detectRange: 10
   attackRange: 2
-  hitDelay: 0.5
+  hitDelay: 0.4
   hitRadius: 1.5
   hitOffset: 1.5
   hitHeight: 1.5
