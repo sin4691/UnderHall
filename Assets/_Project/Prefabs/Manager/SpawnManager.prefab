@@ -52,4 +52,7 @@ MonoBehaviour:
   rewardMaxHealthPrefab: {fileID: 9155953019565534169, guid: 58fff8fb8cc1c1a4a93350714f321ccb, type: 3}
   rewardGiftPrefab: {fileID: 9155953019565534169, guid: 244ae0afb6a29734fb21d01bdcde9bee, type: 3}
   rewardGoldPrefab: {fileID: 9155953019565534169, guid: 400561815e145cc419508d73bfd1b3a6, type: 3}
+  healthIcon: {fileID: 21300000, guid: 10024530fd58d844f986d17744a3cb07, type: 3}
+  giftIcon: {fileID: 21300000, guid: b7f009356fbdfdf47a13761b6943dda7, type: 3}
+  goldIcon: {fileID: 21300000, guid: f7a01888466e6254e8552b137e14190b, type: 3}
   currentRoomReward: 0

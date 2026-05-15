@@ -18,6 +18,11 @@ public class SpawnManager : MonoBehaviour
     public GameObject rewardGiftPrefab;
     public GameObject rewardGoldPrefab;
 
+    [Header("Reward Icon Database")]
+    public Sprite healthIcon;
+    public Sprite giftIcon;
+    public Sprite goldIcon;
+
     [HideInInspector]
     public RewardType currentRoomReward; // GameManager가 맵 넘길 때 세팅해줍니다.
 
@@ -164,7 +169,7 @@ public class SpawnManager : MonoBehaviour
 
         if (prefabToSpawn != null)
         {
-            GameObject rewardItem = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
+            GameObject rewardItem = Instantiate(prefabToSpawn, spawnPos, Quaternion.Euler(45,-45,0));
             RewardInteractable rewardScript = rewardItem.GetComponent<RewardInteractable>();
             if (rewardScript != null)
             {
@@ -202,7 +207,16 @@ public class SpawnManager : MonoBehaviour
             if (door != null)
             {
                 RewardType randomReward = (RewardType)Random.Range(0, 3);
-                door.SetNextRoomReward(randomReward);
+
+                Sprite selectedSprite = null;
+                switch (randomReward)
+                {
+                    case RewardType.MaxHealth: selectedSprite = healthIcon; break;
+                    case RewardType.Gift: selectedSprite = giftIcon; break;
+                    case RewardType.Gold: selectedSprite = goldIcon; break;
+                }
+
+                door.SetNextRoomReward(randomReward, selectedSprite);
             }
         }
     }

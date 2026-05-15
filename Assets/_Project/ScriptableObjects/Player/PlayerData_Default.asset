@@ -29,7 +29,7 @@ MonoBehaviour:
   maxResurrectionCount: 1
   resurrectionHealthPercent: 0.2
   resurrectionInvincibilityTime: 2
-  currentGold: 95100
+  currentGold: 0
   goldGainMultiplier: 1
   levelHP: 0
   levelATK: 0
