@@ -69,7 +69,11 @@ public class PlayerAttack : MonoBehaviour
         isAttackOnCooldown = false;
 
         if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
+        {
+            player.animator.CrossFade("idle", 0.1f);
             player.ChangeState(PlayerState.Idle);
+        }
+            
 
         if (wasSpinning)
         {

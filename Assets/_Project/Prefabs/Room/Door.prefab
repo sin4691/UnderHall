@@ -26,11 +26,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6451446600913852652}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 4842337266532653344}
   - {fileID: 4196443588869417985}
   - {fileID: 6019496416446390496}
   - {fileID: 8750955388749963946}
@@ -69,6 +70,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f40878cb481971d46b9644275ce72852, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
+  nextRewardType: 0
+  rewardIconRenderer: {fileID: 1974879133328490497}
 --- !u!1001 &4196443588869083085
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -184,6 +187,73 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 466356, guid: 749ac805017ffb642834e61134421373, type: 3}
   m_PrefabInstance: {fileID: 6019496416446070100}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &7358856526943936772
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 5555267726639719887}
+    m_Modifications:
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.62
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.68
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.8535535
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.35355338
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.35355338
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.1464466
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -45
+      objectReference: {fileID: 0}
+    - target: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3457403101132470004, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+      propertyPath: m_Name
+      value: DoorGift
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+--- !u!212 &1974879133328490497 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 9040913710678188293, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+  m_PrefabInstance: {fileID: 7358856526943936772}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4842337266532653344 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2678684186199357476, guid: 11e9845086a7be844aa8f262f5d7e9ca, type: 3}
+  m_PrefabInstance: {fileID: 7358856526943936772}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8750955388750004718
 PrefabInstance:

@@ -13,8 +13,8 @@ public class EnemyBase : MonoBehaviour
     protected Animator anim;
     protected Transform target;
 
-    private float currentHealth;
-    private float timer;
+    protected float currentHealth; // 자식 클래스에서 접근 가능하도록 변경
+    protected float timer;
     protected bool isDead = false;
 
     [Header("Attack Settings")]
@@ -23,16 +23,27 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] private float hitOffset = 1.5f;
     [SerializeField] private float hitHeight = 1.5f;
 
+    [Header("VFX Settings")]
+    [SerializeField] protected Transform vfxPoint;
+
     protected virtual void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
-        target = GameObject.FindGameObjectWithTag("Player").transform;
+
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            target = playerObj.transform;
+        }
 
         if (enemyData != null)
         {
             currentHealth = enemyData.maxHealth;
             agent.speed = enemyData.moveSpeed;
+            timer = enemyData.attackCooldown;
+            agent.updateRotation = false;
+            agent.stoppingDistance = attackRange;
         }
     }
 
@@ -40,14 +51,22 @@ public class EnemyBase : MonoBehaviour
     {
         if (isDead || target == null || enemyData == null || !agent.isOnNavMesh) return;
 
+        timer += Time.deltaTime;
+
         float dist = Vector3.Distance(transform.position, target.position);
 
         if (dist <= enemyData.detectionRange)
         {
-            if (dist <= agent.stoppingDistance + 0.5f)
+            Vector3 lookDir = target.position - transform.position;
+            lookDir.y = 0;
+
+            if (lookDir != Vector3.zero)
             {
-                agent.isStopped = true;
-                agent.velocity = Vector3.zero;
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 15f);
+            }
+
+            if (dist <= attackRange)
+            {
                 Attack();
             }
             else
@@ -59,26 +78,22 @@ public class EnemyBase : MonoBehaviour
         else
         {
             agent.isStopped = true;
+            agent.velocity = Vector3.zero;
         }
 
-        float speed = (agent.isStopped || agent.remainingDistance <= agent.stoppingDistance) ? 0f : agent.velocity.magnitude;
+        float speed = (agent.isStopped || dist <= attackRange) ? 0f : agent.velocity.magnitude;
         anim.SetFloat("MoveSpeed", speed, 0.05f, Time.deltaTime);
     }
 
     protected virtual void Attack()
     {
-        if (target != null)
-        {
-            Vector3 lookPos = new Vector3(target.position.x, transform.position.y, target.position.z);
-            transform.LookAt(lookPos);
-        }
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
 
-        timer += Time.deltaTime;
         if (timer >= enemyData.attackCooldown)
         {
             anim.SetTrigger("Attack");
-            timer = 0;
-
+            timer = 0f;
             StartCoroutine(DealDamageCoroutine());
         }
     }
@@ -88,15 +103,18 @@ public class EnemyBase : MonoBehaviour
         yield return new WaitForSeconds(hitDelay);
         if (isDead) yield break;
 
+        VFXManager.Instance.PlayMonsterAttack(
+            transform.position + transform.forward * hitOffset,
+            transform.forward
+        );
+
         Vector3 hitPosition = transform.position + (transform.forward * hitOffset) + (Vector3.up * hitHeight);
         Collider[] hitColliders = Physics.OverlapSphere(hitPosition, hitRadius);
 
         bool hasHitPlayer = false;
-
         foreach (Collider hit in hitColliders)
         {
             if (hasHitPlayer) break;
-
             if (hit.gameObject.CompareTag("Player"))
             {
                 Player player = hit.GetComponent<Player>();
@@ -109,24 +127,9 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (isDead) return;
-
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            Player player = collision.gameObject.GetComponent<Player>();
-            if (player != null)
-            {
-                player.TakeDamage(enemyData.damage);
-            }
-        }
-    }
-
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage) // 오버라이드 가능하도록 변경
     {
         currentHealth -= damage;
-
         if (currentHealth <= 0)
         {
             Die();
@@ -134,6 +137,11 @@ public class EnemyBase : MonoBehaviour
         else
         {
             anim.SetTrigger("Hurt");
+
+            if (vfxPoint != null)
+            {
+                VFXManager.Instance.PlayMonsterHit(vfxPoint.position, Vector3.up, gameObject);
+            }
         }
     }
 
@@ -141,25 +149,25 @@ public class EnemyBase : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
-
         agent.isStopped = true;
         agent.enabled = false;
-
         anim.SetTrigger("Death");
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
-        Destroy(gameObject, 5f);
+        if (vfxPoint != null)
+        {
+            VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);         
+        }
+        Destroy(gameObject, 3f);
     }
 
     private void OnDrawGizmosSelected()
     {
         if (enemyData == null) return;
-
         Gizmos.color = Color.red;
         Vector3 hitPosition = transform.position + (transform.forward * hitOffset) + (Vector3.up * hitHeight);
         Gizmos.DrawWireSphere(hitPosition, hitRadius);
-
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, enemyData.detectionRange);
     }

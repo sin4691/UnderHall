@@ -7,68 +7,103 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Player & UI")]
-    public GameObject player;                 
-    public CanvasGroup fadeCanvasGroup;  
+    public GameObject player;
+    public CanvasGroup fadeCanvasGroup;
     public float fadeDuration = 1f;
     public float blackScreenDuration = 0.5f;
 
     [Header("Stage Settings")]
-    public List<GameObject> normalRoomPrefabs; 
-    public GameObject bossRoomPrefab;        
-    public int roomsBeforeBoss = 5;         
+    public StageData stageData;
 
     [Header("Current State")]
-    public GameObject currentMapInstance;    
-    private int currentRoomCount = 0;        
-    private bool isTransitioning = false;    
+    public GameObject currentMapInstance;
+    private int currentRoomIndex = 0;
+    private bool isTransitioning = false;
+
+    private RewardType upcomingReward;
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
+        upcomingReward = (RewardType)Random.Range(0, 3);
+
+        if (player != null)
         {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
+            Player p = player.GetComponent<Player>();
+            if (p != null && p.playerData != null)
+            {
+                p.playerData.ResetRunData();
+            }
         }
     }
 
-    public void GoToNextRoom()
+    public PlayerData playerData;
+    private void Start()
+    {
+        playerData.ResetRunData();
+
+        Debug.Log("[GameManager] 게임 시작됨! 첫 번째 방을 설정합니다.");
+
+        if (currentMapInstance == null)
+        {
+            SpawnManager foundManager = FindAnyObjectByType<SpawnManager>();
+            if (foundManager != null)
+            {
+                currentMapInstance = foundManager.transform.root.gameObject;
+            }
+            else
+            {
+                Debug.LogError("[GameManager] 씬에 SpawnManager가 없습니다!");
+            }
+        }
+
+        if (currentMapInstance != null)
+        {
+            SpawnManager spawnManager = currentMapInstance.GetComponentInChildren<SpawnManager>();
+            if (spawnManager != null)
+            {
+                spawnManager.currentRoomReward = upcomingReward;
+                spawnManager.StartRoom();
+            }
+        }
+    }
+
+    // Door에서 넘겨준 보상 타입을 받아옵니다.
+    public void GoToNextRoom(RewardType selectedReward)
     {
         if (isTransitioning) return;
 
-        currentRoomCount++;
-        GameObject nextMapToLoad = null;
+        upcomingReward = selectedReward;
+        currentRoomIndex++;
 
-        if (currentRoomCount <= roomsBeforeBoss)
+        if (stageData != null && currentRoomIndex < stageData.roomSequence.Count)
         {
-            int randomIndex = Random.Range(0, normalRoomPrefabs.Count);
-            nextMapToLoad = normalRoomPrefabs[randomIndex];
-        }
-        else if (currentRoomCount == roomsBeforeBoss + 1)
-        {
-            nextMapToLoad = bossRoomPrefab;
+            GameObject nextMapToLoad = stageData.roomSequence[currentRoomIndex];
+            StartCoroutine(MapTransitionRoutine(nextMapToLoad));
         }
         else
         {
-            Debug.Log("보스 클리어! 다음 스테이지나 엔딩을 준비하세요.");
-            return;
+            Debug.Log("모든 스테이지 클리어! 골드를 정산합니다.");
+            Player p = player.GetComponent<Player>();
+            if (p != null) p.CommitGoldToSO();
         }
-
-        StartCoroutine(MapTransitionRoutine(nextMapToLoad));
     }
 
     private IEnumerator MapTransitionRoutine(GameObject nextMapPrefab)
     {
         isTransitioning = true;
 
+        Player p = player.GetComponent<Player>();
+        if (p != null) p.attack.CancelAttack();
+
         yield return StartCoroutine(Fade(1f));
 
         if (currentMapInstance != null)
         {
             Destroy(currentMapInstance);
-            yield return null; 
+            yield return null;
         }
 
         currentMapInstance = Instantiate(nextMapPrefab, Vector3.zero, Quaternion.identity);
@@ -76,44 +111,36 @@ public class GameManager : MonoBehaviour
         Transform spawnPoint = currentMapInstance.transform.Find("SpawnPoint");
         if (spawnPoint != null)
         {
-            UnityEngine.AI.NavMeshAgent agent = player.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            Rigidbody rb = player.GetComponent<Rigidbody>();
+            Vector3 safePos = spawnPoint.position + new Vector3(0f, 1.0f, 0f);
 
-            if (agent != null)
+            if (rb != null)
             {
-                // NavMeshAgent가 있으면 Warp 사용
-                bool warped = agent.Warp(spawnPoint.position);
-                if (!warped)
-                {
-                    Debug.LogWarning("Warp 실패! SpawnPoint가 NavMesh 위에 있는지 확인하세요.");
-                }
-                player.transform.rotation = spawnPoint.rotation;
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                player.transform.position = safePos;
+                rb.position = safePos;
+                rb.rotation = spawnPoint.rotation;
+                Physics.SyncTransforms();
             }
             else
             {
-                // Fallback: 기존 Rigidbody 이동
-                Rigidbody rb = player.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.linearVelocity = Vector3.zero;
-                    rb.angularVelocity = Vector3.zero;
-                    rb.position = spawnPoint.position;
-                    rb.rotation = spawnPoint.rotation;
-                }
-                else
-                {
-                    player.transform.position = spawnPoint.position;
-                    player.transform.rotation = spawnPoint.rotation;
-                }
+                player.transform.position = safePos;
+                player.transform.rotation = spawnPoint.rotation;
+                Physics.SyncTransforms();
             }
-        }
-        else
-        {
-            Debug.LogWarning("새 맵 프리팹 안에 'SpawnPoint'라는 이름의 오브젝트가 없습니다!");
         }
 
         yield return new WaitForSeconds(blackScreenDuration);
-
         yield return StartCoroutine(Fade(0f));
+
+        SpawnManager spawnManager = currentMapInstance.GetComponentInChildren<SpawnManager>();
+        if (spawnManager != null)
+        {
+            // 방금 기억해둔 보상을 새 매니저에게 전달하고 전투 시작
+            spawnManager.currentRoomReward = upcomingReward;
+            spawnManager.StartRoom();
+        }
 
         isTransitioning = false;
     }
@@ -121,17 +148,14 @@ public class GameManager : MonoBehaviour
     private IEnumerator Fade(float targetAlpha)
     {
         if (fadeCanvasGroup == null) yield break;
-
         float startAlpha = fadeCanvasGroup.alpha;
         float time = 0f;
-
         while (time < fadeDuration)
         {
             time += Time.deltaTime;
             fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, time / fadeDuration);
             yield return null;
         }
-
         fadeCanvasGroup.alpha = targetAlpha;
     }
 }
