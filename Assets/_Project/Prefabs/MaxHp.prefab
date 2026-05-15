@@ -107,7 +107,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2891796569549755647
 Transform:
   m_ObjectHideFlags: 0
@@ -286,7 +286,7 @@ GameObject:
   - component: {fileID: 3208375262574336209}
   - component: {fileID: 6570327628997191838}
   m_Layer: 0
-  m_Name: MaxHP
+  m_Name: MaxHp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
