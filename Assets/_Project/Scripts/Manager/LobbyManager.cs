@@ -114,6 +114,8 @@ public class LobbyManager : MonoBehaviour
     // 전체 스탯 적용 (강화를 누를 때마다 최종 스탯 계산)
     private void ApplyAllUpgrades()
     {
+        playerData.ResetRunData();
+
         playerData.maxHealth = baseMaxHealth + bonusHP[playerData.levelHP];
         playerData.damage = baseDamage + bonusATK[playerData.levelATK];
         playerData.maxDashCount = baseMaxDashCount + playerData.levelDash;

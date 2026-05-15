@@ -20,14 +20,30 @@ public class GameManager : MonoBehaviour
     private int currentRoomIndex = 0;
     private bool isTransitioning = false;
 
+    private RewardType upcomingReward;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        upcomingReward = (RewardType)Random.Range(0, 3);
+
+        if (player != null)
+        {
+            Player p = player.GetComponent<Player>();
+            if (p != null && p.playerData != null)
+            {
+                p.playerData.ResetRunData();
+            }
+        }
     }
 
+    public PlayerData playerData;
     private void Start()
     {
+        playerData.ResetRunData();
+
         Debug.Log("[GameManager] 게임 시작됨! 첫 번째 방을 설정합니다.");
 
         if (currentMapInstance == null)
@@ -46,14 +62,20 @@ public class GameManager : MonoBehaviour
         if (currentMapInstance != null)
         {
             SpawnManager spawnManager = currentMapInstance.GetComponentInChildren<SpawnManager>();
-            if (spawnManager != null) spawnManager.StartRoom();
+            if (spawnManager != null)
+            {
+                spawnManager.currentRoomReward = upcomingReward;
+                spawnManager.StartRoom();
+            }
         }
     }
 
-    public void GoToNextRoom()
+    // Door에서 넘겨준 보상 타입을 받아옵니다.
+    public void GoToNextRoom(RewardType selectedReward)
     {
         if (isTransitioning) return;
 
+        upcomingReward = selectedReward;
         currentRoomIndex++;
 
         if (stageData != null && currentRoomIndex < stageData.roomSequence.Count)
@@ -113,6 +135,8 @@ public class GameManager : MonoBehaviour
         SpawnManager spawnManager = currentMapInstance.GetComponentInChildren<SpawnManager>();
         if (spawnManager != null)
         {
+            // 방금 기억해둔 보상을 새 매니저에게 전달하고 전투 시작
+            spawnManager.currentRoomReward = upcomingReward;
             spawnManager.StartRoom();
         }
 
