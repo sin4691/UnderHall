@@ -144,7 +144,6 @@ public class SpawnManager : MonoBehaviour
         activeEnemies.Add(spawnedEnemy);
     }
 
-    // 몬스터 전멸 시 보상 스폰!
     private void ClearRoom()
     {
         isRoomCleared = true;
@@ -154,11 +153,9 @@ public class SpawnManager : MonoBehaviour
 
     private void SpawnReward()
     {
-        // 1. 맵에서 보상이 스폰될 위치(빈 오브젝트) 찾기
         GameObject spawnPoint = GameObject.FindGameObjectWithTag("RewardSpawnPoint");
         Vector3 spawnPos = spawnPoint != null ? spawnPoint.transform.position : transform.position;
 
-        // 2. 프리팹 선택
         GameObject prefabToSpawn = null;
         switch (currentRoomReward)
         {
@@ -183,7 +180,6 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    // 플레이어가 보상을 먹었을 때 호출됨
     public void OnRewardCollected()
     {
         Debug.Log("보상 획득 완료! 다음 방 보상을 배정하고 문을 엽니다.");
@@ -199,24 +195,46 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    // 다음 방 보상 랜덤(1/3 확률) 배정
     private void AssignNextRoomRewards()
     {
+        List<RewardType> availableRewards = new List<RewardType>
+        {
+            RewardType.MaxHealth,
+            RewardType.Gift,
+            RewardType.Gold
+        };
+
+        for (int i = 0; i < availableRewards.Count; i++)
+        {
+            RewardType temp = availableRewards[i];
+            int randomIndex = Random.Range(i, availableRewards.Count);
+            availableRewards[i] = availableRewards[randomIndex];
+            availableRewards[randomIndex] = temp;
+        }
+
+        int rewardIndex = 0;
         foreach (Door door in exitDoors)
         {
             if (door != null)
             {
-                RewardType randomReward = (RewardType)Random.Range(0, 3);
+                if (rewardIndex >= availableRewards.Count)
+                {
+                    Debug.LogWarning("문의 개수가 보상 종류(3개)보다 많습니다. 일부 문은 보상이 세팅되지 않습니다.");
+                    break;
+                }
+
+                RewardType selectedReward = availableRewards[rewardIndex];
+                rewardIndex++;
 
                 Sprite selectedSprite = null;
-                switch (randomReward)
+                switch (selectedReward)
                 {
                     case RewardType.MaxHealth: selectedSprite = healthIcon; break;
                     case RewardType.Gift: selectedSprite = giftIcon; break;
                     case RewardType.Gold: selectedSprite = goldIcon; break;
                 }
 
-                door.SetNextRoomReward(randomReward, selectedSprite);
+                door.SetNextRoomReward(selectedReward, selectedSprite);
             }
         }
     }
