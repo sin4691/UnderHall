@@ -33,7 +33,7 @@ public class Player : MonoBehaviour
     private int remainingResurrections;
     private float currentHealth;
     private Vector2 inputVector;
-
+    private int earnedGoldDuringRun = 0;
     private Door nearbyDoor;
     private RewardInteractable nearbyReward; // 보상 상호작용 추가
 
@@ -181,6 +181,8 @@ public class Player : MonoBehaviour
     {
         if (CurrentState == PlayerState.Dead) return;
 
+        CommitGoldToSO();
+
         VFXManager.Instance.PlayPlayerDeath(vfxPoint.position, gameObject);
 
         ChangeState(PlayerState.Dead);
@@ -229,25 +231,37 @@ public class Player : MonoBehaviour
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (!value.isPressed) return;
 
-        // 보상이 있으면 보상 먼저 먹기
         if (nearbyReward != null)
         {
             nearbyReward.Interact(this);
             return;
         }
 
-        // 보상이 없으면 문 상호작용
         if (nearbyDoor != null && !nearbyDoor.IsLocked)
         {
             nearbyDoor.Interact();
         }
     }
 
-    // Door 등록/해제
+    public void AddGold(int amount)
+    {
+        earnedGoldDuringRun += amount;
+        Debug.Log($"[임시 획득] 골드 +{amount} (이번 판 총합: {earnedGoldDuringRun})");
+
+    }
+    public void CommitGoldToSO()
+    {
+        if (earnedGoldDuringRun > 0)
+        {
+            playerData.currentGold += earnedGoldDuringRun;
+            Debug.Log($"[정산 완료] {earnedGoldDuringRun} 골드가 영구 저장되었습니다. 총액: {playerData.currentGold}");
+            earnedGoldDuringRun = 0; 
+        }
+    }
     public void SetNearbyDoor(Door door) => nearbyDoor = door;
     public void ClearNearbyDoor(Door door) { if (nearbyDoor == door) nearbyDoor = null; }
 
-    // 보상 오브젝트 등록/해제 (추가됨)
+
     public void SetNearbyReward(RewardInteractable reward) => nearbyReward = reward;
     public void ClearNearbyReward(RewardInteractable reward) { if (nearbyReward == reward) nearbyReward = null; }
 
