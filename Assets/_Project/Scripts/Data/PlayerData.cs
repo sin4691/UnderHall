@@ -94,4 +94,24 @@ public class PlayerData : ScriptableObject
 
     [Header("===== 인게임 획득 기프트 (현재 런) =====")]
     public System.Collections.Generic.List<GiftType> acquiredGifts = new System.Collections.Generic.List<GiftType>();
+
+    // PlayerData.cs 파일의 맨 아래쪽에 이 함수를 덮어씌우세요.
+    public void ResetRunData()
+    {
+        acquiredGifts.Clear();
+
+        float[] bonusHP = { 0, 10, 20, 35, 50, 70 };
+        float[] bonusATK = { 0, 2, 4, 7, 10, 15 };
+        float[] bonusGold = { 0f, 0.1f, 0.2f, 0.3f, 0.5f, 1.0f };
+        float[] setRevive = { 0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f };
+
+        maxHealth = 100f + bonusHP[levelHP];
+        damage = 10f + bonusATK[levelATK];
+        maxDashCount = 2 + levelDash;
+        goldGainMultiplier = 1.0f + bonusGold[levelGold];
+        maxResurrectionCount = (levelRevive > 0) ? 1 : 0;
+        resurrectionHealthPercent = setRevive[levelRevive];
+
+        Debug.Log("[PlayerData] 모든 인게임 데이터가 초기화되었습니다.");
+    }
 }

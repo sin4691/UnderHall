@@ -13,6 +13,14 @@ public class SpawnManager : MonoBehaviour
     [Header("Room References")]
     public Door[] exitDoors;
 
+    [Header("Reward Settings")]
+    public GameObject rewardMaxHealthPrefab;
+    public GameObject rewardGiftPrefab;
+    public GameObject rewardGoldPrefab;
+
+    [HideInInspector]
+    public RewardType currentRoomReward; // GameManager가 맵 넘길 때 세팅해줍니다.
+
     private List<Transform> spawnPoints = new List<Transform>();
     private List<GameObject> activeEnemies = new List<GameObject>();
 
@@ -32,16 +40,10 @@ public class SpawnManager : MonoBehaviour
                 spawnPoints.Add(child);
             }
         }
-
-        // 디버그 1: 스폰 포인트 개수 확인
-        Debug.Log($"[디버그 1] {gameObject.name} 맵 전체에서 찾은 스폰 포인트 개수: {spawnPoints.Count}개");
     }
 
     public void StartRoom()
     {
-        // 디버그 2: 티어 데이터 정상 확인
-        Debug.Log($"[디버그 2] StartRoom 호출됨! Tier Data 존재 여부: {tierData != null}");
-
         if (tierData == null)
         {
             Debug.LogWarning("TierData가 없습니다! 바로 문을 엽니다.");
@@ -58,12 +60,6 @@ public class SpawnManager : MonoBehaviour
 
         int beforeCount = activeEnemies.Count;
         activeEnemies.RemoveAll(enemy => enemy == null || !enemy.GetComponent<Collider>().enabled);
-
-        // 디버그 3: 몬스터가 비정상적으로 즉사했는지 확인
-        if (beforeCount > 0 && activeEnemies.Count == 0)
-        {
-            Debug.Log($"[디버그 3] {currentWave}웨이브 몬스터 전멸 감지!");
-        }
 
         if (activeEnemies.Count == 0)
         {
@@ -91,8 +87,6 @@ public class SpawnManager : MonoBehaviour
 
         if (currentWaveData == null || currentWaveData.spawnInfos.Count == 0)
         {
-            // 디버그 4: 웨이브 데이터가 비어있는지 확인
-            Debug.LogWarning($"[디버그 4] {wave}웨이브에 설정된 몬스터가 0마리입니다! 바로 다음 웨이브로 넘어갑니다.");
             isSpawning = false;
             yield break;
         }
@@ -106,24 +100,16 @@ public class SpawnManager : MonoBehaviour
             }
         }
 
-        // 디버그 5: 스폰 대기 중인 몬스터 마릿수 확인
-        Debug.Log($"[디버그 5] {wave}웨이브 스폰 시작! 총 {enemiesToSpawn.Count}마리 스폰 예정.");
-
         List<Transform> availablePoints = new List<Transform>(spawnPoints);
 
         foreach (GameObject enemyPrefab in enemiesToSpawn)
         {
-            if (availablePoints.Count == 0)
-            {
-                Debug.LogWarning("스폰 자리가 부족해서 남은 몬스터를 소환할 수 없습니다!");
-                break;
-            }
+            if (availablePoints.Count == 0) break;
 
             int randomIndex = Random.Range(0, availablePoints.Count);
             Transform selectedPoint = availablePoints[randomIndex];
 
             availablePoints.RemoveAt(randomIndex);
-
             StartCoroutine(SpawnSingleEnemy(enemyPrefab, selectedPoint.position, selectedPoint.rotation));
         }
 
@@ -145,36 +131,79 @@ public class SpawnManager : MonoBehaviour
         Quaternion reversedRot = spawnRot * Quaternion.Euler(0f, -180f, 0f);
         if (spawnPoofVFX != null)
         {
-            // (파티클 길이에 맞춰 2f 숫자를 조절하세요)
             GameObject poof = Instantiate(spawnPoofVFX, spawnPos, Quaternion.Euler(-90, 0, 0));
             Destroy(poof, 2f);
         }
 
         GameObject spawnedEnemy = Instantiate(enemyPrefab, spawnPos, reversedRot);
         activeEnemies.Add(spawnedEnemy);
-
-        // 디버그 6: 정상 스폰 확인
-        Debug.Log($"[디버그 6] {spawnedEnemy.name} 한 마리 스폰 완료!");
     }
 
+    // 몬스터 전멸 시 보상 스폰!
     private void ClearRoom()
     {
         isRoomCleared = true;
-        Debug.Log("[디버그 7] 모든 웨이브 클리어! 등록된 모든 문을 엽니다.");
+        Debug.Log("[디버그 7] 모든 웨이브 클리어! 보상을 스폰합니다.");
+        SpawnReward();
+    }
+
+    private void SpawnReward()
+    {
+        // 1. 맵에서 보상이 스폰될 위치(빈 오브젝트) 찾기
+        GameObject spawnPoint = GameObject.FindGameObjectWithTag("RewardSpawnPoint");
+        Vector3 spawnPos = spawnPoint != null ? spawnPoint.transform.position : transform.position;
+
+        // 2. 프리팹 선택
+        GameObject prefabToSpawn = null;
+        switch (currentRoomReward)
+        {
+            case RewardType.MaxHealth: prefabToSpawn = rewardMaxHealthPrefab; break;
+            case RewardType.Gift: prefabToSpawn = rewardGiftPrefab; break;
+            case RewardType.Gold: prefabToSpawn = rewardGoldPrefab; break;
+        }
+
+        if (prefabToSpawn != null)
+        {
+            GameObject rewardItem = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
+            RewardInteractable rewardScript = rewardItem.GetComponent<RewardInteractable>();
+            if (rewardScript != null)
+            {
+                rewardScript.Initialize(this, currentRoomReward);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("보상 프리팹이 등록되지 않았습니다! 보상 없이 강제로 문을 엽니다.");
+            OnRewardCollected();
+        }
+    }
+
+    // 플레이어가 보상을 먹었을 때 호출됨
+    public void OnRewardCollected()
+    {
+        Debug.Log("보상 획득 완료! 다음 방 보상을 배정하고 문을 엽니다.");
+
+        AssignNextRoomRewards();
 
         if (exitDoors != null && exitDoors.Length > 0)
         {
             foreach (Door door in exitDoors)
             {
-                if (door != null)
-                {
-                    door.UnlockDoor();
-                }
+                if (door != null) door.UnlockDoor();
             }
         }
-        else
+    }
+
+    // 다음 방 보상 랜덤(1/3 확률) 배정
+    private void AssignNextRoomRewards()
+    {
+        foreach (Door door in exitDoors)
         {
-            Debug.LogWarning("열쇠가 될 문(Exit Doors)이 하나도 등록되어 있지 않습니다!");
+            if (door != null)
+            {
+                RewardType randomReward = (RewardType)Random.Range(0, 3);
+                door.SetNextRoomReward(randomReward);
+            }
         }
     }
 }

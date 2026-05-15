@@ -9,15 +9,13 @@ public enum PlayerState { Idle, Move, Attack, Dash, SpecialAttack, Dead, Resurre
 [RequireComponent(typeof(PlayerDash))]
 public class Player : MonoBehaviour
 {
-    //VFX 위치 지정용
     [Header("VFX")]
     public Transform vfxPoint;
-    //// VFXPoint_Body 드래그
 
     [Header("Camera Zoom Settings")]
-    public CinemachineCamera virtualCamera; 
-    public float zoomInFOV = 30f;  
-    public float zoomDuration = 0.5f;  
+    public CinemachineCamera virtualCamera;
+    public float zoomInFOV = 30f;
+    public float zoomDuration = 0.5f;
     private float originalFOV;
     public float CurrentHealth => currentHealth;
 
@@ -35,7 +33,9 @@ public class Player : MonoBehaviour
     private int remainingResurrections;
     private float currentHealth;
     private Vector2 inputVector;
+
     private Door nearbyDoor;
+    private RewardInteractable nearbyReward; // 보상 상호작용 추가
 
     private void Awake()
     {
@@ -47,6 +47,7 @@ public class Player : MonoBehaviour
 
         CurrentState = PlayerState.Idle;
     }
+
     private void Start()
     {
         if (virtualCamera == null) virtualCamera = FindAnyObjectByType<CinemachineCamera>(FindObjectsInactive.Exclude);
@@ -66,11 +67,13 @@ public class Player : MonoBehaviour
     {
         CurrentState = newState;
     }
+
     public void GrantInvincibility(float duration)
     {
         if (invincibilityCoroutine != null) StopCoroutine(invincibilityCoroutine);
         invincibilityCoroutine = StartCoroutine(InvincibilityRoutine(duration));
     }
+
     private IEnumerator InvincibilityRoutine(float duration)
     {
         IsInvincible = true;
@@ -82,13 +85,13 @@ public class Player : MonoBehaviour
     {
         if (IsInvincible || CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
 
+        // 수정 완료된 체력 고정 로직
         currentHealth = Mathf.Max(0, currentHealth - damage);
 
         Debug.Log($"플레이어 피격! 남은 체력: {currentHealth}");
         if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
-        //창우_피격 이펙트
+
         VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
-        //창우_피격 이펙트는 VFXManager에서 구현한 PlayPlayerHit 함수를 호출하여 재생합니다. 이 함수는 피격 위치와 방향, 그리고 플레이어 객체를 인자로 받아서 적절한 피격 이펙트를 생성합니다.
 
         if (currentHealth <= 0)
         {
@@ -112,7 +115,7 @@ public class Player : MonoBehaviour
         if (CurrentState == PlayerState.Dead) return;
         currentHealth += amount;
         if (currentHealth > playerData.maxHealth) currentHealth = playerData.maxHealth;
-        Debug.Log($"[흡혈] 체력 회복! 현재 체력: {currentHealth}");
+        Debug.Log($"[회복] 현재 체력: {currentHealth}");
 
         if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
     }
@@ -129,10 +132,7 @@ public class Player : MonoBehaviour
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
         Time.timeScale = 0.1f;
 
-        //창우_부활 시작 이펙트  쓰러지는 순간 (슬로우모션 진입 직후)
         VFXManager.Instance.PlayPlayerResurrectStart(vfxPoint.position);
-
-
         StartCoroutine(CameraZoomRoutine(zoomInFOV, zoomDuration));
 
         yield return new WaitForSecondsRealtime(4f);
@@ -147,7 +147,6 @@ public class Player : MonoBehaviour
 
         StartCoroutine(CameraZoomRoutine(originalFOV, 0.2f));
 
-        //부활 완료 이펙트  일어나는 순간 (타임스케일 복구 직후)
         VFXManager.Instance.PlayPlayerResurrectEnd(vfxPoint.position);
 
         animator.SetBool("isMoving", false);
@@ -167,11 +166,9 @@ public class Player : MonoBehaviour
         while (elapsed < duration)
         {
             elapsed += Time.unscaledDeltaTime;
-
             var lens = virtualCamera.Lens;
             lens.FieldOfView = Mathf.Lerp(startFOV, targetFOV, elapsed / duration);
             virtualCamera.Lens = lens;
-
             yield return null;
         }
 
@@ -184,13 +181,7 @@ public class Player : MonoBehaviour
     {
         if (CurrentState == PlayerState.Dead) return;
 
-        //창우_사망 시 이펙트 재생
         VFXManager.Instance.PlayPlayerDeath(vfxPoint.position, gameObject);
-
-        ChangeState(PlayerState.Dead);
-        attack.CancelAttack();
-        //창우_사망 시 이동과 공격을 즉시 멈추고 입력을 무시하도록 설정, 창현씨가 영상올려주신 한번 부활? 하는 기능을 구현할때는 지워도 될 듯 합니다.
-
 
         ChangeState(PlayerState.Dead);
         attack.CancelAttack();
@@ -203,16 +194,12 @@ public class Player : MonoBehaviour
         }
 
         animator.Play("death");
-        //GetComponent<Collider>().enabled = false;
     }
 
     public void OnDash(InputValue value)
     {
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
-        if (value.isPressed)
-        {
-            dash.ExecuteDash();
-        }
+        if (value.isPressed) dash.ExecuteDash();
     }
 
     public void OnMove(InputValue value)
@@ -224,49 +211,45 @@ public class Player : MonoBehaviour
     public void OnAttack(InputValue value)
     {
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
-        if (value.isPressed && CurrentState != PlayerState.Dash)
-        {
-            attack.ExecuteAttack();
-        }
+        if (value.isPressed && CurrentState != PlayerState.Dash) attack.ExecuteAttack();
     }
+
     public void OnSpecialAttack(InputValue value)
     {
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (value.isPressed)
         {
-            if (CurrentState != PlayerState.Dash)
-            {
-                attack.StartSpecialAttack();
-            }
+            if (CurrentState != PlayerState.Dash) attack.StartSpecialAttack();
         }
-        else
-        {
-            attack.StopSpecialAttack();
-        }
+        else attack.StopSpecialAttack();
     }
-   
+
     public void OnInteract(InputValue value)
     {
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (!value.isPressed) return;
 
+        // 보상이 있으면 보상 먼저 먹기
+        if (nearbyReward != null)
+        {
+            nearbyReward.Interact(this);
+            return;
+        }
+
+        // 보상이 없으면 문 상호작용
         if (nearbyDoor != null && !nearbyDoor.IsLocked)
         {
-            Debug.Log("[OnInteract] Interact 실행!");
             nearbyDoor.Interact();
         }
     }
 
-    public void SetNearbyDoor(Door door)
-    {
-        nearbyDoor = door;
-    }
+    // Door 등록/해제
+    public void SetNearbyDoor(Door door) => nearbyDoor = door;
+    public void ClearNearbyDoor(Door door) { if (nearbyDoor == door) nearbyDoor = null; }
 
-    public void ClearNearbyDoor(Door door)
-    {
-        if (nearbyDoor == door)
-            nearbyDoor = null;
-    }
+    // 보상 오브젝트 등록/해제 (추가됨)
+    public void SetNearbyReward(RewardInteractable reward) => nearbyReward = reward;
+    public void ClearNearbyReward(RewardInteractable reward) { if (nearbyReward == reward) nearbyReward = null; }
 
     public Vector2 GetInputVector() => inputVector;
 }
