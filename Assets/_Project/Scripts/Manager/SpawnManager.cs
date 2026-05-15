@@ -18,6 +18,11 @@ public class SpawnManager : MonoBehaviour
     public GameObject rewardGiftPrefab;
     public GameObject rewardGoldPrefab;
 
+    [Header("Reward Icon Database")]
+    public Sprite healthIcon;
+    public Sprite giftIcon;
+    public Sprite goldIcon;
+
     [HideInInspector]
     public RewardType currentRoomReward; // GameManager가 맵 넘길 때 세팅해줍니다.
 
@@ -139,21 +144,39 @@ public class SpawnManager : MonoBehaviour
         activeEnemies.Add(spawnedEnemy);
     }
 
-    // 몬스터 전멸 시 보상 스폰!
     private void ClearRoom()
     {
         isRoomCleared = true;
         Debug.Log("[디버그 7] 모든 웨이브 클리어! 보상을 스폰합니다.");
-        SpawnReward();
+
+        //창우_ 방 클리어 VFX (SpawnManager 위치 기준)
+        if (VFXManager.Instance != null)
+            VFXManager.Instance.PlayRoomClear(transform.position);
+
+        StartCoroutine(ClearRoomRoutine());//창우_클리어 VFX 재생 후 보상 스폰하는 코루틴
+
+        //원래코드_SpawnReward();
     }
 
-    private void SpawnReward()
+    private IEnumerator ClearRoomRoutine()//창우_ 클리어 VFX 재생 후 딜레이 주는 코루틴
+    {
+        //창우_클리어 VFX 먼저 재생
+        if (VFXManager.Instance != null)
+            VFXManager.Instance.PlayRoomClear(transform.position);
+        //창우_이 딜레이 동안 클리어 VFX만 나옴
+        yield return new WaitForSeconds(1.2f); //창우_원하는 시간으로 조절
+        //창우_딜레이 후 보상 스폰
+        StartCoroutine(SpawnRewardRoutine()); //창우_코루틴으로 변경
+    }
+
+
+    //원래코드_private void SpawnReward()
+    private IEnumerator SpawnRewardRoutine() //창우_ 보상 스폰도 코루틴으로 변경 (VFX 재생 후 딜레이 주기 위해)
     {
         // 1. 맵에서 보상이 스폰될 위치(빈 오브젝트) 찾기
         GameObject spawnPoint = GameObject.FindGameObjectWithTag("RewardSpawnPoint");
         Vector3 spawnPos = spawnPoint != null ? spawnPoint.transform.position : transform.position;
 
-        // 2. 프리팹 선택
         GameObject prefabToSpawn = null;
         switch (currentRoomReward)
         {
@@ -164,7 +187,17 @@ public class SpawnManager : MonoBehaviour
 
         if (prefabToSpawn != null)
         {
-            GameObject rewardItem = Instantiate(prefabToSpawn, spawnPos, Quaternion.identity);
+            //창우_VFX 먼저 재생
+            if (VFXManager.Instance != null)
+                VFXManager.Instance.PlayRewardAppear(spawnPos);
+            //창우_VFX 재생 후 딜레이 뒤에 보상 등장
+            yield return new WaitForSeconds(1.2f); // 원하는 시간으로 조절
+
+            GameObject rewardItem = Instantiate(prefabToSpawn, spawnPos, Quaternion.Euler(45, -45, 0));
+
+            //창우_둥둥 띄우기 시작
+            StartCoroutine(FloatReward(rewardItem));
+
             RewardInteractable rewardScript = rewardItem.GetComponent<RewardInteractable>();
             if (rewardScript != null)
             {
@@ -177,8 +210,23 @@ public class SpawnManager : MonoBehaviour
             OnRewardCollected();
         }
     }
+    //창우_둥둥 효과
+    private IEnumerator FloatReward(GameObject reward)
+    {
+        if (reward == null) yield break;
 
-    // 플레이어가 보상을 먹었을 때 호출됨
+        Vector3 basePos = reward.transform.position;
+        float floatHeight = 0.3f;   // 위아래 진폭
+        float floatSpeed = 2f;      // 위아래 속도
+
+        while (reward != null)
+        {
+            float newY = basePos.y + Mathf.Sin(Time.time * floatSpeed) * floatHeight;
+            reward.transform.position = new Vector3(basePos.x, newY, basePos.z);
+            yield return null;
+        }
+    }
+
     public void OnRewardCollected()
     {
         Debug.Log("보상 획득 완료! 다음 방 보상을 배정하고 문을 엽니다.");
@@ -194,15 +242,46 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    // 다음 방 보상 랜덤(1/3 확률) 배정
     private void AssignNextRoomRewards()
     {
+        List<RewardType> availableRewards = new List<RewardType>
+        {
+            RewardType.MaxHealth,
+            RewardType.Gift,
+            RewardType.Gold
+        };
+
+        for (int i = 0; i < availableRewards.Count; i++)
+        {
+            RewardType temp = availableRewards[i];
+            int randomIndex = Random.Range(i, availableRewards.Count);
+            availableRewards[i] = availableRewards[randomIndex];
+            availableRewards[randomIndex] = temp;
+        }
+
+        int rewardIndex = 0;
         foreach (Door door in exitDoors)
         {
             if (door != null)
             {
-                RewardType randomReward = (RewardType)Random.Range(0, 3);
-                door.SetNextRoomReward(randomReward);
+                if (rewardIndex >= availableRewards.Count)
+                {
+                    Debug.LogWarning("문의 개수가 보상 종류(3개)보다 많습니다. 일부 문은 보상이 세팅되지 않습니다.");
+                    break;
+                }
+
+                RewardType selectedReward = availableRewards[rewardIndex];
+                rewardIndex++;
+
+                Sprite selectedSprite = null;
+                switch (selectedReward)
+                {
+                    case RewardType.MaxHealth: selectedSprite = healthIcon; break;
+                    case RewardType.Gift: selectedSprite = giftIcon; break;
+                    case RewardType.Gold: selectedSprite = goldIcon; break;
+                }
+
+                door.SetNextRoomReward(selectedReward, selectedSprite);
             }
         }
     }

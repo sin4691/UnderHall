@@ -69,4 +69,6 @@ MonoBehaviour:
   playerHitColor: {r: 1, g: 0.15, b: 0.15, a: 1}
   monsterHitColor: {r: 1, g: 0.3, b: 0.1, a: 1}
   hitFlashDuration: 0.12
+  roomClearVFXPrefab: {fileID: 0}
+  rewardAppearVFXPrefab: {fileID: 1228946162475541010, guid: de04edbdac79d394b976db37021bf254, type: 3}
   dissolveDuration: 1.2

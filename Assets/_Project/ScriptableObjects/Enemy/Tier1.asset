@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TierData
   wave1:
     spawnInfos:
-    - enemyPrefab: {fileID: 1837250232964476417, guid: 2463da36cb2405b409bbf5e1cab1ad75, type: 3}
+    - enemyPrefab: {fileID: 1837250232964476417, guid: cc3a6f884b7d66844a1888898539b5f4, type: 3}
       count: 3
   wave2:
     spawnInfos:
-    - enemyPrefab: {fileID: 1837250232964476417, guid: 2463da36cb2405b409bbf5e1cab1ad75, type: 3}
+    - enemyPrefab: {fileID: 1837250232964476417, guid: cc3a6f884b7d66844a1888898539b5f4, type: 3}
       count: 5
   wave3:
     spawnInfos:
-    - enemyPrefab: {fileID: 1837250232964476417, guid: 2463da36cb2405b409bbf5e1cab1ad75, type: 3}
+    - enemyPrefab: {fileID: 1837250232964476417, guid: cc3a6f884b7d66844a1888898539b5f4, type: 3}
       count: 2
     - enemyPrefab: {fileID: 8734851924109653997, guid: 1d71361d821e1b5489f96ce05c6560bc, type: 3}
       count: 2

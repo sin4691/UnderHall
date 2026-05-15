@@ -85,7 +85,9 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("모든 스테이지를 클리어했습니다! 결과를 준비하세요.");
+            Debug.Log("모든 스테이지 클리어! 골드를 정산합니다.");
+            Player p = player.GetComponent<Player>();
+            if (p != null) p.CommitGoldToSO();
         }
     }
 
