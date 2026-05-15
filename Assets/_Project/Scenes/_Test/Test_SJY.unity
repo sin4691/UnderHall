@@ -325,6 +325,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1395083176}
     - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
+      propertyPath: playerData
+      value: 
+      objectReference: {fileID: 11400000, guid: 44ad76d51a30ee74486bcc6c842e4478, type: 2}
+    - target: {fileID: 7192385134274132815, guid: 63a0196aeca1bf241abeee745b75a737, type: 3}
       propertyPath: bossRoomPrefab
       value: 
       objectReference: {fileID: 7305840450799742983, guid: 0c6402ca2b1d75d479aa2453c8aad3df, type: 3}
