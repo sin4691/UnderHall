@@ -67,6 +67,11 @@ public class VFXManager : MonoBehaviour
     [SerializeField] Color monsterHitColor = new Color(1f, 0.3f, 0.1f, 1f);
     [SerializeField] float hitFlashDuration = 0.12f;
 
+    [Header("─ 방 클리어 / 보상 이펙트 ─")]
+    [SerializeField] GameObject roomClearVFXPrefab;   // 클리어 시 전체 폭발 연출
+    [SerializeField] GameObject rewardAppearVFXPrefab; // 보상 등장 시 빛나는 연출
+
+
     [Header("─ 사망 Dissolve 설정 ─")]
     [SerializeField] float dissolveDuration = 1.2f;
 
@@ -118,6 +123,10 @@ public class VFXManager : MonoBehaviour
         PrewarmPool(bossFlyAttackPrefab);
         PrewarmPool(bossFlyBreathPrefab);
         PrewarmPool(bossDivePrefab);
+        PrewarmPool(roomClearVFXPrefab);
+        PrewarmPool(rewardAppearVFXPrefab);
+
+
     }
 
     void PrewarmPool(GameObject prefab)
@@ -190,6 +199,13 @@ public class VFXManager : MonoBehaviour
             pool[prefab].Enqueue(go);
     }
 
+
+    public void PlayRoomClear(Vector3 position)
+    => GetFromPool(roomClearVFXPrefab, position, Vector3.up);
+
+    /// <summary>보상 오브젝트 등장 시 — SpawnManager.SpawnReward()에서 호출</summary>
+    public GameObject PlayRewardAppear(Vector3 position)
+     => GetFromPool(rewardAppearVFXPrefab, position, Vector3.up);
     // ─────────────────────────────────────────
     // 무기 이펙트
     // ─────────────────────────────────────────
