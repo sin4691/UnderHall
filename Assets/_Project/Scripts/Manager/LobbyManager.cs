@@ -4,6 +4,7 @@ public class LobbyManager : MonoBehaviour
 {
     public static LobbyManager Instance { get; private set; }
     public PlayerData playerData;
+    public System.Action OnUpgradeChanged;
 
     [Header("강화 비용 (골드)")]
     private readonly int[] cost5Levels = { 50, 100, 200, 400, 800 };
@@ -130,6 +131,8 @@ public class LobbyManager : MonoBehaviour
         Debug.Log($"Dash Count: {playerData.maxDashCount} (Lv.{playerData.levelDash})");
         Debug.Log($"Gold Multiplier: x{playerData.goldGainMultiplier} (Lv.{playerData.levelGold})");
         Debug.Log($"Revive HP: {playerData.resurrectionHealthPercent * 100}% (Lv.{playerData.levelRevive})");
+
+        OnUpgradeChanged?.Invoke();
     }
 
     // === UI에서 값 읽기 위한 Getter ===

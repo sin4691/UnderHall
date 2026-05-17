@@ -6,6 +6,7 @@ public class MainMenuManager : MonoBehaviour
     [Header("Panels")]
     [SerializeField] private GameObject mainPanel;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private GameObject metaUpgradePanel;
 
     [Header("Scene")]
     [SerializeField] private string inGameSceneName = "Main";
@@ -24,6 +25,18 @@ public class MainMenuManager : MonoBehaviour
     public void OnSettingsBack()
     {
         settingsPanel.SetActive(false);
+        mainPanel.SetActive(true);
+    }
+
+    public void OnMetaUpgradeButton()
+    {
+        mainPanel.SetActive(false);
+        metaUpgradePanel.SetActive(true);
+    }
+
+    public void OnMetaUpgradeBack()
+    {
+        metaUpgradePanel.SetActive(false);
         mainPanel.SetActive(true);
     }
 
