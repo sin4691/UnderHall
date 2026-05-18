@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 using Unity.Cinemachine;
+using UnityEngine.SceneManagement;
 
 public enum PlayerState { Idle, Move, Attack, Dash, SpecialAttack, Dead, Resurrecting }
 
@@ -196,6 +197,18 @@ public class Player : MonoBehaviour
         }
 
         animator.Play("death");
+
+        StartCoroutine(GoToMainMenuRoutine(3f));
+    }
+    private IEnumerator GoToMainMenuRoutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (GameManager.Instance != null)
+        {
+            yield return StartCoroutine(GameManager.Instance.Fade(1f));
+        }
+
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void OnDash(InputValue value)
