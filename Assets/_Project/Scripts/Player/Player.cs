@@ -94,6 +94,11 @@ public class Player : MonoBehaviour
 
         VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
 
+        if (currentHealth > 0 && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Player_Hit");
+        }
+
         if (currentHealth <= 0)
         {
             if (remainingResurrections > 0)
@@ -150,6 +155,11 @@ public class Player : MonoBehaviour
 
         VFXManager.Instance.PlayPlayerResurrectEnd(vfxPoint.position);
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Player_Resurrect_End");
+        }
+
         animator.SetBool("isMoving", false);
         animator.CrossFade("idle", 0.1f);
 
@@ -185,6 +195,11 @@ public class Player : MonoBehaviour
         CommitGoldToSO();
 
         VFXManager.Instance.PlayPlayerDeath(vfxPoint.position, gameObject);
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Player_Death");
+        }
 
         ChangeState(PlayerState.Dead);
         attack.CancelAttack();

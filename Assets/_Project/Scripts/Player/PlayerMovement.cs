@@ -88,4 +88,16 @@ public class PlayerMovement : MonoBehaviour
             player.animator.SetBool(isMovingHash, false);
         }
     }
+
+    public void PlayFootstepSound()
+    {
+        int randomIndex = Random.Range(1, 11);
+
+        string soundName = "Footstep_" + randomIndex;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX(soundName);
+        }
+    }
 }

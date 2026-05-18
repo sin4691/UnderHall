@@ -72,6 +72,11 @@ public class PlayerDash : MonoBehaviour
         // 대시 VFX 재생
         VFXManager.Instance.PlayDash(dashVFXPoint.position, dashDirection, player.playerData.dashDuration);
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Player_Dash");
+        }
+
         float startTime = Time.time;
         while (Time.time < startTime + player.playerData.dashDuration)
         {
