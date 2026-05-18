@@ -49,6 +49,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3776087576606845102, guid: 17ff3dfcddcb55a458f79bdc31d347ea, type: 3}
+      propertyPath: m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3776087576606845102, guid: 17ff3dfcddcb55a458f79bdc31d347ea, type: 3}
       propertyPath: m_IntensityMultiplier
       value: 2
       objectReference: {fileID: 0}

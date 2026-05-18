@@ -45,8 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnManager
   tierData: {fileID: 11400000, guid: 53c7bfefc233f8a4e854173601645ab9, type: 2}
-  magicCircleVFX: {fileID: 1663630106462961253, guid: 73b401f5ccae5da49a5b383aaeb017c7, type: 3}
-  spawnPoofVFX: {fileID: 1259762591101698, guid: d9c1fac1f620ebd4f9e47ef7b9ca6bca, type: 3}
+  magicCircleVFX: {fileID: 5601825055935271728, guid: 387f07d0ae6a3ec4aa586d06f1ffcf00, type: 3}
+  spawnPoofVFX: {fileID: 8678210493037586766, guid: 3cdfa75852d183c4baef1c53cb3b67e2, type: 3}
   spawnDelay: 1.5
   exitDoors: []
   rewardMaxHealthPrefab: {fileID: 9155953019565534169, guid: 58fff8fb8cc1c1a4a93350714f321ccb, type: 3}

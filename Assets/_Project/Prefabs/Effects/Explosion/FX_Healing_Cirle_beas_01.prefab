@@ -56,7 +56,7 @@ GameObject:
   - component: {fileID: 198853323768970596}
   - component: {fileID: 199928695985356350}
   m_Layer: 0
-  m_Name: FX_Healing_Cirle_01
+  m_Name: FX_Healing_Cirle_beas_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
