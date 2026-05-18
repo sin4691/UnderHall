@@ -48,6 +48,7 @@ public class LobbyManager : MonoBehaviour
             playerData.currentGold -= cost5Levels[playerData.levelHP];
             playerData.levelHP++;
             ApplyAllUpgrades();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX("Upgrade_Success");
             Debug.Log($"[강화 성공] 체력 증가! (Lv.{playerData.levelHP}) 남은 골드: {playerData.currentGold}");
             Debug.Log($"Max HP: {playerData.maxHealth} (Lv.{playerData.levelHP})");
         }
@@ -62,6 +63,7 @@ public class LobbyManager : MonoBehaviour
             playerData.currentGold -= cost5Levels[playerData.levelATK];
             playerData.levelATK++;
             ApplyAllUpgrades();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX("Upgrade_Success");
             Debug.Log($"[강화 성공] 공격력 증가! (Lv.{playerData.levelATK}) 남은 골드: {playerData.currentGold}");
             Debug.Log($"ATK: {playerData.damage} (Lv.{playerData.levelATK})");
         }
@@ -76,6 +78,7 @@ public class LobbyManager : MonoBehaviour
             playerData.currentGold -= costDash;
             playerData.levelDash++;
             ApplyAllUpgrades();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX("Upgrade_Success");
             Debug.Log($"[강화 성공] 이중 도약 획득! (Lv.{playerData.levelDash}) 남은 골드: {playerData.currentGold}");
             Debug.Log($"Dash Count: {playerData.maxDashCount} (Lv.{playerData.levelDash})");
         }
@@ -90,6 +93,7 @@ public class LobbyManager : MonoBehaviour
             playerData.currentGold -= cost5Levels[playerData.levelGold];
             playerData.levelGold++;
             ApplyAllUpgrades();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX("Upgrade_Success");
             Debug.Log($"[강화 성공] 골드 획득량 증가! (Lv.{playerData.levelGold}) 남은 골드: {playerData.currentGold}");
             Debug.Log($"Gold Multiplier: x{playerData.goldGainMultiplier} (Lv.{playerData.levelGold})");
         }
@@ -105,7 +109,7 @@ public class LobbyManager : MonoBehaviour
             playerData.levelRevive++;
             
             ApplyAllUpgrades();
-         
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX("Upgrade_Success");
             Debug.Log($"[강화 성공] 부활 체력 증가! (Lv.{playerData.levelRevive}) 남은 골드: {playerData.currentGold}");
             Debug.Log($"Revive HP: {playerData.resurrectionHealthPercent * 100}% (Lv.{playerData.levelRevive})");
         }

@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 using Unity.Cinemachine;
-
+using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 public enum PlayerState { Idle, Move, Attack, Dash, SpecialAttack, Dead, Resurrecting }
 
 [RequireComponent(typeof(Rigidbody), typeof(PlayerMovement), typeof(PlayerAttack))]
@@ -93,6 +94,11 @@ public class Player : MonoBehaviour
 
         VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
 
+        if (currentHealth > 0 && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Player_Hit");
+        }
+
         if (currentHealth <= 0)
         {
             if (remainingResurrections > 0)
@@ -149,6 +155,11 @@ public class Player : MonoBehaviour
 
         VFXManager.Instance.PlayPlayerResurrectEnd(vfxPoint.position);
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Player_Resurrect_End");
+        }
+
         animator.SetBool("isMoving", false);
         animator.CrossFade("idle", 0.1f);
 
@@ -185,6 +196,11 @@ public class Player : MonoBehaviour
 
         VFXManager.Instance.PlayPlayerDeath(vfxPoint.position, gameObject);
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Player_Death");
+        }
+
         ChangeState(PlayerState.Dead);
         attack.CancelAttack();
         inputVector = Vector2.zero;
@@ -196,6 +212,18 @@ public class Player : MonoBehaviour
         }
 
         animator.Play("death");
+
+        StartCoroutine(GoToMainMenuRoutine(3f));
+    }
+    private IEnumerator GoToMainMenuRoutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (GameManager.Instance != null)
+        {
+            yield return StartCoroutine(GameManager.Instance.Fade(1f));
+        }
+
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void OnDash(InputValue value)
@@ -212,12 +240,15 @@ public class Player : MonoBehaviour
 
     public void OnAttack(InputValue value)
     {
+        if (Time.timeScale == 0f) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (value.isPressed && CurrentState != PlayerState.Dash) attack.ExecuteAttack();
     }
 
     public void OnSpecialAttack(InputValue value)
     {
+        if (Time.timeScale == 0f) return;
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (value.isPressed)
         {

@@ -10,6 +10,11 @@ public class Door : MonoBehaviour
 
     [Header("Visual Settings")]
     public SpriteRenderer rewardIconRenderer;
+
+    //창우_양문 컨트롤 추가
+    [Header("양문 컨트롤러")]
+    public DoubleDoorController doubleDoor;
+
     public void SetNextRoomReward(RewardType type, Sprite icon)
     {
         nextRewardType = type;
@@ -26,6 +31,16 @@ public class Door : MonoBehaviour
         isLocked = false;
         if (rewardIconRenderer != null) rewardIconRenderer.color = Color.white;
         Debug.Log($"문이 열렸습니다! (다음 방 보상: {nextRewardType})");
+
+
+        //창우_양문 컨트롤러 열기 호출
+        if (doubleDoor != null)
+            doubleDoor.OpenDoor();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Door_Open");
+        }
     }
 
     public void Interact()
