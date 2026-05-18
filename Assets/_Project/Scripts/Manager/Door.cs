@@ -36,6 +36,11 @@ public class Door : MonoBehaviour
         //창우_양문 컨트롤러 열기 호출
         if (doubleDoor != null)
             doubleDoor.OpenDoor();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Door_Open");
+        }
     }
 
     public void Interact()
