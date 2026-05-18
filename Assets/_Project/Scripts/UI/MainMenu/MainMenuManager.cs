@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class MainMenuManager : MonoBehaviour
 {
@@ -11,9 +12,62 @@ public class MainMenuManager : MonoBehaviour
     [Header("Scene")]
     [SerializeField] private string inGameSceneName = "Main";
 
+    [Header("Fade Settings")]
+    [SerializeField] private CanvasGroup fadeCanvasGroup;
+    [SerializeField] private float fadeDuration = 1f;
+
+    private void Awake()
+    {
+        if (fadeCanvasGroup != null)
+        {
+            fadeCanvasGroup.alpha = 1f;
+            fadeCanvasGroup.blocksRaycasts = true;
+        }
+
+    }
+    private void Start()
+    {
+        if (fadeCanvasGroup != null)
+        {
+            StartCoroutine(Fade(0f));
+        }
+
+    }
     public void OnStartButton()
     {
+        StartCoroutine(StartGameRoutine());
+    }
+
+    private IEnumerator StartGameRoutine()
+    {
+        if (fadeCanvasGroup != null)
+        {
+            fadeCanvasGroup.blocksRaycasts = true; 
+            yield return StartCoroutine(Fade(1f));
+        }
+
         SceneManager.LoadScene(inGameSceneName);
+    }
+    private IEnumerator Fade(float targetAlpha)
+    {
+        if (fadeCanvasGroup == null) yield break;
+
+        float startAlpha = fadeCanvasGroup.alpha;
+        float time = 0f;
+
+        while (time < fadeDuration)
+        {
+            time += Time.deltaTime;
+            fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, time / fadeDuration);
+            yield return null;
+        }
+
+        fadeCanvasGroup.alpha = targetAlpha;
+
+        if (targetAlpha == 0f)
+        {
+            fadeCanvasGroup.blocksRaycasts = false;
+        }
     }
 
     public void OnSettingsButton()
@@ -44,7 +98,7 @@ public class MainMenuManager : MonoBehaviour
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
-        // ¿¡µðÅÍ¿¡¼­´Â °ÔÀÓ Á¾·á ´ë½Å ÇÃ·¹ÀÌ ¸ðµå ²ô±â
+        // ì—ë””í„°ì—ì„œëŠ” ê²Œìž„ ì¢…ë£Œ ëŒ€ì‹  í”Œë ˆì´ ëª¨ë“œ ë„ê¸°
 #else
         Application.Quit();
 #endif

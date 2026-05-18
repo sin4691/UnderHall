@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
     private bool isTransitioning = false;
 
     private RewardType upcomingReward;
+    public PlayerData playerData;
 
     private void Awake()
     {
@@ -37,15 +38,23 @@ public class GameManager : MonoBehaviour
                 p.playerData.ResetRunData();
             }
         }
+
+        if (fadeCanvasGroup != null)
+        {
+            fadeCanvasGroup.alpha = 1f;
+            fadeCanvasGroup.blocksRaycasts = true; 
+        }
     }
 
-    public PlayerData playerData;
     private void Start()
     {
         playerData.ResetRunData();
 
         Debug.Log("[GameManager] 게임 시작됨! 첫 번째 방을 설정합니다.");
-
+        if (fadeCanvasGroup != null)
+        {
+            StartCoroutine(Fade(0f));
+        }
         if (currentMapInstance == null)
         {
             SpawnManager foundManager = FindAnyObjectByType<SpawnManager>();
@@ -145,11 +154,14 @@ public class GameManager : MonoBehaviour
         isTransitioning = false;
     }
 
-    private IEnumerator Fade(float targetAlpha)
+    public IEnumerator Fade(float targetAlpha)
     {
         if (fadeCanvasGroup == null) yield break;
         float startAlpha = fadeCanvasGroup.alpha;
         float time = 0f;
+
+        fadeCanvasGroup.blocksRaycasts = true;
+
         while (time < fadeDuration)
         {
             time += Time.deltaTime;
@@ -157,5 +169,10 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
         fadeCanvasGroup.alpha = targetAlpha;
+
+        if (targetAlpha == 0f)
+        {
+            fadeCanvasGroup.blocksRaycasts = false;
+        }
     }
 }
