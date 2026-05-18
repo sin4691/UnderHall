@@ -87,4 +87,20 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 71d6f0670c0d74749b9f88b2ad33420d, type: 3}
   - name: Player_Resurrect_End
     clip: {fileID: 8300000, guid: 7b2113c75a5d64c46862ae493d101a4e, type: 3}
+  - name: Door_Open
+    clip: {fileID: 8300000, guid: 29131b3fe4b4a6047968656786f4e503, type: 3}
+  - name: Reward_Gift_Spawn
+    clip: {fileID: 8300000, guid: 0cb7568bbac12c94e92683453a495d8f, type: 3}
+  - name: Reward_Health_Spawn
+    clip: {fileID: 8300000, guid: 0cb7568bbac12c94e92683453a495d8f, type: 3}
+  - name: Reward_Gold_Spawn
+    clip: {fileID: 8300000, guid: 0cb7568bbac12c94e92683453a495d8f, type: 3}
+  - name: UI_Button_Click
+    clip: {fileID: 8300000, guid: 97ff698d16ccc63499454288c68bddcd, type: 3}
+  - name: Upgrade_Success
+    clip: {fileID: 8300000, guid: 09d613a3a1155504ea3927190f6322fb, type: 3}
+  - name: Bruiser_Attack
+    clip: {fileID: 8300000, guid: ceede9fc9d58ba046a95dd7e8990a3e8, type: 3}
+  - name: Bruiser_Death
+    clip: {fileID: 8300000, guid: 6053129db3b0ec54f8d25c674f8d9292, type: 3}
   sfxSourceCount: 10

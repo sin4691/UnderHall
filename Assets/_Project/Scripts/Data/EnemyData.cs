@@ -41,6 +41,9 @@ public class EnemyData : ScriptableObject
     [Range(1, 30)]
     public float detectionRange = 10f;
 
+    [Header("Sound Settings")]
+    public string attackSoundName = "Enemy_Attack"; 
+    public string deathSoundName = "Enemy_Death";
 }
 
 public enum EnemyType

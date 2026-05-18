@@ -20,3 +20,5 @@ MonoBehaviour:
   attackRange: 3
   attackCooldown: 3
   detectionRange: 20
+  attackSoundName: Bruiser_Attack
+  deathSoundName: Bruiser_Death
