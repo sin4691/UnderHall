@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4622028512334735282, guid: a83c6c3bcdc558340a4ddb4cc7449c08, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4622028512334735311, guid: a83c6c3bcdc558340a4ddb4cc7449c08, type: 3}
       propertyPath: ColorModule.gradient.maxGradient.ctime2
       value: 64507
@@ -295,6 +299,18 @@ PrefabInstance:
     - target: {fileID: 4622028513638136127, guid: a83c6c3bcdc558340a4ddb4cc7449c08, type: 3}
       propertyPath: ColorModule.gradient.maxGradient.m_NumColorKeys
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4622028513871840012, guid: a83c6c3bcdc558340a4ddb4cc7449c08, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4622028513871840012, guid: a83c6c3bcdc558340a4ddb4cc7449c08, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4622028513871840012, guid: a83c6c3bcdc558340a4ddb4cc7449c08, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 4622028513871840012, guid: a83c6c3bcdc558340a4ddb4cc7449c08, type: 3}
       propertyPath: m_LocalPosition.x
