@@ -153,7 +153,10 @@ public class GiftManager : MonoBehaviour
 
                 giftButtons[i].onClick.RemoveAllListeners();
                 GiftType selectedType = availableGifts[i].type;
-                giftButtons[i].onClick.AddListener(() => SelectGift(selectedType));
+                giftButtons[i].onClick.AddListener(() => {
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX("Upgrade_Success");
+                    SelectGift(selectedType);
+                });
             }
             else
             {

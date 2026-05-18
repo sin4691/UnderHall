@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine.SceneManagement;
-
+using UnityEngine.EventSystems;
 public enum PlayerState { Idle, Move, Attack, Dash, SpecialAttack, Dead, Resurrecting }
 
 [RequireComponent(typeof(Rigidbody), typeof(PlayerMovement), typeof(PlayerAttack))]
@@ -240,12 +240,15 @@ public class Player : MonoBehaviour
 
     public void OnAttack(InputValue value)
     {
+        if (Time.timeScale == 0f) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (value.isPressed && CurrentState != PlayerState.Dash) attack.ExecuteAttack();
     }
 
     public void OnSpecialAttack(InputValue value)
     {
+        if (Time.timeScale == 0f) return;
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (value.isPressed)
         {

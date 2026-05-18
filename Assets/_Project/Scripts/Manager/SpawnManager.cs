@@ -178,11 +178,22 @@ public class SpawnManager : MonoBehaviour
         Vector3 spawnPos = spawnPoint != null ? spawnPoint.transform.position : transform.position;
 
         GameObject prefabToSpawn = null;
+        string spawnSoundName = "";
+
         switch (currentRoomReward)
         {
-            case RewardType.MaxHealth: prefabToSpawn = rewardMaxHealthPrefab; break;
-            case RewardType.Gift: prefabToSpawn = rewardGiftPrefab; break;
-            case RewardType.Gold: prefabToSpawn = rewardGoldPrefab; break;
+            case RewardType.MaxHealth:
+                prefabToSpawn = rewardMaxHealthPrefab;
+                spawnSoundName = "Reward_Health_Spawn";
+                break;
+            case RewardType.Gift:
+                prefabToSpawn = rewardGiftPrefab;
+                spawnSoundName = "Reward_Gift_Spawn";
+                break;
+            case RewardType.Gold:
+                prefabToSpawn = rewardGoldPrefab;
+                spawnSoundName = "Reward_Gold_Spawn";  
+                break;
         }
 
         if (prefabToSpawn != null)
@@ -194,6 +205,11 @@ public class SpawnManager : MonoBehaviour
             yield return new WaitForSeconds(1.2f); // 원하는 시간으로 조절
 
             GameObject rewardItem = Instantiate(prefabToSpawn, spawnPos, Quaternion.Euler(45, -45, 0));
+
+            if (AudioManager.Instance != null && !string.IsNullOrEmpty(spawnSoundName))
+            {
+                AudioManager.Instance.PlaySFX(spawnSoundName);
+            }
 
             //창우_둥둥 띄우기 시작
             StartCoroutine(FloatReward(rewardItem));
