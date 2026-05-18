@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        if (playerData != null) playerData.LoadFromDevice();
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 

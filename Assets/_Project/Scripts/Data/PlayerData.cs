@@ -114,4 +114,27 @@ public class PlayerData : ScriptableObject
 
         Debug.Log("[PlayerData] 모든 인게임 데이터가 초기화되었습니다.");
     }
+
+    public void SaveToDevice()
+    {
+        PlayerPrefs.SetInt("Meta_Gold", currentGold);
+        PlayerPrefs.SetInt("Meta_LevelHP", levelHP);
+        PlayerPrefs.SetInt("Meta_LevelATK", levelATK);
+        PlayerPrefs.SetInt("Meta_LevelDash", levelDash);
+        PlayerPrefs.SetInt("Meta_LevelGold", levelGold);
+        PlayerPrefs.SetInt("Meta_LevelRevive", levelRevive);
+        PlayerPrefs.Save(); 
+        Debug.Log("[PlayerData] 기기에 데이터 영구 저장 완료!");
+    }
+
+    public void LoadFromDevice()
+    {
+        currentGold = PlayerPrefs.GetInt("Meta_Gold", 0);
+        levelHP = PlayerPrefs.GetInt("Meta_LevelHP", 0);
+        levelATK = PlayerPrefs.GetInt("Meta_LevelATK", 0);
+        levelDash = PlayerPrefs.GetInt("Meta_LevelDash", 0);
+        levelGold = PlayerPrefs.GetInt("Meta_LevelGold", 0);
+        levelRevive = PlayerPrefs.GetInt("Meta_LevelRevive", 0);
+        Debug.Log("[PlayerData] 기기에서 데이터를 성공적으로 불러왔습니다!");
+    }
 }

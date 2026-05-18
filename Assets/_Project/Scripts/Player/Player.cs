@@ -286,7 +286,8 @@ public class Player : MonoBehaviour
         {
             playerData.currentGold += earnedGoldDuringRun;
             Debug.Log($"[정산 완료] {earnedGoldDuringRun} 골드가 영구 저장되었습니다. 총액: {playerData.currentGold}");
-            earnedGoldDuringRun = 0; 
+            earnedGoldDuringRun = 0;
+            playerData.SaveToDevice();
         }
     }
     public void SetNearbyDoor(Door door) => nearbyDoor = door;
