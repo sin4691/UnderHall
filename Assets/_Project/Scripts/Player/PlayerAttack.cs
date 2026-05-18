@@ -64,6 +64,12 @@ public class PlayerAttack : MonoBehaviour
         isSpinning = false;
         //창우_마지막 잔상 즉시 제거
         VFXManager.Instance.StopWeaponSkillLoop();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopSFXLoop("Player_Spin");
+        }
+
         currentCombo = 0;
         isNextAttackBuffered = false;
         isAttackOnCooldown = false;
@@ -102,6 +108,11 @@ public class PlayerAttack : MonoBehaviour
 
             // 기본 공격 이펙트
             VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, weaponVFXPoint.forward);
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX("Attack_" + currentCombo);
+            }
 
             ExecuteHitDetection(transform.position + transform.forward * (player.playerData.attackRange * 0.5f),
                                 player.playerData.attackRange * 0.5f, 1f, false);
@@ -142,6 +153,11 @@ public class PlayerAttack : MonoBehaviour
             VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint); // 기본 프리팹
         }
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFXLoop("Player_Spin");
+        }
+
         while (isSpinning && timer < maxDuration)
         {
             if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting)
@@ -176,6 +192,11 @@ public class PlayerAttack : MonoBehaviour
 
         //[VFX/FEAT]창우_마지막 잔상 즉시 제거
         VFXManager.Instance.StopWeaponSkillLoop();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopSFXLoop("Player_Spin");
+        }
 
         if (player.CurrentState == PlayerState.SpecialAttack)
         {
@@ -269,6 +290,11 @@ public class PlayerAttack : MonoBehaviour
 
                 // 데미지 적용
                 target.TakeDamage(finalDamage);
+
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX("Hit_Monster");
+                }
 
                 // [흡혈] 때린 직후에 콜라이더가 꺼졌다? = 적이 죽었다!
                 if (wasAlive && !col.enabled && player.playerData.acquiredGifts.Contains(GiftType.Vampirism))

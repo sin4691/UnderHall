@@ -123,6 +123,46 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public void PlaySFXLoop(string name)
+    {
+        if (sfxDictionary.TryGetValue(name, out AudioClip clip))
+        {
+            // 현재 이미 같은 루프 소리가 나고 있다면 중복 재생 방지
+            foreach (AudioSource source in sfxSources)
+            {
+                if (source.isPlaying && source.clip == clip) return;
+            }
+
+            // 비어있는 소스를 찾아 무한 루프로 재생
+            foreach (AudioSource source in sfxSources)
+            {
+                if (!source.isPlaying)
+                {
+                    source.clip = clip;
+                    source.loop = true; // 루프 ON
+                    source.Play();
+                    return;
+                }
+            }
+        }
+    }
+
+    public void StopSFXLoop(string name)
+    {
+        if (sfxDictionary.TryGetValue(name, out AudioClip clip))
+        {
+            // 해당 클립을 재생 중인 소스를 찾아 정지시키고 루프를 끕니다.
+            foreach (AudioSource source in sfxSources)
+            {
+                if (source.clip == clip)
+                {
+                    source.Stop();
+                    source.loop = false; // 루프 OFF (풀 복원)
+                }
+            }
+        }
+
+    }
     // =========================================================
     // 볼륨 조절 함수 (UI 슬라이더와 연동)
     // 자연스러운 볼륨 변화를 위해 로그 스케일(Log10) 적용
