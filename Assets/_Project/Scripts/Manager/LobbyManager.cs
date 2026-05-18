@@ -135,7 +135,7 @@ public class LobbyManager : MonoBehaviour
         Debug.Log($"Dash Count: {playerData.maxDashCount} (Lv.{playerData.levelDash})");
         Debug.Log($"Gold Multiplier: x{playerData.goldGainMultiplier} (Lv.{playerData.levelGold})");
         Debug.Log($"Revive HP: {playerData.resurrectionHealthPercent * 100}% (Lv.{playerData.levelRevive})");
-
+        playerData.SaveToDevice();
         OnUpgradeChanged?.Invoke();
     }
 
