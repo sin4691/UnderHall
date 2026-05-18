@@ -94,6 +94,10 @@ public class EnemyBase : MonoBehaviour
         {
             anim.SetTrigger("Attack");
             timer = 0f;
+            if (AudioManager.Instance != null && !string.IsNullOrEmpty(enemyData.attackSoundName))
+            {
+                AudioManager.Instance.PlaySFX(enemyData.attackSoundName);
+            }
             StartCoroutine(DealDamageCoroutine());
         }
     }
@@ -154,6 +158,11 @@ public class EnemyBase : MonoBehaviour
         anim.SetTrigger("Death");
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
+
+        if (AudioManager.Instance != null && !string.IsNullOrEmpty(enemyData.deathSoundName))
+        {
+            AudioManager.Instance.PlaySFX(enemyData.deathSoundName);
+        }
 
         if (vfxPoint != null)
         {
