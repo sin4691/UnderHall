@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5555267726639719887}
   - component: {fileID: 8383509600956317669}
   - component: {fileID: -7875085346477505527}
+  - component: {fileID: -1434158263114228716}
   m_Layer: 0
   m_Name: Door
   m_TagString: Untagged
@@ -72,6 +73,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   nextRewardType: 0
   rewardIconRenderer: {fileID: 1974879133328490497}
+  doubleDoor: {fileID: -1434158263114228716}
+--- !u!114 &-1434158263114228716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6451446600913852652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ede5a9d6bd9d3b45b9ad8754e84be59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DoubleDoorController
+  leftDoor: {fileID: 6019496416446390496}
+  rightDoor: {fileID: 8750955388749963946}
+  openAngle: 100
+  shakeDuration: 0.25
+  openDuration: 0.45
+  closeDuration: 0.4
+  shakeStrength: 8
+  isOpen: 0
 --- !u!1001 &4196443588869083085
 PrefabInstance:
   m_ObjectHideFlags: 0
