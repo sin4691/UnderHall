@@ -329,7 +329,7 @@ public class VFXManager : MonoBehaviour
     {
         GetFromPool(monsterDeathPrefab, position, Vector3.up);
         GetFromPool(monsterDeathSmokePrefab, position, Vector3.up);
-        StartCoroutine(DissolveRoutine(monsterObj));
+        //StartCoroutine(DissolveRoutine(monsterObj));
     }
 
     //-------------------------------------------------
@@ -389,27 +389,27 @@ public class VFXManager : MonoBehaviour
                 m.SetFloat(HitBlendID, 0f);
     }
 
-    IEnumerator DissolveRoutine(GameObject target)
-    {
-        if (target == null) yield break;
-        var mats = GetMaterials(target);
-        float elapsed = 0f;
-        while (elapsed < dissolveDuration)
-        {
-            if (target == null) yield break;
-            float t = elapsed / dissolveDuration;
-            foreach (var m in mats)
-                if (m.HasProperty(FadeAmountID))
-                    m.SetFloat(FadeAmountID, t);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-        foreach (var m in mats)
-            if (m.HasProperty(FadeAmountID))
-                m.SetFloat(FadeAmountID, 1f);
-        yield return new WaitForSeconds(0.1f);
-        Destroy(target);
-    }
+    //IEnumerator DissolveRoutine(GameObject target)
+    //{
+    //    if (target == null) yield break;
+    //    var mats = GetMaterials(target);
+    //    float elapsed = 0f;
+    //    while (elapsed < dissolveDuration)
+    //    {
+    //        if (target == null) yield break;
+    //        float t = elapsed / dissolveDuration;
+    //        foreach (var m in mats)
+    //            if (m.HasProperty(FadeAmountID))
+    //                m.SetFloat(FadeAmountID, t);
+    //        elapsed += Time.deltaTime;
+    //        yield return null;
+    //    }
+    //    foreach (var m in mats)
+    //        if (m.HasProperty(FadeAmountID))
+    //            m.SetFloat(FadeAmountID, 1f);
+    //    yield return new WaitForSeconds(0.1f);
+    //    Destroy(target);
+    //}
 
     Material[] GetMaterials(GameObject target)
     {
