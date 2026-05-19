@@ -58,4 +58,15 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  giftCategoryTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  giftIconImages:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  basicAttackIcon: {fileID: 21300000, guid: 4d63d23d1b1ef4e0797b47991427b8ff, type: 3}
+  specialAttackIcon: {fileID: 21300000, guid: ff2e39937f1784455b4bed921de416f7, type: 3}
+  utilityIcon: {fileID: 21300000, guid: 1c0971a6c5d0446a8bf943cfc4e71f1e, type: 3}
   allGifts: []
