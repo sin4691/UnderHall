@@ -164,34 +164,55 @@ public class BasicBoss : EnemyBase
     IEnumerator BreathAttackRoutine()
     {
         isAttacking = true;
-        isBreathActive = true;
+        isBreathActive = true; 
+
         agent.isStopped = true; agent.velocity = Vector3.zero;
         anim.SetTrigger("Breath");
         StartCoroutine(SmoothFaceTarget(4.0f, 2.0f));
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f); 
+
         if (closeRangeVFX != null) { closeRangeVFX.SetActive(true); }
 
         float timer = 0f;
-        float totalDuration = 6.0f;
+        float totalDuration = 6.0f; 
+        float damageTickRate = 0.2f;
+        float nextDamageTime = 0f;
+
         Vector3 boxCenter = transform.position + transform.rotation * boxOffset;
         Vector3 halfExtents = new Vector3(boxSize.x / 2, boxHeight / 2, boxSize.y / 2);
 
         while (timer < totalDuration)
         {
             if (isDead) yield break;
-            Collider[] hits = Physics.OverlapBox(boxCenter, halfExtents, transform.rotation);
-            foreach (Collider hit in hits)
-                if (hit.CompareTag("Player")) hit.GetComponent<Player>()?.TakeDamage(closeRangeDamage);
 
-            yield return new WaitForSeconds(0.2f);
-            timer += 0.2f;
+            boxCenter = transform.position + transform.rotation * boxOffset;
+
+            if (timer >= nextDamageTime)
+            {
+                Collider[] hits = Physics.OverlapBox(boxCenter, halfExtents, transform.rotation);
+                foreach (Collider hit in hits)
+                {
+                    if (hit.CompareTag("Player"))
+                    {
+                        hit.GetComponent<Player>()?.TakeDamage(closeRangeDamage);
+                    }
+                }
+                nextDamageTime += damageTickRate;
+            }
+
+            timer += Time.deltaTime;
+            yield return null; 
         }
 
         if (closeRangeVFX != null) closeRangeVFX.SetActive(false);
-        basicAttackCount = 0; SetNextBreathThreshold();
+
+        basicAttackCount = 0;
+        SetNextBreathThreshold();
+
         yield return new WaitForSeconds(breathCooldown);
-        isBreathActive = false;
+
+        isBreathActive = false; 
         isAttacking = false;
     }
 
