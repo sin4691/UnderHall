@@ -40,18 +40,56 @@ public class PlayerAttack : MonoBehaviour
         else if (currentCombo < maxCombo)
             isNextAttackBuffered = true;
     }
-
     // 마우스 우클릭 누름: 스킬 시작
     public void StartSpecialAttack()
     {
         if (isSpecialAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
 
         if (player.CurrentState != PlayerState.Attack && player.CurrentState != PlayerState.SpecialAttack)
+        {
+            if (specialAttackCoroutine != null) StopCoroutine(specialAttackCoroutine);
+
+            if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
+                VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint);
+            else
+                VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint);
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFXLoop("Player_Spin");
+
             specialAttackCoroutine = StartCoroutine(SpinRoutine());
+        }
     }
 
     // 마우스 우클릭 뗌: 스킬 중지
-    public void StopSpecialAttack() => isSpinning = false;
+    public void StopSpecialAttack()
+    {
+        if (!isSpinning) return;
+
+        if (specialAttackCoroutine != null)
+        {
+            StopCoroutine(specialAttackCoroutine);
+            specialAttackCoroutine = null;
+        }
+
+        isSpinning = false;
+
+        VFXManager.Instance.StopWeaponSkillLoop();
+
+        // 만약 VFXManager 안에 폭발 이펙트 전용 정지 함수가 있다면 아래 주석(//)을 반드시 풀어주세요!!
+        // VFXManager.Instance.StopWeaponSkillExplosion(); 
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.StopSFXLoop("Player_Spin");
+
+        if (player.CurrentState == PlayerState.SpecialAttack)
+        {
+            player.animator.CrossFade("idle", 0.15f);
+            player.ChangeState(PlayerState.Idle);
+        }
+
+        StartCoroutine(SpecialCooldownRoutine());
+    }
 
     // 대시 등으로 인한 강제 취소
     public void CancelAttack()
@@ -143,67 +181,25 @@ public class PlayerAttack : MonoBehaviour
         float tickRate = 0.25f;
         float tickTimer = tickRate;
 
-
-        if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
-        {
-            VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint); // 커진 프리팹
-        }
-        else
-        {
-            VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint); // 기본 프리팹
-        }
-
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlaySFXLoop("Player_Spin");
-        }
-
         while (isSpinning && timer < maxDuration)
         {
-            if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting)
-            {
-                isSpinning = false;
-                break;
-            }
+            if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting) break;
 
             timer += Time.deltaTime;
             tickTimer += Time.deltaTime;
 
             if (tickTimer >= tickRate)
             {
-                // [폭발] 로직 : 타격 범위 반경 증가
                 float currentRadius = player.playerData.specialAttackRange;
-                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
-                {
-                    // 기프트 보유 시 공격 반경 1.5배 증가
-                    //VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint.position, skillVFXPoint.forward);
-                    currentRadius *= 1.5f;
-                }
+                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion)) currentRadius *= 1.5f;
 
-                // 변경된 Radius를 적용하여 데미지 판정 (isSpecial = true)
                 ExecuteHitDetection(transform.position, currentRadius, player.playerData.specialAttackMultiplier, true);
-
                 tickTimer = 0f;
             }
             yield return null;
         }
 
-        isSpinning = false;
-
-        //[VFX/FEAT]창우_마지막 잔상 즉시 제거
-        VFXManager.Instance.StopWeaponSkillLoop();
-
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.StopSFXLoop("Player_Spin");
-        }
-
-        if (player.CurrentState == PlayerState.SpecialAttack)
-        {
-            player.animator.CrossFade("idle", 0.15f);
-            player.ChangeState(PlayerState.Idle);
-        }
-        StartCoroutine(SpecialCooldownRoutine());
+        StopSpecialAttack();
     }
 
     // 통합 데미지 판정 시스템

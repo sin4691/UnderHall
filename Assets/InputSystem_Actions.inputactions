@@ -441,7 +441,7 @@
                     "name": "",
                     "id": "fc013eaa-f975-46be-8346-617f4d25fa9d",
                     "path": "<Mouse>/rightButton",
-                    "interactions": "",
+                    "interactions": "Press(behavior=2)",
                     "processors": "",
                     "groups": "",
                     "action": "SpecialAttack",
