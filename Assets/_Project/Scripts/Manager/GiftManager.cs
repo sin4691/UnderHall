@@ -78,8 +78,8 @@ public class GiftManager : MonoBehaviour
                     break;
                 case GiftType.Explosion:
                     gift.category = GiftCategory.SpecialAttack;
-                    gift.giftName = "폭발";
-                    gift.description = "특수 공격이 적중 시 광역 피해";
+                    gift.giftName = "확장";
+                    gift.description = "특수 공격 범위 +50%";
                     break;
                 case GiftType.RapidFire:
                     gift.category = GiftCategory.SpecialAttack;
