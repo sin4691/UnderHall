@@ -1006,6 +1006,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4038471329221908301, guid: 4cd19b94934416742b7b3c983a4843e7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.8351698
+      objectReference: {fileID: 0}
+    - target: {fileID: 4038471329221908301, guid: 4cd19b94934416742b7b3c983a4843e7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 4038471329221908301, guid: 4cd19b94934416742b7b3c983a4843e7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.0792313
+      objectReference: {fileID: 0}
     - target: {fileID: 5180168883171016185, guid: 4cd19b94934416742b7b3c983a4843e7, type: 3}
       propertyPath: m_RenderPostProcessing
       value: 1
@@ -1849,54 +1861,6 @@ PrefabInstance:
     - target: {fileID: 5417113505185963611, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: sfxList.Array.size
-      value: 27
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[0].clip
-      value: 
-      objectReference: {fileID: 8300000, guid: cf5a9b0b87b6d304cae09b11c40391e9, type: 3}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[0].name
-      value: Stage_BGM
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[1].clip
-      value: 
-      objectReference: {fileID: 8300000, guid: 7a28902feb72e0f4e945e0b8d19b3ab3, type: 3}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[1].name
-      value: Lobby_BGM
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[2].clip
-      value: 
-      objectReference: {fileID: 8300000, guid: 2375205092ea73b4191d34c1380b33f6, type: 3}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[2].name
-      value: Death_BGM
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: sfxList.Array.data[27].clip
-      value: 
-      objectReference: {fileID: 8300000, guid: cf5a9b0b87b6d304cae09b11c40391e9, type: 3}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: sfxList.Array.data[27].name
-      value: Stage_BGM
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: sfxList.Array.data[28].clip
-      value: 
-      objectReference: {fileID: 8300000, guid: 7a28902feb72e0f4e945e0b8d19b3ab3, type: 3}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: sfxList.Array.data[28].name
-      value: Lobby_BGM
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
