@@ -263,20 +263,32 @@ public class Player : MonoBehaviour
 
     public void OnSpecialAttack(InputValue value)
     {
+        Debug.Log("우클릭 신호 들어옴! 누름 상태: " + value.isPressed);
+        if (!value.isPressed)
+        {
+            attack.StopSpecialAttack();
+            return;
+        }
         if (Time.timeScale == 0f) return;
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
-        if (value.isPressed)
+
+        if (CurrentState != PlayerState.Dash && CurrentState != PlayerState.SpecialAttack)
         {
-            if (CurrentState != PlayerState.Dash) attack.StartSpecialAttack();
+            attack.StartSpecialAttack();
         }
-        else attack.StopSpecialAttack();
     }
 
     public void OnInteract(InputValue value)
     {
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (!value.isPressed) return;
+
+        if (CurrentState == PlayerState.Attack || CurrentState == PlayerState.SpecialAttack)
+        {
+            attack.CancelAttack();
+            ChangeState(PlayerState.Idle);
+        }
 
         if (nearbyReward != null)
         {

@@ -148,7 +148,7 @@ public class VFXManager : MonoBehaviour
     // 풀 관리
     // ─────────────────────────────────────────
 
-    GameObject GetFromPool(GameObject prefab, Vector3 position, Vector3 direction, bool useUnscaledTime = false)
+    GameObject GetFromPool(GameObject prefab, Vector3 position, Vector3 direction, bool useUnscaledTime = false, bool autoReturn = true)
     {
         if (prefab == null) return null;
         if (!pool.ContainsKey(prefab))
@@ -167,13 +167,16 @@ public class VFXManager : MonoBehaviour
         var ps = go.GetComponent<ParticleSystem>();
         if (ps != null) ps.Play();
 
-        float duration = ps != null
-            ? ps.main.duration + ps.main.startLifetime.constantMax
-            : 2f;
+        if (autoReturn)
+        {
+            float duration = ps != null
+                ? ps.main.duration + ps.main.startLifetime.constantMax
+                : 2f;
 
-        StartCoroutine(useUnscaledTime
-            ? ReturnToPoolUnscaled(go, prefab, duration)
-            : ReturnToPool(go, prefab, duration));
+            StartCoroutine(useUnscaledTime
+                ? ReturnToPoolUnscaled(go, prefab, duration)
+                : ReturnToPool(go, prefab, duration));
+        }
 
         return go;
     }
@@ -224,7 +227,7 @@ public class VFXManager : MonoBehaviour
     {
         StopWeaponSkillLoop();
         activeWeaponSkillPrefab = weaponSkillPrefab;
-        activeWeaponSkillInstance = GetFromPool(weaponSkillPrefab, targetTransform.position, targetTransform.forward);
+        activeWeaponSkillInstance = GetFromPool(weaponSkillPrefab, targetTransform.position, targetTransform.forward, false, false);
         if (activeWeaponSkillInstance != null)
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
@@ -247,7 +250,7 @@ public class VFXManager : MonoBehaviour
     {
         StopWeaponSkillLoop();
         activeWeaponSkillPrefab = weaponSkillExplosionPrefab;
-        activeWeaponSkillInstance = GetFromPool(weaponSkillExplosionPrefab, targetTransform.position, targetTransform.forward);
+        activeWeaponSkillInstance = GetFromPool(weaponSkillExplosionPrefab, targetTransform.position, targetTransform.forward, false, false);
         if (activeWeaponSkillInstance != null)
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
