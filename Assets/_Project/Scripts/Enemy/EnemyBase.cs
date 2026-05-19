@@ -131,13 +131,15 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    public virtual void TakeDamage(float damage) // 오버라이드 가능하도록 변경
+    public virtual void TakeDamage(float damage, bool isCritical = false) // 오버라이드 가능하도록 변경
+                                                                          //창우_데미지넘버 스포너에서 치명타 여부도 전달받도록 수정 bool isCritical = false 추가
     {
         currentHealth -= damage;
 
         //창우_데미지넘버 스포너에 데미지 정보 전달
         if (DamageNumberSpawner.Instance != null)
-            DamageNumberSpawner.Instance.Show(damage, transform.position, false, gameObject); 
+            DamageNumberSpawner.Instance.Show(damage, transform.position, isCritical, gameObject);
+
 
         if (currentHealth <= 0)
         {

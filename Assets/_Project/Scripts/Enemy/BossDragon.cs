@@ -76,23 +76,23 @@ public class BossDragon : EnemyBase
 
     protected override void Attack() { }
 
-    public override void TakeDamage(float damage)
-    {
-        if (isDead || isFlying) return;
+    //public override void TakeDamage(float damage)
+    //{
+    //    if (isDead || isFlying) return;
 
-        currentHealth -= damage;
+    //    currentHealth -= damage;
 
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
-        else
-        {
-            anim.SetTrigger("Hurt");
-            if (vfxPoint != null)
-                VFXManager.Instance.PlayMonsterHit(vfxPoint.position, Vector3.up, gameObject);
-        }
-    }
+    //    if (currentHealth <= 0)
+    //    {
+    //        Die();
+    //    }
+    //    else
+    //    {
+    //        anim.SetTrigger("Hurt");
+    //        if (vfxPoint != null)
+    //            VFXManager.Instance.PlayMonsterHit(vfxPoint.position, Vector3.up, gameObject);
+    //    }
+    //}
 
     private void Die()
     {

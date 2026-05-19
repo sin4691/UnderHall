@@ -228,6 +228,8 @@ public class PlayerAttack : MonoBehaviour
             if (target != null && col.enabled)
             {
                 float finalDamage = player.playerData.damage * damageMultiplier;
+                bool isCritical = false; // 1_창우_여기 추가
+
 
                 // [패시브 계열]
                 // [광폭] 내 체력이 50% 이하면 데미지 +40%
@@ -267,9 +269,11 @@ public class PlayerAttack : MonoBehaviour
                     if (player.playerData.acquiredGifts.Contains(GiftType.Critical) && Random.value <= 0.15f)
                     {
                         finalDamage *= 2f;
+
+                        isCritical = true; //2_창우_Show 호출 삭제하고 이걸로 교체
+
                         Debug.Log("크리티컬 터짐!");
-                        if (DamageNumberSpawner.Instance != null)
-                            DamageNumberSpawner.Instance.Show(finalDamage, target.transform.position, isCritical: true);
+                       
 
                     }
                 }
@@ -288,7 +292,8 @@ public class PlayerAttack : MonoBehaviour
                 Debug.Log($"[데미지 판정] {attackType} 명중! 최종 데미지: {finalDamage}");
 
                 // 데미지 적용
-                target.TakeDamage(finalDamage);
+                target.TakeDamage(finalDamage,isCritical); // 3_창우_isCritical 추가
+
 
                 //창우_카메라 흔들림 추가
                 CameraManager.Instance.ShakeOnAttackDirectional(transform.forward);
