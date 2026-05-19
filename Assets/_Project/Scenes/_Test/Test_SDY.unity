@@ -7967,6 +7967,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   nextRewardType: 0
   rewardIconRenderer: {fileID: 2132324281739277155}
+  doubleDoor: {fileID: 0}
 --- !u!33 &1466657622383862528
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -88549,6 +88550,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   nextRewardType: 0
   rewardIconRenderer: {fileID: 8275105230023535754}
+  doubleDoor: {fileID: 0}
 --- !u!65 &8896871251336567567
 BoxCollider:
   m_ObjectHideFlags: 0
