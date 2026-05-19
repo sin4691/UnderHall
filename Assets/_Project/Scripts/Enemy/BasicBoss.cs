@@ -82,19 +82,24 @@ public class BasicBoss : EnemyBase
         else anim.SetFloat("MoveSpeed", 0f);
     }
 
-    public override void TakeDamage(float damage)
+    public override void TakeDamage(float damage,bool isCritical = false) //창우_ bool isCritical = false 추가
     {
         if (isDead || isPhaseTransitioning) return;
 
         if (isBreathActive)
         {
             currentHealth -= damage;
+
+            // 창우_↓ 이거 추가
+            if (DamageNumberSpawner.Instance != null)
+                DamageNumberSpawner.Instance.Show(damage, transform.position, isCritical, gameObject);
+
             if (!isPhase2 && enemyData != null && currentHealth <= enemyData.maxHealth * 0.5f)
                 StartCoroutine(Phase2TransitionRoutine());
         }
         else
         {
-            base.TakeDamage(damage);
+            base.TakeDamage(damage,isCritical); //창우_  isCritical  추가
         }
     }
 
