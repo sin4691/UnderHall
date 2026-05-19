@@ -14,14 +14,15 @@ public class LobbyManager : MonoBehaviour
     private readonly float[] bonusHP = { 0, 10, 20, 35, 50, 70 };
     private readonly float[] bonusATK = { 0, 2, 4, 7, 10, 15 };
     private readonly float[] bonusGold = { 0f, 0.1f, 0.2f, 0.3f, 0.5f, 1.0f };
-
     private readonly float[] setRevive = { 0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f };
+    private readonly float[] bonusSpeed = { 0f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f };
 
     [Header("기본 스탯 (기준점)")]
     private readonly float baseMaxHealth = 100f;
     private readonly float baseDamage = 10f;
     private readonly int baseMaxDashCount = 2;
     private readonly float baseGoldMultiplier = 1.0f;
+    private readonly float baseMoveSpeed = 5f;
 
     private void Awake()
     {
@@ -119,6 +120,21 @@ public class LobbyManager : MonoBehaviour
         }
         else Debug.LogWarning("골드가 부족하거나 이미 만렙입니다!");
     }
+    // 6. 이속증가
+    public void BuyUpgradeSPEED()
+    {
+        if (playerData.levelSpeed < 5 && playerData.currentGold >= cost5Levels[playerData.levelSpeed])
+        {
+            playerData.currentGold -= cost5Levels[playerData.levelSpeed];
+            playerData.levelSpeed++;
+
+            ApplyAllUpgrades();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX("Upgrade_Success");
+            Debug.Log($"[강화 성공] 이동 속도 증가! (Lv.{playerData.levelSpeed}) 남은 골드: {playerData.currentGold}");
+            Debug.Log($"Move Speed: {playerData.moveSpeed} (Lv.{playerData.levelSpeed})");
+        }
+        else Debug.LogWarning("골드가 부족하거나 이미 만렙입니다!");
+    }
 
     // 전체 스탯 적용 (강화를 누를 때마다 최종 스탯 계산)
     private void ApplyAllUpgrades()
@@ -132,6 +148,7 @@ public class LobbyManager : MonoBehaviour
         playerData.maxResurrectionCount = (playerData.levelRevive > 0) ? 1 : 0;
         playerData.resurrectionHealthPercent = setRevive[playerData.levelRevive];
 
+        playerData.moveSpeed = baseMoveSpeed + bonusSpeed[playerData.levelSpeed]; 
 
         Debug.Log("==== 현재 플레이어 스탯 현황 ====");
         Debug.Log($"Max HP: {playerData.maxHealth} (Lv.{playerData.levelHP})");
@@ -139,6 +156,8 @@ public class LobbyManager : MonoBehaviour
         Debug.Log($"Dash Count: {playerData.maxDashCount} (Lv.{playerData.levelDash})");
         Debug.Log($"Gold Multiplier: x{playerData.goldGainMultiplier} (Lv.{playerData.levelGold})");
         Debug.Log($"Revive HP: {playerData.resurrectionHealthPercent * 100}% (Lv.{playerData.levelRevive})");
+        Debug.Log($"Move Speed: {playerData.moveSpeed} (Lv.{playerData.levelSpeed})");
+
         playerData.SaveToDevice();
         OnUpgradeChanged?.Invoke();
     }
@@ -156,4 +175,5 @@ public class LobbyManager : MonoBehaviour
     public float GetBonusATK(int level) => bonusATK[level];
     public float GetBonusGold(int level) => bonusGold[level];
     public float GetSetRevive(int level) => setRevive[level];
+    public float GetBonusSpeed(int level) => bonusSpeed[level];
 }
