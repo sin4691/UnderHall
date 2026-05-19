@@ -86,11 +86,12 @@ public class PlayerData : ScriptableObject
     public float goldGainMultiplier = 1.0f;
 
     [Header("강화 레벨 (0이 기본상태)")]
-    public int levelHP = 0;     
-    public int levelATK = 0;    
-    public int levelDash = 0;   
-    public int levelGold = 0;   
+    public int levelHP = 0;
+    public int levelATK = 0;
+    public int levelDash = 0;
+    public int levelGold = 0;
     public int levelRevive = 0;
+    public int levelSpeed = 0;
 
     [Header("===== 인게임 획득 기프트 (현재 런) =====")]
     public System.Collections.Generic.List<GiftType> acquiredGifts = new System.Collections.Generic.List<GiftType>();
@@ -104,6 +105,7 @@ public class PlayerData : ScriptableObject
         float[] bonusATK = { 0, 2, 4, 7, 10, 15 };
         float[] bonusGold = { 0f, 0.1f, 0.2f, 0.3f, 0.5f, 1.0f };
         float[] setRevive = { 0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f };
+        float[] bonusSpeed = { 0f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f }; 
 
         maxHealth = 100f + bonusHP[levelHP];
         damage = 10f + bonusATK[levelATK];
@@ -111,6 +113,8 @@ public class PlayerData : ScriptableObject
         goldGainMultiplier = 1.0f + bonusGold[levelGold];
         maxResurrectionCount = (levelRevive > 0) ? 1 : 0;
         resurrectionHealthPercent = setRevive[levelRevive];
+
+        moveSpeed = 5f + bonusSpeed[levelSpeed]; 
 
         Debug.Log("[PlayerData] 모든 인게임 데이터가 초기화되었습니다.");
     }
@@ -123,7 +127,8 @@ public class PlayerData : ScriptableObject
         PlayerPrefs.SetInt("Meta_LevelDash", levelDash);
         PlayerPrefs.SetInt("Meta_LevelGold", levelGold);
         PlayerPrefs.SetInt("Meta_LevelRevive", levelRevive);
-        PlayerPrefs.Save(); 
+        PlayerPrefs.SetInt("Meta_LevelSpeed", levelSpeed); 
+        PlayerPrefs.Save();
         Debug.Log("[PlayerData] 기기에 데이터 영구 저장 완료!");
     }
 
@@ -135,6 +140,7 @@ public class PlayerData : ScriptableObject
         levelDash = PlayerPrefs.GetInt("Meta_LevelDash", 0);
         levelGold = PlayerPrefs.GetInt("Meta_LevelGold", 0);
         levelRevive = PlayerPrefs.GetInt("Meta_LevelRevive", 0);
+        levelSpeed = PlayerPrefs.GetInt("Meta_LevelSpeed", 0); 
         Debug.Log("[PlayerData] 기기에서 데이터를 성공적으로 불러왔습니다!");
     }
 }
