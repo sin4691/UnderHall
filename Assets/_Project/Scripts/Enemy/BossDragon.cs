@@ -14,6 +14,11 @@ public class BossDragon : EnemyBase
     private bool isAttacking = false;
     private bool isCooldown = false;
 
+    [Header("Aerial Breath Height Setting")]
+    public float aerialHoverHeightAdd = 10f;
+    public float landingYOffset = 0.5f;
+    public GameObject flyingBreathVFX;
+
     // [VFX/feat]창우_ Boss 전용 공격 이펙트 포인트 (머리)
     [Header("Boss Bones")]
     [SerializeField] private Transform headBone;
@@ -31,6 +36,8 @@ public class BossDragon : EnemyBase
 
     // [추가] 물어뜯기 횟 카운트
     private int biteCount = 0;
+    // 2페이즈 랜덤 억까 방지용 순서 제어 인덱스
+    private int phase2AttackIndex = 0;
 
     protected override void Start()
     {
@@ -43,9 +50,9 @@ public class BossDragon : EnemyBase
     {
         if (isDead) return;
 
-        if(isAttacking)
+        if (isAttacking)
         {
-            agent.velocity = Vector3.zero;
+            if (agent.enabled) agent.velocity = Vector3.zero;
             return;
         }
         // 공격 중이거나 비행 중일 때는 부모의 로직(회전 등)을 완전 무시 (얼음 상태)
@@ -106,6 +113,9 @@ public class BossDragon : EnemyBase
 
         anim.ResetTrigger("Attack");
         anim.ResetTrigger("BreatheFire");
+        anim.ResetTrigger("FIy Breath Fire");
+        anim.SetBool("flyBreatheFire", false);
+
         anim.SetTrigger("Death");
         anim.SetFloat("MoveSpeed", 0);
 
@@ -117,13 +127,28 @@ public class BossDragon : EnemyBase
             Destroy(gameObject);
     }
 
+    private void SetGhostMode(bool isGhost)
+    {
+        Collider[] allCols = GetComponentsInChildren<Collider>();
+        foreach (Collider c in allCols)
+        {
+            c.isTrigger = isGhost;
+        }
+
+        CharacterController cc = GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = !isGhost;
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null) rb.isKinematic = isGhost;
+    }
+
     IEnumerator BossThinkRoutine()
     {
         while (!isDead)
         {
             yield return new WaitForSeconds(0.2f);
 
-            if (isDead || isAttacking || isCooldown || target == null || !agent.isOnNavMesh) continue;
+            if (isDead || isAttacking || isFlying || isCooldown || target == null || !agent.isOnNavMesh) continue;
 
             if (!isPhase2 && currentHealth <= enemyData.maxHealth * 0.5f)
                 isPhase2 = true;
@@ -171,16 +196,30 @@ public class BossDragon : EnemyBase
                 // 3번 물어뜯은 후 (3회차)
                 biteCount = 0;
 
-                // 2페이즈라면 브레스 대신 돌진이 나올 확률 반반
-                if (isPhase2 && Random.value > 0.5f)
+                if (isPhase2)
                 {
-                    yield return StartCoroutine(DashAndSlamPattern());
+                    if (phase2AttackIndex == 0)
+                    {
+                        yield return StartCoroutine(AerialBreathPattern());
+                    }
+                    else if (phase2AttackIndex == 1)
+                    {
+                        yield return StartCoroutine(DashAndSlamPattern());
+                    }
+                    else
+                    {
+                        // 브레스 발사
+                        anim.SetTrigger("BreatheFire");
+                        yield return StartCoroutine(BossBreathHit(0.5f, breathDuration));
+                    }
+
+                    phase2AttackIndex++;
+                    if (phase2AttackIndex > 2) phase2AttackIndex = 0;
                 }
                 else
                 {
-                    // 브레스 발사
+                    // 1페이즈일 때는 무조건 지상 브레스
                     anim.SetTrigger("BreatheFire");
-                    // 실제 이펙트 재생은 애니메이션 이벤트 OnBreathEffectStart에서 수행
                     yield return StartCoroutine(BossBreathHit(0.5f, breathDuration));
                 }
             }
@@ -209,49 +248,275 @@ public class BossDragon : EnemyBase
     IEnumerator DashAndSlamPattern()
     {
         if (isDead) yield break;
-        isFlying = false;
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.isTrigger = true;
 
-        anim.CrossFade("Ground.Idle Takeoff", 0.2f);
+        isFlying = true;
+        isAttacking = true;
+
+        SetGhostMode(true);
+        bool originalRootMotion = anim.applyRootMotion;
+        anim.applyRootMotion = false;
+
+        // 원본 바닥 Y축 높이 저장을 위해 스킬 시작 위치 백업
+        Vector3 skillStartPos = transform.position;
+        if (agent.enabled) agent.enabled = false;
+
         yield return StartCoroutine(MoveTowardPlayerWithDamage(0.8f));
         if (isDead) yield break;
 
         yield return new WaitForSeconds(0.4f);
         if (isDead) yield break;
 
-        anim.CrossFade("Ground.Idle Takeoff", 0.2f);
         yield return StartCoroutine(MoveTowardPlayerWithDamage(0.8f));
         if (isDead) yield break;
 
-        if (col != null) col.isTrigger = false;
-        isFlying = true;
+        // 비행 시작: flyIdle 전환 후 상승
+        anim.SetTrigger("flyIdle");
+        yield return new WaitForSeconds(0.2f);
 
-        while (agent.baseOffset < flyHeight + 3f)
+        float t = 0;
+        Vector3 flyStartPos = transform.position;
+        Vector3 flyTargetPos = flyStartPos;
+        flyTargetPos.y = skillStartPos.y + flyHeight + 3f;
+
+        while (t < 0.5f)
         {
             if (isDead) yield break;
-            agent.baseOffset += Time.deltaTime * 12f;
+            transform.position = Vector3.Lerp(flyStartPos, flyTargetPos, t / 0.5f);
+            t += Time.deltaTime;
             yield return null;
         }
+        transform.position = flyTargetPos;
 
-        anim.CrossFade("Ground.FlyDive", 0.1f);
-        while (agent.baseOffset > 0)
+        yield return new WaitForSeconds(0.1f);
+
+        t = 0;
+        Vector3 diveStartPos = transform.position;
+
+        // 착지 시 플레이어 쪽으로 자연스럽게 유도
+        Vector3 landDir = transform.position - target.position;
+        landDir.y = 0;
+        if (landDir == Vector3.zero) landDir = transform.forward;
+
+        // 플레이어 바로 앞(2.5 거리)에 착지 지점 계산
+        Vector3 diveTargetPos = target.position + landDir.normalized * 2.5f;
+        diveTargetPos.y = skillStartPos.y + landingYOffset;
+
+        // 버벅거림 방지: 내비메시 위 안전 구역으로 보정
+        UnityEngine.AI.NavMeshHit navHit;
+        if (UnityEngine.AI.NavMesh.SamplePosition(diveTargetPos, out navHit, 5f, UnityEngine.AI.NavMesh.AllAreas))
+        {
+            diveTargetPos.x = navHit.position.x;
+            diveTargetPos.z = navHit.position.z;
+        }
+
+        while (t < 0.3f)
         {
             if (isDead) yield break;
-            agent.baseOffset -= Time.deltaTime * 25f;
+            transform.position = Vector3.Lerp(diveStartPos, diveTargetPos, t / 0.3f);
+            t += Time.deltaTime;
             yield return null;
         }
+        transform.position = diveTargetPos;
 
-        agent.baseOffset = 0f;
-        if (isDead) yield break;
-
-        anim.CrossFade("Ground.Idle Landing", 0.1f);
         VFXManager.Instance.PlayBossAttack(transform.position, transform.forward);
         yield return StartCoroutine(BossSingleHit(0.1f));
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(0.5f);
+
+        if (!agent.enabled)
+        {
+            if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out navHit, 10f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                agent.Warp(navHit.position);
+            }
+            agent.baseOffset = 0f;
+            agent.enabled = true;
+        }
+
+        SetGhostMode(false);
+        anim.applyRootMotion = originalRootMotion;
+
+        if (!isDead)
+        {
+            anim.CrossFade("Ground.Ground Locomotion", 0.2f);
+            anim.SetFloat("MoveSpeed", 0f);
+        }
+
         isFlying = false;
-        if (!isDead) anim.CrossFade("Ground.Ground Locomotion", 0.2f);
+    }
+
+    IEnumerator AerialBreathPattern()
+    {
+        if (isDead || target == null) yield break;
+
+        isFlying = true;
+        isAttacking = true;
+
+        SetGhostMode(true);
+        bool originalRootMotion = anim.applyRootMotion;
+        anim.applyRootMotion = false;
+
+        // 원본 위치 백업
+        Vector3 skillStartPos = transform.position;
+        if (agent.enabled) agent.enabled = false;
+
+        anim.SetTrigger("flyIdle");
+        yield return new WaitForSeconds(0.2f);
+
+        // 1. 공중으로 상승할 때 플레이어와 적당한 거리(6.0)를 두면서 올라감
+        Vector3 dirToPlayer = transform.position - target.position;
+        dirToPlayer.y = 0;
+        if (dirToPlayer == Vector3.zero) dirToPlayer = transform.forward;
+
+        Vector3 startPos = transform.position;
+        Vector3 targetHoverPos = target.position + dirToPlayer.normalized * 6f + Vector3.up * (flyHeight + aerialHoverHeightAdd);
+
+        float t = 0;
+        while (t < 1.5f)
+        {
+            if (isDead) yield break;
+            float smoothT = Mathf.SmoothStep(0, 1, t / 1.5f);
+            transform.position = Vector3.Lerp(startPos, targetHoverPos, smoothT);
+
+            // 상승 도중 타겟 바라보기
+            Vector3 lookDir = target.position - transform.position;
+            lookDir.y = 0;
+            if (lookDir != Vector3.zero) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 5f);
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        // 공중 브레스 발사 모션 트리거
+        anim.SetTrigger("FIy Breath Fire");
+        anim.SetBool("flyBreatheFire", true);
+
+        if (flyingBreathVFX != null) flyingBreathVFX.SetActive(true);
+
+        float breathTime = 3.0f;
+        float timer = 0f;
+        float damageTick = 0f;
+
+        while (timer < breathTime)
+        {
+            if (isDead) yield break;
+
+            Vector3 curDirToPlayer = transform.position - target.position;
+            curDirToPlayer.y = 0;
+            if (curDirToPlayer == Vector3.zero) curDirToPlayer = transform.forward;
+
+            // 목적지 높이 계산
+            Vector3 desiredHoverPos = target.position + curDirToPlayer.normalized * 6f + Vector3.up * (flyHeight + aerialHoverHeightAdd);
+
+            // 💡 [수정 핵심] 최대 이동 거리를 플레이어 인식거리의 딱 절반인 15f로 봉인!
+            Vector3 horizontalOffset = desiredHoverPos - skillStartPos;
+            horizontalOffset.y = 0;
+            horizontalOffset = Vector3.ClampMagnitude(horizontalOffset, 15f); // 🔒 30에서 15로 반토막 조절
+
+            Vector3 constrainedHoverPos = skillStartPos + horizontalOffset;
+            constrainedHoverPos.y = desiredHoverPos.y;
+
+            // 조절된 컴팩트한 안전 영역 안에서만 Lerp 추적
+            transform.position = Vector3.Lerp(transform.position, constrainedHoverPos, Time.deltaTime * 1.5f);
+
+            Vector3 lookDir = target.position - transform.position;
+            lookDir.y = 0;
+            if (lookDir != Vector3.zero) transform.rotation = Quaternion.LookRotation(lookDir);
+
+            damageTick += Time.deltaTime;
+            if (damageTick >= 0.5f)
+            {
+                damageTick = 0f;
+                Collider[] hits = Physics.OverlapSphere(transform.position + (Vector3.down * (flyHeight + aerialHoverHeightAdd)), 4f);
+                foreach (var hitCol in hits)
+                {
+                    if (hitCol.CompareTag("Player"))
+                    {
+                        hitCol.GetComponent<Player>()?.TakeDamage(enemyData.damage * 0.5f);
+                    }
+                }
+            }
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        if (flyingBreathVFX != null) flyingBreathVFX.SetActive(false);
+        anim.SetBool("flyBreatheFire", false);
+
+        // ==========================================
+        // 3. 복귀 비행: 거리가 훨씬 가까워졌으므로 더 안정적으로 비행 모션이 연출됨
+        // ==========================================
+        Vector3 returnStartPos = transform.position;
+        Vector3 returnHoverPos = skillStartPos;
+        returnHoverPos.y = returnStartPos.y;
+
+        float returnDist = Vector3.Distance(returnStartPos, returnHoverPos);
+        float returnDuration = returnDist / 12f;
+        if (returnDuration < 1.0f) returnDuration = 1.0f;
+
+        t = 0;
+        while (t < returnDuration)
+        {
+            if (isDead) yield break;
+
+            float smoothT = Mathf.SmoothStep(0, 1, t / returnDuration);
+            transform.position = Vector3.Lerp(returnStartPos, returnHoverPos, smoothT);
+
+            Vector3 moveDir = returnHoverPos - transform.position;
+            moveDir.y = 0;
+            if (moveDir != Vector3.zero)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(moveDir), Time.deltaTime * 5f);
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = returnHoverPos;
+
+        // ==========================================
+        // 4. 수직 착지
+        // ==========================================
+        Vector3 fallStartPos = transform.position;
+        Vector3 groundPos = skillStartPos;
+        groundPos.y = skillStartPos.y + landingYOffset;
+
+        UnityEngine.AI.NavMeshHit navHit;
+        if (UnityEngine.AI.NavMesh.SamplePosition(groundPos, out navHit, 5f, UnityEngine.AI.NavMesh.AllAreas))
+        {
+            groundPos.x = navHit.position.x;
+            groundPos.z = navHit.position.z;
+        }
+
+        t = 0;
+        while (t < 0.8f)
+        {
+            if (isDead) yield break;
+            float smoothT = Mathf.SmoothStep(0, 1, t / 0.8f);
+            transform.position = Vector3.Lerp(fallStartPos, groundPos, smoothT);
+            t += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = groundPos;
+
+        yield return new WaitForSeconds(0.5f);
+
+        if (!agent.enabled)
+        {
+            if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out navHit, 10f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                agent.Warp(navHit.position);
+            }
+            agent.baseOffset = 0f;
+            agent.enabled = true;
+        }
+
+        SetGhostMode(false);
+        anim.applyRootMotion = originalRootMotion;
+
+        anim.CrossFade("Ground.Ground Locomotion", 0.2f);
+        anim.SetFloat("MoveSpeed", 0f);
+
+        isFlying = false;
     }
 
     IEnumerator BossSingleHit(float delay)
@@ -338,10 +603,10 @@ public class BossDragon : EnemyBase
 
         if (agent.enabled)
         {
-            UnityEngine.AI.NavMeshHit hit;
-            if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out hit, 10f, UnityEngine.AI.NavMesh.AllAreas))
+            UnityEngine.AI.NavMeshHit agentHit;
+            if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out agentHit, 10f, UnityEngine.AI.NavMesh.AllAreas))
             {
-                agent.Warp(hit.position);
+                agent.Warp(agentHit.position);
             }
         }
     }
