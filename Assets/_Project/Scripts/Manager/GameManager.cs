@@ -52,6 +52,11 @@ public class GameManager : MonoBehaviour
         playerData.ResetRunData();
 
         Debug.Log("[GameManager] 게임 시작됨! 첫 번째 방을 설정합니다.");
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM("Stage_BGM");
+        }
+
         if (fadeCanvasGroup != null)
         {
             StartCoroutine(Fade(0f));

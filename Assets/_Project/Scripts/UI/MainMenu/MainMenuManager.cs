@@ -27,6 +27,11 @@ public class MainMenuManager : MonoBehaviour
     }
     private void Start()
     {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM("Lobby_BGM");
+        }
+
         if (fadeCanvasGroup != null)
         {
             StartCoroutine(Fade(0f));
