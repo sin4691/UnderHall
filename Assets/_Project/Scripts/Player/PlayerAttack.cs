@@ -268,6 +268,9 @@ public class PlayerAttack : MonoBehaviour
                     {
                         finalDamage *= 2f;
                         Debug.Log("크리티컬 터짐!");
+                        if (DamageNumberSpawner.Instance != null)
+                            DamageNumberSpawner.Instance.Show(finalDamage, target.transform.position, isCritical: true);
+
                     }
                 }
                 // [특수 공격 계열]
