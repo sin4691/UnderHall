@@ -37,6 +37,10 @@ public class LobbyManager : MonoBehaviour
 
     private void Start()
     {
+        if (playerData != null)
+        {
+            playerData.LoadFromDevice();
+        }
         ApplyAllUpgrades();
     }
 

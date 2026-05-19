@@ -86,7 +86,6 @@ public class Player : MonoBehaviour
     {
         if (IsInvincible || CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
 
-        // 수정 완료된 체력 고정 로직
         currentHealth = Mathf.Max(0, currentHealth - damage);
 
         Debug.Log($"플레이어 피격! 남은 체력: {currentHealth}");
@@ -213,7 +212,23 @@ public class Player : MonoBehaviour
 
         animator.Play("death");
 
-        StartCoroutine(GoToMainMenuRoutine(3f));
+        StartCoroutine(DeathToMainMenuRoutine());
+    }
+    private IEnumerator DeathToMainMenuRoutine()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM("Death_BGM");
+        }
+
+        yield return new WaitForSeconds(2f);
+
+        if (GameManager.Instance != null)
+        {
+            yield return StartCoroutine(GameManager.Instance.Fade(1f));
+        }
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
     private IEnumerator GoToMainMenuRoutine(float delay)
     {
@@ -249,6 +264,7 @@ public class Player : MonoBehaviour
     public void OnSpecialAttack(InputValue value)
     {
         if (Time.timeScale == 0f) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
         if (CurrentState == PlayerState.Dead || CurrentState == PlayerState.Resurrecting) return;
         if (value.isPressed)
         {
