@@ -28,7 +28,7 @@ public class PlayerData : ScriptableObject
     public float attackRange = 1.5f;
 
     [Tooltip("특수 공격 데미지 배율")]
-    [Range(1f, 5f)]
+    [Range(0.1f, 5f)]
     public float specialAttackMultiplier = 3f;
 
     [Tooltip("특수 공격 타격 반경")]

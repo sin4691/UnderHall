@@ -199,4 +199,4 @@ MonoBehaviour:
   fadeDelay: 0.3
   fadeDuration: 0.4
   normalColor: {r: 1, g: 1, b: 1, a: 1}
-  criticalColor: {r: 1, g: 0.8352941, b: 0, a: 1}
+  criticalColor: {r: 1, g: 0.09019608, b: 0, a: 1}
