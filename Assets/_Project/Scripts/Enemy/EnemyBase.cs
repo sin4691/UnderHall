@@ -134,6 +134,11 @@ public class EnemyBase : MonoBehaviour
     public virtual void TakeDamage(float damage) // 오버라이드 가능하도록 변경
     {
         currentHealth -= damage;
+
+        //창우_데미지넘버 스포너에 데미지 정보 전달
+        if (DamageNumberSpawner.Instance != null)
+            DamageNumberSpawner.Instance.Show(damage, transform.position, false, gameObject); 
+
         if (currentHealth <= 0)
         {
             Die();
