@@ -1,7 +1,8 @@
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PauseMenuManager : MonoBehaviour
 {
@@ -14,6 +15,11 @@ public class PauseMenuManager : MonoBehaviour
     public Slider bgmSlider;
     public Slider sfxSlider;
     public Toggle fullscreenToggle;
+
+    [Header("Value Texts")]
+    public TMP_Text masterValueText;
+    public TMP_Text bgmValueText;
+    public TMP_Text sfxValueText;
 
     [Header("Scene Settings")]
     public string mainMenuSceneName = "MainMenu";
@@ -29,6 +35,22 @@ public class PauseMenuManager : MonoBehaviour
         if (bgmSlider != null) bgmSlider.onValueChanged.AddListener(SetBGMVolume);
         if (sfxSlider != null) sfxSlider.onValueChanged.AddListener(SetSFXVolume);
         if (fullscreenToggle != null) fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
+
+        if (bgmSlider != null)
+        {
+            bgmSlider.onValueChanged.AddListener(v => UpdateValueText(bgmValueText, v));
+            UpdateValueText(bgmValueText, bgmSlider.value);
+        }
+        if (sfxSlider != null)
+        {
+            sfxSlider.onValueChanged.AddListener(v => UpdateValueText(sfxValueText, v));
+            UpdateValueText(sfxValueText, sfxSlider.value);
+        }
+        if (masterSlider != null)
+        {
+            masterSlider.onValueChanged.AddListener(v => UpdateValueText(masterValueText, v));
+            UpdateValueText(masterValueText, masterSlider.value);
+        }
     }
 
     private void Update()
@@ -69,6 +91,12 @@ public class PauseMenuManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(mainMenuSceneName);
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     // =========================================================
@@ -118,5 +146,11 @@ public class PauseMenuManager : MonoBehaviour
             Screen.SetResolution(1280, 720, FullScreenMode.Windowed);
             Debug.Log("창모드 (1280x720) 적용");
         }
+    }
+
+    private void UpdateValueText(TMP_Text text, float value)
+    {
+        if (text != null)
+            text.text = Mathf.RoundToInt(value * 100).ToString();
     }
 }
