@@ -52,11 +52,11 @@ public class Anubis : EnemyBase
         }
     }
 
-    public override void TakeDamage(float damage)
+    public override void TakeDamage(float damage, bool isCritical = false)
     {
         AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
         bool isAttackingNow = stateInfo.IsName("Attack");
-        base.TakeDamage(damage);
+        base.TakeDamage(damage, isCritical);
 
         if (isAttackingNow)
         {
