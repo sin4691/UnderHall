@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: FX_FlameThrower_02 Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 1653619026499950, guid: ef4d31ab810a39b499877583c1f6a865, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4740318220287132, guid: ef4d31ab810a39b499877583c1f6a865, type: 3}
       propertyPath: m_LocalPosition.x
       value: -37.24162

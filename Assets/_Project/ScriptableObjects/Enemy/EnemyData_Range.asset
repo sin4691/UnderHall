@@ -19,4 +19,6 @@ MonoBehaviour:
   damage: 10
   attackRange: 15
   attackCooldown: 1
-  detectionRange: 15
+  detectionRange: 30
+  attackSoundName: Enemy_Attack
+  deathSoundName: Enemy_Death
