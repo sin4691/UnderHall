@@ -291,6 +291,9 @@ public class PlayerAttack : MonoBehaviour
                 // 데미지 적용
                 target.TakeDamage(finalDamage);
 
+                //창우_카메라 흔들림 추가
+                CameraManager.Instance.ShakeOnAttackDirectional(transform.forward);
+
                 if (AudioManager.Instance != null)
                 {
                     AudioManager.Instance.PlaySFX("Hit_Monster");
