@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class Anubis : EnemyBase
 {
-
     protected override void Update()
     {
         timer += Time.deltaTime;
@@ -10,8 +9,9 @@ public class Anubis : EnemyBase
 
         AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
         bool isAttackingNow = stateInfo.IsName("Attack");
+        bool isHurtNow = stateInfo.IsName("Hurt");
 
-        if (isAttackingNow)
+        if (isAttackingNow || isHurtNow)
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
@@ -21,20 +21,19 @@ public class Anubis : EnemyBase
 
         float dist = Vector3.Distance(transform.position, target.position);
 
-        if(dist <= attackRange)
+        if (dist <= attackRange)
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
 
-
             Vector3 lookPos = new Vector3(target.position.x, transform.position.y, target.position.z);
             transform.LookAt(lookPos);
             anim.SetFloat("MoveSpeed", 0f);
-            if(anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") == false)
+
+            if (anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") == false)
             {
                 Attack();
             }
-            
         }
         else
         {
@@ -43,7 +42,7 @@ public class Anubis : EnemyBase
 
             Vector3 lookDir = target.position - transform.position;
             lookDir.y = 0;
-            if(lookDir != Vector3.zero)
+            if (lookDir != Vector3.zero)
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 15f);
             }
@@ -52,7 +51,20 @@ public class Anubis : EnemyBase
             anim.SetFloat("MoveSpeed", speed, 0.05f, Time.deltaTime);
         }
     }
-    
-        
-}
 
+    public override void TakeDamage(float damage)
+    {
+        AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+        bool isAttackingNow = stateInfo.IsName("Attack");
+        base.TakeDamage(damage);
+
+        if (isAttackingNow)
+        {
+            anim.ResetTrigger("Hurt");
+        }
+        else
+        {
+            StopAllCoroutines();
+        }
+    }
+}
