@@ -123,9 +123,13 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2785141518030544433}
     m_Modifications:
+    - target: {fileID: 1573500420542586006, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1704195604910083400, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: field of view
-      value: 50
+      value: 37
       objectReference: {fileID: 0}
     - target: {fileID: 2262919473865490177, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_Name
@@ -133,15 +137,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7655576388383143458, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.8351698
+      value: -14.04807
       objectReference: {fileID: 0}
     - target: {fileID: 7655576388383143458, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.75
+      value: -24.80513
       objectReference: {fileID: 0}
     - target: {fileID: 7655576388383143458, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.0792313
+      value: -46.41474
       objectReference: {fileID: 0}
     - target: {fileID: 7655576388383143458, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_LocalRotation.w
@@ -263,7 +267,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 124962374166461947, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: Lens.FieldOfView
-      value: 50
+      value: 37
       objectReference: {fileID: 0}
     - target: {fileID: 124962374166461947, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: Target.TrackingTarget
@@ -335,7 +339,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6484906422265539760, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: TrackerSettings.PositionDamping.z
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

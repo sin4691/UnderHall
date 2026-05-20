@@ -74,7 +74,31 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("[GameManager] 씬에 SpawnManager가 없습니다!");
             }
         }
-
+        // ======================================================================
+        // 창우_첫 번째 맵을 찾았으니 시작하자마자 카메라에 바운드를 강제 주입합니다!
+        // ======================================================================
+        if (currentMapInstance != null)
+        {
+            CameraConfinerAutoBinder autoBinder = FindAnyObjectByType<CameraConfinerAutoBinder>();
+            if (autoBinder != null)
+            {
+                // 씬 전체에서 첫 번째 맵의 CameraBounds 오브젝트를 탐색
+                GameObject boundsObj = GameObject.FindWithTag("CameraBounds");
+                if (boundsObj != null)
+                {
+                    Collider targetCol = boundsObj.GetComponent<Collider>();
+                    if (targetCol != null)
+                    {
+                        autoBinder.AssignBounds(targetCol); // 첫 방 카메라 영역 강제 셋팅!
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[GameManager] 첫 맵에서 'CameraBounds' 태그 오브젝트를 찾지 못했습니다.");
+                }
+            }
+        }
+        // ======================================================================
         if (currentMapInstance != null)
         {
             SpawnManager spawnManager = currentMapInstance.GetComponentInChildren<SpawnManager>();
