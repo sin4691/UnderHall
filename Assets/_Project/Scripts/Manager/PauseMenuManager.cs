@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class PauseMenuManager : MonoBehaviour
 {
     [Header("Panels")]
-    public GameObject pausePanel;  
+    public GameObject pausePanel;
     public GameObject optionsPanel;
 
     [Header("Options UI")]
@@ -31,25 +31,38 @@ public class PauseMenuManager : MonoBehaviour
         pausePanel.SetActive(false);
         optionsPanel.SetActive(false);
 
-        if (masterSlider != null) masterSlider.onValueChanged.AddListener(SetMasterVolume);
-        if (bgmSlider != null) bgmSlider.onValueChanged.AddListener(SetBGMVolume);
-        if (sfxSlider != null) sfxSlider.onValueChanged.AddListener(SetSFXVolume);
-        if (fullscreenToggle != null) fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
+        // =========================================================
+        // [수정] PlayerPrefs에서 저장된 값을 불러와서 슬라이더/토글 위치를 맞춰줍니다.
+        // =========================================================
+        if (masterSlider != null)
+        {
+            masterSlider.value = PlayerPrefs.GetFloat("MasterVolume", 1f);
+            masterSlider.onValueChanged.AddListener(SetMasterVolume);
+            masterSlider.onValueChanged.AddListener(v => UpdateValueText(masterValueText, v));
+            UpdateValueText(masterValueText, masterSlider.value);
+        }
 
         if (bgmSlider != null)
         {
+            bgmSlider.value = PlayerPrefs.GetFloat("BGMVolume", 1f);
+            bgmSlider.onValueChanged.AddListener(SetBGMVolume);
             bgmSlider.onValueChanged.AddListener(v => UpdateValueText(bgmValueText, v));
             UpdateValueText(bgmValueText, bgmSlider.value);
         }
+
         if (sfxSlider != null)
         {
+            sfxSlider.value = PlayerPrefs.GetFloat("SFXVolume", 1f);
+            sfxSlider.onValueChanged.AddListener(SetSFXVolume);
             sfxSlider.onValueChanged.AddListener(v => UpdateValueText(sfxValueText, v));
             UpdateValueText(sfxValueText, sfxSlider.value);
         }
-        if (masterSlider != null)
+
+        if (fullscreenToggle != null)
         {
-            masterSlider.onValueChanged.AddListener(v => UpdateValueText(masterValueText, v));
-            UpdateValueText(masterValueText, masterSlider.value);
+            bool isFull = PlayerPrefs.GetInt("IsFullscreen", 1) == 1;
+            fullscreenToggle.isOn = isFull;
+            fullscreenToggle.onValueChanged.AddListener(SetFullscreen);
         }
     }
 
@@ -116,22 +129,25 @@ public class PauseMenuManager : MonoBehaviour
     }
 
     // =========================================================
-    // 옵션 기능 연동 (볼륨 & 해상도)
+    // 옵션 기능 연동 및 영구 저장 (PlayerPrefs)
     // =========================================================
 
     public void SetMasterVolume(float value)
     {
         if (AudioManager.Instance != null) AudioManager.Instance.SetMasterVolume(value);
+        PlayerPrefs.SetFloat("MasterVolume", value); 
     }
 
     public void SetBGMVolume(float value)
     {
         if (AudioManager.Instance != null) AudioManager.Instance.SetBGMVolume(value);
+        PlayerPrefs.SetFloat("BGMVolume", value);
     }
 
     public void SetSFXVolume(float value)
     {
         if (AudioManager.Instance != null) AudioManager.Instance.SetSFXVolume(value);
+        PlayerPrefs.SetFloat("SFXVolume", value); 
     }
 
     public void SetFullscreen(bool isFullscreen)
@@ -139,13 +155,12 @@ public class PauseMenuManager : MonoBehaviour
         if (isFullscreen)
         {
             Screen.SetResolution(1920, 1080, FullScreenMode.FullScreenWindow);
-            Debug.Log("전체화면 (1920x1080) 적용");
         }
         else
         {
             Screen.SetResolution(1280, 720, FullScreenMode.Windowed);
-            Debug.Log("창모드 (1280x720) 적용");
         }
+        PlayerPrefs.SetInt("IsFullscreen", isFullscreen ? 1 : 0);
     }
 
     private void UpdateValueText(TMP_Text text, float value)
