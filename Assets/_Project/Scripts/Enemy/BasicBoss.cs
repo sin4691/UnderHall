@@ -423,7 +423,7 @@ public class BasicBoss : EnemyBase
     public void OnBreathFire() { if (breathPoint != null) VFXManager.Instance.PlayBossBreath(breathPoint, breathPoint.forward); }
     protected override void Attack() { }
 
-    private void OnDrawGizmosSelected()
+    protected override void OnDrawGizmosSelected()
     {
         if (attackPoint != null)
         {

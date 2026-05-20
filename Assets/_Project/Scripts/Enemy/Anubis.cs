@@ -1,17 +1,27 @@
+using System.Collections;
 using UnityEngine;
 
 public class Anubis : EnemyBase
 {
+    [Header("Anubis Special Skill")]
+    public float spinAttackCooldown = 8f;
+    private float spinTimer = 0f;
+    public float spinHitRadius = 3.5f;
+    public float spinDamage = 30f;
+
     protected override void Update()
     {
         timer += Time.deltaTime;
+        spinTimer += Time.deltaTime;
+
         if (isDead || target == null) return;
 
         AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
         bool isAttackingNow = stateInfo.IsName("Attack");
         bool isHurtNow = stateInfo.IsName("Hurt");
+        bool isSpinningNow = stateInfo.IsName("SpinAttack");
 
-        if (isAttackingNow || isHurtNow)
+        if (isAttackingNow || isHurtNow || isSpinningNow)
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
@@ -30,7 +40,8 @@ public class Anubis : EnemyBase
             transform.LookAt(lookPos);
             anim.SetFloat("MoveSpeed", 0f);
 
-            if (anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") == false)
+            if (anim.GetCurrentAnimatorStateInfo(0).IsName("Attack") == false &&
+                anim.GetCurrentAnimatorStateInfo(0).IsName("SpinAttack") == false)
             {
                 Attack();
             }
@@ -52,19 +63,67 @@ public class Anubis : EnemyBase
         }
     }
 
+    protected override void Attack()
+    {
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+
+        if (spinTimer >= spinAttackCooldown && timer >= enemyData.attackCooldown)
+        {
+            StartCoroutine(SpinAttackRoutine());
+            timer = 0f;
+            spinTimer = 0f;
+        }
+        else if (timer >= enemyData.attackCooldown)
+        {
+            base.Attack();
+        }
+    }
+
+    IEnumerator SpinAttackRoutine()
+    {
+        isSuperArmor = true;
+        anim.SetTrigger("SpinAttack");
+
+        yield return new WaitForSeconds(0.5f);
+
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, spinHitRadius);
+        foreach (Collider hit in hitColliders)
+        {
+            if (hit.CompareTag("Player"))
+            {
+                Player player = hit.GetComponent<Player>();
+                if (player != null)
+                {
+                    player.TakeDamage(spinDamage);
+                }
+                break;
+            }
+        }
+
+
+        yield return new WaitForSeconds(2.0f);
+
+        isSuperArmor = false;
+    }
+
     public override void TakeDamage(float damage, bool isCritical = false)
     {
-        AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
-        bool isAttackingNow = stateInfo.IsName("Attack");
         base.TakeDamage(damage, isCritical);
 
-        if (isAttackingNow)
-        {
-            anim.ResetTrigger("Hurt");
-        }
-        else
+        if (!isSuperArmor && currentHealth > 0)
         {
             StopAllCoroutines();
         }
     }
+    protected override void OnDrawGizmosSelected()
+    {
+
+        base.OnDrawGizmosSelected();
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, spinHitRadius);
+    }
 }
+
+    
