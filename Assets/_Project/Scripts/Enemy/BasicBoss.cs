@@ -22,7 +22,7 @@ public class BasicBoss : EnemyBase
     private int basicAttackCount = 0;
     private int nextBreathThreshold;
     private bool isAttacking = false;
-    private bool isBreathActive = false; 
+    private bool isBreathActive = false;
 
     [Header("─ 등장 연출 설정 ─")]
     public float startHeight = 15f;
@@ -38,6 +38,18 @@ public class BasicBoss : EnemyBase
     private bool isPhase2 = false;
     private int phase2AttackIndex = 0;
     private bool isPhaseTransitioning = false;
+
+    [Header("─ 도약 내려찍기 (하데스식 매운맛) ─")]
+    public float leapTriggerDistance = 8.0f;
+    public float leapCooldown = 6.0f;
+    private float lastLeapTime = -10f;
+    public float leapDamage = 30f;
+    public float leapRadius = 4.0f;
+    public float leapHeight = 12f;
+    public float leapHangTime = 0.8f;
+    public GameObject warningVFX;
+    public GameObject slamVFX;
+    private bool isLeaping = false;
 
     protected override void Start()
     {
@@ -82,15 +94,14 @@ public class BasicBoss : EnemyBase
         else anim.SetFloat("MoveSpeed", 0f);
     }
 
-    public override void TakeDamage(float damage,bool isCritical = false) //창우_ bool isCritical = false 추가
+    public override void TakeDamage(float damage, bool isCritical = false)
     {
         if (isDead || isPhaseTransitioning) return;
 
-        if (isBreathActive)
+        if (isBreathActive || isLeaping)
         {
             currentHealth -= damage;
 
-            // 창우_↓ 이거 추가
             if (DamageNumberSpawner.Instance != null)
                 DamageNumberSpawner.Instance.Show(damage, transform.position, isCritical, gameObject);
 
@@ -99,7 +110,7 @@ public class BasicBoss : EnemyBase
         }
         else
         {
-            base.TakeDamage(damage,isCritical); //창우_  isCritical  추가
+            base.TakeDamage(damage, isCritical);
         }
     }
 
@@ -117,9 +128,20 @@ public class BasicBoss : EnemyBase
         while (!isDead)
         {
             yield return new WaitForSeconds(0.2f);
-            if (!isAwake || isAttacking || isPhaseTransitioning || target == null || !agent.isOnNavMesh) continue;
 
-            if (Vector3.Distance(transform.position, target.position) <= attackRange)
+            if (!isAwake || isAttacking || isBreathActive || isPhaseTransitioning || target == null || !agent.isOnNavMesh)
+                continue;
+
+            float dist = Vector3.Distance(transform.position, target.position);
+
+            if (dist >= leapTriggerDistance && Time.time >= lastLeapTime + leapCooldown)
+            {
+                int jumpCount = isPhase2 ? 3 : 1;
+                StartCoroutine(LeapAndSlamRoutine(jumpCount));
+                continue;
+            }
+
+            if (dist <= attackRange)
             {
                 if (basicAttackCount >= nextBreathThreshold)
                 {
@@ -132,8 +154,97 @@ public class BasicBoss : EnemyBase
                     StartCoroutine(AttackRoutine());
                 }
             }
-            else { agent.isStopped = false; agent.SetDestination(target.position); }
+            else
+            {
+                agent.isStopped = false;
+                agent.SetDestination(target.position);
+            }
         }
+    }
+
+    IEnumerator LeapAndSlamRoutine(int jumpCount)
+    {
+        isAttacking = true;
+        isLeaping = true;
+
+        if (agent.enabled) { agent.isStopped = true; agent.enabled = false; }
+        SetGhostMode(true);
+
+        for (int i = 0; i < jumpCount; i++)
+        {
+            anim.SetTrigger("Jump");
+
+            Vector3 startPos = transform.position;
+            Vector3 peakPos = startPos + Vector3.up * leapHeight;
+
+            float t = 0;
+            while (t < 0.3f)
+            {
+                if (isDead) yield break;
+                transform.position = Vector3.Lerp(startPos, peakPos, t / 0.3f);
+                t += Time.deltaTime;
+                yield return null;
+            }
+
+            float currentHangTime = (i == 0) ? leapHangTime : leapHangTime * 0.4f;
+
+            Vector3 targetPos = target.position;
+            targetPos.y = startPos.y;
+
+            if (warningVFX != null)
+            {
+                warningVFX.transform.position = targetPos + Vector3.up * 0.1f;
+                warningVFX.SetActive(true);
+            }
+
+            yield return new WaitForSeconds(currentHangTime);
+
+            targetPos = target.position;
+            targetPos.y = startPos.y;
+            if (warningVFX != null) warningVFX.transform.position = targetPos + Vector3.up * 0.1f;
+
+            Vector3 lookDir = targetPos - transform.position;
+            if (lookDir != Vector3.zero)
+            {
+                transform.rotation = Quaternion.LookRotation(lookDir);
+            }
+
+            t = 0;
+            Vector3 dropStartPos = transform.position;
+            while (t < 0.15f)
+            {
+                if (isDead) yield break;
+                transform.position = Vector3.Lerp(dropStartPos, targetPos, t / 0.15f);
+                t += Time.deltaTime;
+                yield return null;
+            }
+            transform.position = targetPos;
+
+            anim.SetTrigger("Land");
+            if (warningVFX != null) warningVFX.SetActive(false);
+
+            if (slamVFX != null)
+            {
+                slamVFX.transform.position = targetPos;
+                slamVFX.SetActive(true);
+            }
+
+            Collider[] hits = Physics.OverlapSphere(targetPos, leapRadius);
+            foreach (Collider hit in hits)
+            {
+                if (hit.CompareTag("Player")) hit.GetComponent<Player>()?.TakeDamage(leapDamage);
+            }
+
+            if (i < jumpCount - 1) yield return new WaitForSeconds(0.3f);
+        }
+
+        yield return new WaitForSeconds(1.2f);
+
+        lastLeapTime = Time.time;
+        SetGhostMode(false);
+        agent.enabled = true;
+        isLeaping = false;
+        isAttacking = false;
     }
 
     IEnumerator ExecutePhase2Pattern()
@@ -169,18 +280,18 @@ public class BasicBoss : EnemyBase
     IEnumerator BreathAttackRoutine()
     {
         isAttacking = true;
-        isBreathActive = true; 
+        isBreathActive = true;
 
         agent.isStopped = true; agent.velocity = Vector3.zero;
         anim.SetTrigger("Breath");
         StartCoroutine(SmoothFaceTarget(4.0f, 2.0f));
 
-        yield return new WaitForSeconds(1f); 
+        yield return new WaitForSeconds(1f);
 
         if (closeRangeVFX != null) { closeRangeVFX.SetActive(true); }
 
         float timer = 0f;
-        float totalDuration = 6.0f; 
+        float totalDuration = 6.0f;
         float damageTickRate = 0.2f;
         float nextDamageTime = 0f;
 
@@ -207,7 +318,7 @@ public class BasicBoss : EnemyBase
             }
 
             timer += Time.deltaTime;
-            yield return null; 
+            yield return null;
         }
 
         if (closeRangeVFX != null) closeRangeVFX.SetActive(false);
@@ -217,7 +328,7 @@ public class BasicBoss : EnemyBase
 
         yield return new WaitForSeconds(breathCooldown);
 
-        isBreathActive = false; 
+        isBreathActive = false;
         isAttacking = false;
     }
 
@@ -323,5 +434,17 @@ public class BasicBoss : EnemyBase
         Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position + transform.rotation * boxOffset, transform.rotation, Vector3.one);
         Gizmos.matrix = rotationMatrix;
         Gizmos.DrawWireCube(Vector3.zero, new Vector3(boxSize.x, boxHeight, boxSize.y));
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, leapRadius);
+    }
+
+    protected override void Die()
+    {
+        base.Die();
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ClearGame();
+        }
     }
 }

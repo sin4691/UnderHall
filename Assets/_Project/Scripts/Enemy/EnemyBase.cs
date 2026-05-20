@@ -17,6 +17,9 @@ public class EnemyBase : MonoBehaviour
     protected float timer;
     protected bool isDead = false;
 
+    public float CurrentHealth => currentHealth;
+    public float MaxHealth => enemyData != null ? enemyData.maxHealth : 1f;
+
     [Header("Attack Settings")]
     [SerializeField] private float hitDelay = 0.5f;
     [SerializeField] private float hitRadius = 1.5f;
@@ -156,7 +159,7 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    void Die()
+    protected virtual void Die()
     {
         if (isDead) return;
         isDead = true;
@@ -173,7 +176,7 @@ public class EnemyBase : MonoBehaviour
 
         if (vfxPoint != null)
         {
-            VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);         
+            VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);
         }
         Destroy(gameObject, 3f);
     }
@@ -187,4 +190,5 @@ public class EnemyBase : MonoBehaviour
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, enemyData.detectionRange);
     }
+
 }
