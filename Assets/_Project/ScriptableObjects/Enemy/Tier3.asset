@@ -16,13 +16,13 @@ MonoBehaviour:
     spawnInfos:
     - enemyPrefab: {fileID: 8734851924109653997, guid: 1d71361d821e1b5489f96ce05c6560bc, type: 3}
       count: 2
-    - enemyPrefab: {fileID: 1837250232964476417, guid: cc3a6f884b7d66844a1888898539b5f4, type: 3}
+    - enemyPrefab: {fileID: 6631393216345816413, guid: 300a17bc28055de4f8f4c9ad69911f56, type: 3}
       count: 4
   wave2:
     spawnInfos:
     - enemyPrefab: {fileID: 8734851924109653997, guid: 1d71361d821e1b5489f96ce05c6560bc, type: 3}
       count: 2
-    - enemyPrefab: {fileID: 1837250232964476417, guid: cc3a6f884b7d66844a1888898539b5f4, type: 3}
+    - enemyPrefab: {fileID: 6631393216345816413, guid: 300a17bc28055de4f8f4c9ad69911f56, type: 3}
       count: 4
   wave3:
     spawnInfos:
