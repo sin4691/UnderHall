@@ -97,11 +97,17 @@ public class SpawnManager : MonoBehaviour
         }
 
         List<GameObject> enemiesToSpawn = new List<GameObject>();
+
         foreach (var info in currentWaveData.spawnInfos)
         {
-            for (int i = 0; i < info.count; i++)
+            GameObject prefab = tierData.GetEnemyPrefab(info.enemyType);
+
+            if (prefab != null)
             {
-                enemiesToSpawn.Add(info.enemyPrefab);
+                for (int i = 0; i < info.count; i++)
+                {
+                    enemiesToSpawn.Add(prefab);
+                }
             }
         }
 
@@ -154,8 +160,6 @@ public class SpawnManager : MonoBehaviour
             VFXManager.Instance.PlayRoomClear(transform.position);
 
         StartCoroutine(ClearRoomRoutine());//창우_클리어 VFX 재생 후 보상 스폰하는 코루틴
-
-        //원래코드_SpawnReward();
     }
 
     private IEnumerator ClearRoomRoutine()//창우_ 클리어 VFX 재생 후 딜레이 주는 코루틴
@@ -163,14 +167,15 @@ public class SpawnManager : MonoBehaviour
         //창우_클리어 VFX 먼저 재생
         if (VFXManager.Instance != null)
             VFXManager.Instance.PlayRoomClear(transform.position);
+
         //창우_이 딜레이 동안 클리어 VFX만 나옴
         yield return new WaitForSeconds(1.2f); //창우_원하는 시간으로 조절
+
         //창우_딜레이 후 보상 스폰
         StartCoroutine(SpawnRewardRoutine()); //창우_코루틴으로 변경
     }
 
 
-    //원래코드_private void SpawnReward()
     private IEnumerator SpawnRewardRoutine() //창우_ 보상 스폰도 코루틴으로 변경 (VFX 재생 후 딜레이 주기 위해)
     {
         // 1. 맵에서 보상이 스폰될 위치(빈 오브젝트) 찾기
@@ -192,7 +197,7 @@ public class SpawnManager : MonoBehaviour
                 break;
             case RewardType.Gold:
                 prefabToSpawn = rewardGoldPrefab;
-                spawnSoundName = "Reward_Gold_Spawn";  
+                spawnSoundName = "Reward_Gold_Spawn";
                 break;
         }
 
@@ -201,6 +206,7 @@ public class SpawnManager : MonoBehaviour
             //창우_VFX 먼저 재생
             if (VFXManager.Instance != null)
                 VFXManager.Instance.PlayRewardAppear(spawnPos);
+
             //창우_VFX 재생 후 딜레이 뒤에 보상 등장
             yield return new WaitForSeconds(1.2f); // 원하는 시간으로 조절
 
@@ -226,6 +232,7 @@ public class SpawnManager : MonoBehaviour
             OnRewardCollected();
         }
     }
+
     //창우_둥둥 효과
     private IEnumerator FloatReward(GameObject reward)
     {
