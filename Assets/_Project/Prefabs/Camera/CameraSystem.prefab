@@ -133,7 +133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1704195604910083400, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: field of view
-      value: 37
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 2262919473865490177, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_Name
@@ -141,15 +141,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7655576388383143458, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -14.964149
+      value: 30.519745
       objectReference: {fileID: 0}
     - target: {fileID: 7655576388383143458, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -16.72155
+      value: 10.196865
       objectReference: {fileID: 0}
     - target: {fileID: 7655576388383143458, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -38.319263
+      value: -50.36162
       objectReference: {fileID: 0}
     - target: {fileID: 7655576388383143458, guid: a635b8e3e96cfa847a7f77b017d1064b, type: 3}
       propertyPath: m_LocalRotation.w
@@ -335,11 +335,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6484906422265539760, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: TrackerSettings.PositionDamping.x
-      value: 0.1
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 6484906422265539760, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: TrackerSettings.PositionDamping.y
-      value: 0.1
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 6484906422265539760, guid: 889f63f54d3ed7345b57dd7e3f821271, type: 3}
       propertyPath: TrackerSettings.PositionDamping.z
