@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -100,12 +101,47 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("모든 스테이지 클리어! 골드를 정산합니다.");
-            Player p = player.GetComponent<Player>();
-            if (p != null) p.CommitGoldToSO();
+            Debug.Log("모든 스테이지 클리어! 클리어 연출을 시작합니다.");
+            ClearGame();
+        }
+    }
+    public void ClearGame()
+    {
+        if (!isTransitioning)
+        {
+            StartCoroutine(GameClearRoutine());
         }
     }
 
+    private IEnumerator GameClearRoutine()
+    {
+        isTransitioning = true;
+
+        Player p = player.GetComponent<Player>();
+        if (p != null)
+        {
+            p.attack.CancelAttack();
+            if (p.TryGetComponent<UnityEngine.InputSystem.PlayerInput>(out var input))
+            {
+                input.enabled = false;
+            }
+            p.CommitGoldToSO();
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM("Clear_BGM");
+        }
+
+        yield return new WaitForSeconds(4f);
+
+        if (fadeCanvasGroup != null)
+        {
+            yield return StartCoroutine(Fade(1f));
+        }
+
+        SceneManager.LoadScene("MainMenu");
+    }
     private IEnumerator MapTransitionRoutine(GameObject nextMapPrefab)
     {
         isTransitioning = true;
@@ -174,7 +210,6 @@ public class GameManager : MonoBehaviour
         SpawnManager spawnManager = currentMapInstance.GetComponentInChildren<SpawnManager>();
         if (spawnManager != null)
         {
-            // 방금 기억해둔 보상을 새 매니저에게 전달하고 전투 시작
             spawnManager.currentRoomReward = upcomingReward;
             spawnManager.StartRoom();
         }

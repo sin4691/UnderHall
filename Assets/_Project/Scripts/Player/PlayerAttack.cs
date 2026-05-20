@@ -246,23 +246,12 @@ public class PlayerAttack : MonoBehaviour
                     // [처형] 리플렉션으로 EnemyBase의 private 체력 읽어오기
                     if (player.playerData.acquiredGifts.Contains(GiftType.Execution))
                     {
-                        FieldInfo healthField = typeof(EnemyBase).GetField("currentHealth", BindingFlags.NonPublic | BindingFlags.Instance);
-                        FieldInfo dataField = typeof(EnemyBase).GetField("enemyData", BindingFlags.NonPublic | BindingFlags.Instance);
+                        // 방금 EnemyBase에 뚫어둔 통로로 체력 값을 즉시 가져옵니다. (속도 매우 빠름)
+                        float enemyCurrentHP = target.CurrentHealth;
+                        float enemyMaxHP = target.MaxHealth;
 
-                        if (healthField != null && dataField != null)
-                        {
-                            float enemyCurrentHP = (float)healthField.GetValue(target);
-                            var enemyData = dataField.GetValue(target);
-
-                            FieldInfo maxHpField = enemyData.GetType().GetField("maxHealth", BindingFlags.Public | BindingFlags.Instance);
-                            if (maxHpField != null)
-                            {
-                                float enemyMaxHP = (float)maxHpField.GetValue(enemyData);
-
-                                // 체력이 20% 이하면 데미지 2배!
-                                if (enemyCurrentHP <= enemyMaxHP * 0.2f) finalDamage *= 2f;
-                            }
-                        }
+                        // 체력이 20% 이하면 데미지 2배!
+                        if (enemyCurrentHP <= enemyMaxHP * 0.2f) finalDamage *= 2f;
                     }
 
                     // [치명타] 15% 확률로 2배

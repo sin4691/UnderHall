@@ -230,16 +230,6 @@ public class Player : MonoBehaviour
 
         UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
-    private IEnumerator GoToMainMenuRoutine(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        if (GameManager.Instance != null)
-        {
-            yield return StartCoroutine(GameManager.Instance.Fade(1f));
-        }
-
-        SceneManager.LoadScene("MainMenu");
-    }
 
     public void OnDash(InputValue value)
     {

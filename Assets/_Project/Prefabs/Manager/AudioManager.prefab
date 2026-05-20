@@ -54,6 +54,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 7a28902feb72e0f4e945e0b8d19b3ab3, type: 3}
   - name: Death_BGM
     clip: {fileID: 8300000, guid: 2375205092ea73b4191d34c1380b33f6, type: 3}
+  - name: Clear_BGM
+    clip: {fileID: 8300000, guid: 2375205092ea73b4191d34c1380b33f6, type: 3}
   sfxList:
   - name: Footstep_1
     clip: {fileID: 8300000, guid: 1567509a895016d48857d78dbd91173e, type: 3}

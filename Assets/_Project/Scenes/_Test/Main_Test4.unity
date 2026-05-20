@@ -1260,6 +1260,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Dragon
       objectReference: {fileID: 0}
+    - target: {fileID: 2382066045459298468, guid: 590f69f56ae2cc240a45d7c0b6e8f792, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6467269619316742156, guid: 590f69f56ae2cc240a45d7c0b6e8f792, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.36164254
@@ -1356,6 +1360,18 @@ PrefabInstance:
     - target: {fileID: 5417113505185963611, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
+      propertyPath: bgmList.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
+      propertyPath: bgmList.Array.data[3].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 2375205092ea73b4191d34c1380b33f6, type: 3}
+    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
+      propertyPath: bgmList.Array.data[3].name
+      value: Clear_BGM
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
