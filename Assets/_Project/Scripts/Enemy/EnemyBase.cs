@@ -13,9 +13,11 @@ public class EnemyBase : MonoBehaviour
     protected Animator anim;
     protected Transform target;
 
-    protected float currentHealth; // 자식 클래스에서 접근 가능하도록 변경
+    protected float currentHealth; 
     protected float timer;
     protected bool isDead = false;
+
+    protected bool isSuperArmor = false;
 
     public float CurrentHealth => currentHealth;
     public float MaxHealth => enemyData != null ? enemyData.maxHealth : 1f;
@@ -134,15 +136,14 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    public virtual void TakeDamage(float damage, bool isCritical = false) // 오버라이드 가능하도록 변경
-                                                                          //창우_데미지넘버 스포너에서 치명타 여부도 전달받도록 수정 bool isCritical = false 추가
+    public virtual void TakeDamage(float damage, bool isCritical = false)
     {
+        if (isDead) return;
         currentHealth -= damage;
 
         //창우_데미지넘버 스포너에 데미지 정보 전달
         if (DamageNumberSpawner.Instance != null)
             DamageNumberSpawner.Instance.Show(damage, transform.position, isCritical, gameObject);
-
 
         if (currentHealth <= 0)
         {
@@ -150,7 +151,10 @@ public class EnemyBase : MonoBehaviour
         }
         else
         {
-            anim.SetTrigger("Hurt");
+            if (!isSuperArmor)
+            {
+                anim.SetTrigger("Hurt");
+            }
 
             if (vfxPoint != null)
             {
@@ -163,12 +167,31 @@ public class EnemyBase : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
-        agent.isStopped = true;
-        agent.enabled = false;
-        anim.SetTrigger("Death");
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
 
+        StopAllCoroutines();
+        anim.ResetTrigger("Attack");
+        anim.ResetTrigger("Hurt");
+
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+
+        anim.Play("Death");
+
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (Collider col in colliders)
+        {
+            col.enabled = false;
+        }
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;       
+            rb.detectCollisions = false; 
+        }
         if (AudioManager.Instance != null && !string.IsNullOrEmpty(enemyData.deathSoundName))
         {
             AudioManager.Instance.PlaySFX(enemyData.deathSoundName);
@@ -178,10 +201,11 @@ public class EnemyBase : MonoBehaviour
         {
             VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);
         }
+
         Destroy(gameObject, 3f);
     }
 
-    private void OnDrawGizmosSelected()
+    protected virtual void OnDrawGizmosSelected()
     {
         if (enemyData == null) return;
         Gizmos.color = Color.red;
@@ -190,5 +214,4 @@ public class EnemyBase : MonoBehaviour
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, enemyData.detectionRange);
     }
-
 }
