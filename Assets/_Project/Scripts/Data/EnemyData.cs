@@ -46,11 +46,3 @@ public class EnemyData : ScriptableObject
     public string deathSoundName = "Enemy_Death";
 }
 
-public enum EnemyType
-{
-    // 예시라 수정 하셔도됩니다
-    Melee,      // 근접
-    Ranged,     // 원거리
-    Charger,    // 돌진
-    Elite       // 엘리트
-}
