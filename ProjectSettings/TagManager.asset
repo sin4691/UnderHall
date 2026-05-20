@@ -7,11 +7,12 @@ TagManager:
   - Enemy
   - EnemySpawnPoint
   - RewardSpawnPoint
+  - CameraBounds
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - CameraBounds
   - Water
   - UI
   - 

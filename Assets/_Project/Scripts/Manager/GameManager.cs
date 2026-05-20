@@ -123,6 +123,28 @@ public class GameManager : MonoBehaviour
 
         currentMapInstance = Instantiate(nextMapPrefab, Vector3.zero, Quaternion.identity);
 
+
+        //창우_CameraConfinerAutoBinder 찾아서 새 맵의 카메라 바운드 콜라이더 주입하기
+        CameraConfinerAutoBinder autoBinder = FindAnyObjectByType<CameraConfinerAutoBinder>();
+        if (autoBinder != null)
+        {
+            // 생성된 맵 인스턴스 안에서 "CameraBounds" 태그를 가진 오브젝트를 찾습니다.
+            GameObject boundsObj = GameObject.FindWithTag("CameraBounds");
+            if (boundsObj != null)
+            {
+                Collider targetCol = boundsObj.GetComponent<Collider>();
+                if (targetCol != null)
+                {
+                    // 수동으로 카메라에게 새 콜라이더 주입!
+                    autoBinder.AssignBounds(targetCol);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[GameManager] 새 맵에서 'CameraBounds' 태그를 가진 오브젝트를 찾지 못했습니다.");
+            }
+        }
+
         Transform spawnPoint = currentMapInstance.transform.Find("SpawnPoint");
         if (spawnPoint != null)
         {
