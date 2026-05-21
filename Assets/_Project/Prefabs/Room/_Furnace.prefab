@@ -5194,6 +5194,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
+      propertyPath: tierData
+      value: 
+      objectReference: {fileID: 11400000, guid: 53c7bfefc233f8a4e854173601645ab9, type: 2}
+    - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
       propertyPath: exitDoors.Array.size
       value: 2
       objectReference: {fileID: 0}
