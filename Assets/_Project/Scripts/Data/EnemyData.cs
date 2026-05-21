@@ -14,7 +14,7 @@ public class EnemyData : ScriptableObject
     [Header("===== 스탯 =====")]
 
     [Tooltip("최대 체력")]
-    [Range(1, 500)]
+    [Range(1, 1000)]
     public float maxHealth = 30f;
 
     [Tooltip("이동 속도")]
@@ -38,7 +38,7 @@ public class EnemyData : ScriptableObject
     [Header("===== AI =====")]
 
     [Tooltip("플레이어 감지 거리")]
-    [Range(1, 30)]
+    [Range(1, 100)]
     public float detectionRange = 10f;
 
     [Header("Sound Settings")]
