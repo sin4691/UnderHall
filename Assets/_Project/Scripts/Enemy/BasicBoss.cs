@@ -54,6 +54,9 @@ public class BasicBoss : EnemyBase
     protected override void Start()
     {
         base.Start();
+
+        isSuperArmor = true; // 보스 상시 슈퍼아머 적용
+
         transform.position += new Vector3(0, startHeight, 0);
         agent.enabled = false;
         SetNextBreathThreshold();
@@ -64,6 +67,8 @@ public class BasicBoss : EnemyBase
     protected override void Update()
     {
         if (isDead) return;
+
+        timer += Time.deltaTime; // 일반 공격 쿨타임 타이머 갱신
 
         if (!isAwake)
         {
@@ -148,7 +153,7 @@ public class BasicBoss : EnemyBase
                     if (isPhase2) StartCoroutine(ExecutePhase2Pattern());
                     else StartCoroutine(BreathAttackRoutine());
                 }
-                else
+                else if (timer >= attackCooldown) // 공격 쿨타임 확인 후 실행
                 {
                     isAttacking = true;
                     StartCoroutine(AttackRoutine());
@@ -238,7 +243,7 @@ public class BasicBoss : EnemyBase
             if (i < jumpCount - 1) yield return new WaitForSeconds(0.3f);
         }
 
-        yield return new WaitForSeconds(1.2f);
+        yield return new WaitForSeconds(0.5f); // 도약 공격 후 대기 시간
 
         lastLeapTime = Time.time;
         SetGhostMode(false);
@@ -273,8 +278,11 @@ public class BasicBoss : EnemyBase
         StartCoroutine(SmoothFaceTarget(0.5f, 15f));
         anim.SetTrigger("Attack");
         basicAttackCount++;
-        yield return new WaitForSeconds(1.0f + attackCooldown);
+
+        yield return new WaitForSeconds(0.8f); // 공격 애니메이션 대기 후 이동 재개 가능
+
         isAttacking = false;
+        timer = 0f; // 일반 공격 쿨타임 초기화
     }
 
     IEnumerator BreathAttackRoutine()
@@ -290,7 +298,7 @@ public class BasicBoss : EnemyBase
 
         if (closeRangeVFX != null) { closeRangeVFX.SetActive(true); }
 
-        float timer = 0f;
+        float timerForBreath = 0f;
         float totalDuration = 6.0f;
         float damageTickRate = 0.2f;
         float nextDamageTime = 0f;
@@ -298,13 +306,13 @@ public class BasicBoss : EnemyBase
         Vector3 boxCenter = transform.position + transform.rotation * boxOffset;
         Vector3 halfExtents = new Vector3(boxSize.x / 2, boxHeight / 2, boxSize.y / 2);
 
-        while (timer < totalDuration)
+        while (timerForBreath < totalDuration)
         {
             if (isDead) yield break;
 
             boxCenter = transform.position + transform.rotation * boxOffset;
 
-            if (timer >= nextDamageTime)
+            if (timerForBreath >= nextDamageTime)
             {
                 Collider[] hits = Physics.OverlapBox(boxCenter, halfExtents, transform.rotation);
                 foreach (Collider hit in hits)
@@ -317,7 +325,7 @@ public class BasicBoss : EnemyBase
                 nextDamageTime += damageTickRate;
             }
 
-            timer += Time.deltaTime;
+            timerForBreath += Time.deltaTime;
             yield return null;
         }
 
@@ -326,7 +334,7 @@ public class BasicBoss : EnemyBase
         basicAttackCount = 0;
         SetNextBreathThreshold();
 
-        yield return new WaitForSeconds(breathCooldown);
+        yield return new WaitForSeconds(0.8f); // 브레스 패턴 종료 후 대기 시간
 
         isBreathActive = false;
         isAttacking = false;
@@ -411,15 +419,15 @@ public class BasicBoss : EnemyBase
 
     IEnumerator SmoothFaceTarget(float duration, float rotationSpeed)
     {
-        float timer = 0f;
-        while (timer < duration)
+        float t = 0f;
+        while (t < duration)
         {
             if (target != null)
             {
                 Vector3 direction = (target.position - transform.position).normalized; direction.y = 0;
                 if (direction != Vector3.zero) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * rotationSpeed);
             }
-            timer += Time.deltaTime; yield return null;
+            t += Time.deltaTime; yield return null;
         }
     }
 
@@ -448,6 +456,9 @@ public class BasicBoss : EnemyBase
         Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position + transform.rotation * boxOffset, transform.rotation, Vector3.one);
         Gizmos.matrix = rotationMatrix;
         Gizmos.DrawWireCube(Vector3.zero, new Vector3(boxSize.x, boxHeight, boxSize.y));
+
+        Gizmos.matrix = Matrix4x4.identity; // 기즈모 그리기용 매트릭스 원상복구
+
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, leapRadius);
     }

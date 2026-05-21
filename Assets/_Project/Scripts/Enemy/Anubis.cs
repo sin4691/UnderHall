@@ -8,6 +8,8 @@ public class Anubis : EnemyBase
     private float spinTimer = 0f;
     public float spinHitRadius = 3.5f;
     public float spinDamage = 30f;
+    private float nextFinchTime = 0f;
+
 
     protected override void Update()
     {
@@ -111,7 +113,15 @@ public class Anubis : EnemyBase
     {
         base.TakeDamage(damage, isCritical);
 
-        if (!isSuperArmor && currentHealth > 0)
+        AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+        bool isAttackingNow = stateInfo.IsName("Attack");
+        bool isSpinningNow = stateInfo.IsName("SpinAttack");
+
+        if (isSuperArmor || isAttackingNow || isSpinningNow)
+        {
+            anim.ResetTrigger("Hurt");
+        }
+        else if (currentHealth > 0)
         {
             StopAllCoroutines();
         }
