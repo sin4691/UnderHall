@@ -62,6 +62,7 @@ MonoBehaviour:
   monsterDeathSmokePrefab: {fileID: 0}
   bossAttackPrefab: {fileID: 0}
   bossBreathPrefab: {fileID: 5058549489459257812, guid: d39dd2810133cf34d8cb804fa333b82f, type: 3}
+  bossRushPrefab: {fileID: 1267622881173442705, guid: c15e6ae34ba4f4342aaea160e0d30071, type: 3}
   bossFlyAttackPrefab: {fileID: 0}
   bossFlyBreathPrefab: {fileID: 0}
   bossDivePrefab: {fileID: 0}
@@ -71,4 +72,3 @@ MonoBehaviour:
   hitFlashDuration: 0.12
   roomClearVFXPrefab: {fileID: 0}
   rewardAppearVFXPrefab: {fileID: 1228946162475541010, guid: de04edbdac79d394b976db37021bf254, type: 3}
-  dissolveDuration: 1.2
