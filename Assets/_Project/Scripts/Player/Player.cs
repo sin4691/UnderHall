@@ -91,6 +91,21 @@ public class Player : MonoBehaviour
         Debug.Log($"플레이어 피격! 남은 체력: {currentHealth}");
         if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
 
+        //창우_UI매니저 호출해서 HP 깎는 애니메이션과 HP 흔드는 애니메이션을 동시에 실행합니다.
+        if (UIManager.Instance != null)
+        {
+            //창우_먼저 UI의 실제 HP 수치와 게이지를 깎고
+            UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
+
+            //창우_그와 동시에 HP  흔들어 줍니다.
+            UIManager.Instance.PlayHealthBarShake();
+        }
+        // 창우_카메라 매니저를 호출하여 화면 흔들기 + 붉은색 플래시 융합 터뜨리기
+        if (CameraManager.Instance != null)
+        {
+            CameraManager.Instance.ShakeOnHit();
+        }
+
         VFXManager.Instance.PlayPlayerHit(vfxPoint.position, Vector3.up, gameObject);
 
         if (currentHealth > 0 && AudioManager.Instance != null)

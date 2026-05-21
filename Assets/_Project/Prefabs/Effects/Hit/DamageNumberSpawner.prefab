@@ -46,5 +46,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DamageNumberSpawner
   damageNumberPrefab: {fileID: 2380452521349780371, guid: 9e6759848c13ebe4997415fc5c67da5c, type: 3}
   baseHeight: 2
-  spacing: 1
-  groupTime: 1
+  spacing: 0.5
+  groupTime: 1.6

@@ -21,6 +21,39 @@ public class HardwareSoftCursor : MonoBehaviour
     public LayerMask enemyLayer;
 
     private bool isOverEnemy = false;
+    void Awake()
+    {
+        var objs = FindObjectsOfType<HardwareSoftCursor>();
+        if (objs.Length > 1)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+
+        if (transform.parent != null)
+            DontDestroyOnLoad(transform.root.gameObject); 
+        else
+            DontDestroyOnLoad(gameObject);
+
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    //  오브젝트가 메모리에서 지워질 때 이벤트 연결을 해제해 줍니다. (메모리 누수 방지)
+    private void OnDestroy()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    //  유니티가 씬을 새로 읽자마자 발동되는 함수
+    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        // 유니티가 씬 바꿨다고 윈도우 커서를 멋대로 켰으니, 로드 직후 다시 강제로 숨겨버립니다.
+        Cursor.visible = false;
+
+        // 추가로 씬이 바뀌었으니 새로운 씬의 메인 카메라를 즉시 다시 조준합니다.
+        mainCamera = Camera.main;
+    }
 
     void Start()
     {
@@ -37,9 +70,12 @@ public class HardwareSoftCursor : MonoBehaviour
         }
     }
 
-    // ★ 마우스 싱크 문제를 잡기 위해 렌더링 직전 단계인 LateUpdate로 위치 이동을 옮깁니다.
+    // 마우스 싱크 문제를 잡기 위해 렌더링 직전 단계인 LateUpdate로 위치 이동을 옮깁니다.
     void LateUpdate()
     {
+        if (Cursor.visible)
+            Cursor.visible = false;
+
         // 1. 마우스 위치 실시간 동기화
         Vector2 mousePos = Mouse.current.position.ReadValue();
         rectTransform.position = mousePos;
@@ -47,7 +83,7 @@ public class HardwareSoftCursor : MonoBehaviour
         // 2. 몬스터 레이캐스트 체크
         CheckEnemyUnderCursor(mousePos);
 
-        // 3. 클릭 입력 처리 및 쫀득한 두트윈 연출
+        // 3. 클릭 입력 처리 및 연출
         HandleMouseClick();
     }
 
@@ -65,7 +101,7 @@ public class HardwareSoftCursor : MonoBehaviour
             {
                 isOverEnemy = true;
 
-                // [변경 포인트] 몬스터 위에 올라갔을 때 모양은 B로 바뀌지만, 색상은 A의 기본 색상(흰색)을 유지합니다.
+                //몬스터 위에 올라갔을 때 모양은 B로 바뀌지만, 색상은 A의 기본 색상(흰색)을 유지합니다.
                 ChangeCursorShape(cursorB_Attack, normalColor, 1.1f);
             }
         }
@@ -89,13 +125,13 @@ public class HardwareSoftCursor : MonoBehaviour
             rectTransform.DOKill();
             cursorImage.DOKill();
 
-            // 공통 크기 튕김 연출 (쫀득하게 크기 키우기)
+            // 공통 크기 튕김 연출 
             rectTransform.localScale = Vector3.one * 1.3f;
             rectTransform.DOScale(1f, 0.12f).SetEase(Ease.OutQuad);
 
             if (isOverEnemy)
             {
-                // ★ [핵심 기믹] 몬스터 위에서 클릭했다면, 순간적으로 B의 색상(붉은색)으로 강렬하게 변경!
+                // 핵심 기믹 몬스터 위에서 클릭했다면, 순간적으로 B의 색상(붉은색)으로 변경!
                 cursorImage.color = attackClickColor;
                 // 클릭 후 0.15초 동안 다시 은은하게 평소 색상(A색)으로 돌아오게 만듭니다.
                 cursorImage.DOColor(normalColor, 0.15f);
