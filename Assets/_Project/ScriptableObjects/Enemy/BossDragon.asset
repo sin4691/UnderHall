@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: 
   enemyType: 3
-  maxHealth: 300
+  maxHealth: 500
   moveSpeed: 5
-  damage: 1
+  damage: 10
   attackRange: 10
   attackCooldown: 1
   detectionRange: 30
+  attackSoundName: Enemy_Attack
+  deathSoundName: Enemy_Death
