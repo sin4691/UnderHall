@@ -189,6 +189,12 @@ public class BasicBoss : EnemyBase
         {
             anim.SetTrigger("Jump");
 
+            // 창우_ [추가] 공중으로 뛰어오르는 순간 공중 공격 이펙트 재생 (FlyAttack)
+            if (VFXManager.Instance != null && vfxPoint != null)
+            {
+                VFXManager.Instance.PlayBossFlyAttack(vfxPoint);
+            }
+
             Vector3 startPos = transform.position;
             Vector3 peakPos = startPos + Vector3.up * leapHeight;
 
@@ -224,19 +230,44 @@ public class BasicBoss : EnemyBase
                 transform.rotation = Quaternion.LookRotation(lookDir);
             }
 
+            //창우_[추가] 공중에서 플레이어를 향해 수직 낙하(다이브)를 시작하는 타이밍 (FlyDive)
+            if (VFXManager.Instance != null && vfxPoint != null)
+            {
+                VFXManager.Instance.PlayBossDive(vfxPoint);
+            }
+
             t = 0;
             Vector3 dropStartPos = transform.position;
             while (t < 0.15f)
             {
                 if (isDead) yield break;
+
+
                 transform.position = Vector3.Lerp(dropStartPos, targetPos, t / 0.15f);
-                t += Time.deltaTime;
+                t += Time.unscaledDeltaTime;
+                //t += Time.deltaTime;
                 yield return null;
             }
             transform.position = targetPos;
 
             anim.SetTrigger("Land");
+
+            //창우_[추가] 바닥 밟는 순간 화면 진동
+            if (CameraManager.Instance != null)
+            {
+                CameraManager.Instance.ShakeOnBossSlam();
+            }
+            if (VFXManager.Instance != null)
+                VFXManager.Instance.PlayBossSlam(targetPos);
+
+
             if (warningVFX != null) warningVFX.SetActive(false);
+
+            //창우_[변경] 바닥 착지 후 쾅! 터지는 슬램 연출을 VFX 매니저의 지상 공격 풀링으로 변경
+            if (VFXManager.Instance != null)
+            {
+                VFXManager.Instance.PlayBossAttack(targetPos, transform.forward);
+            }
 
             if (slamVFX != null)
             {

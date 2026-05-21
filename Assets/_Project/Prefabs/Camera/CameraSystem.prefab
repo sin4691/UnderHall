@@ -59,6 +59,15 @@ MonoBehaviour:
   flashInDuration: 0.02
   flashOutDuration: 0.16
   hitDistortionStrength: 0.45
+  bossSlamShakeX: 0.5
+  bossSlamShakeY: 0.8
+  slamFOVPunch: 15
+  slamFOVInDuration: 0.02
+  slamFOVOutDuration: 1
+  slamSlowMotionScale: 0.4
+  slamSlowMotionDuration: 0.8
+  slamFlashColor: {r: 1, g: 1, b: 1, a: 0.5}
+  slamFlashDuration: 0.12
 --- !u!1001 &5639233155483721574
 PrefabInstance:
   m_ObjectHideFlags: 0
