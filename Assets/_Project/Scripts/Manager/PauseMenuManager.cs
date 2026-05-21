@@ -26,6 +26,9 @@ public class PauseMenuManager : MonoBehaviour
 
     private bool isPaused = false;
 
+    //창우_[추가] 외부에서 일시정지 상태를 확인할 수 있도록 프로퍼티 추가
+    public bool IsPaused => isPaused;
+
     private void Start()
     {
         pausePanel.SetActive(false);
