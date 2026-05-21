@@ -4,12 +4,12 @@ using TMPro;
 
 public class UpgradeCardUI : MonoBehaviour
 {
-    public enum UpgradeType { HP, ATK, Dash, Gold, Revive }
+    public enum UpgradeType { HP, ATK, Dash, Gold, Revive, Speed }
 
-    [Header("ÀÌ Ä«µå°¡ ´ã´çÇÒ °­È­")]
+    [Header("ì´ ì¹´ë“œê°€ ë‹´ë‹¹í•  ê°•í™”")]
     [SerializeField] private UpgradeType upgradeType;
 
-    [Header("UI ÂüÁ¶")]
+    [Header("UI ì°¸ì¡°")]
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private TMP_Text descriptionText;
     [SerializeField] private TMP_Text effectText;
@@ -18,7 +18,7 @@ public class UpgradeCardUI : MonoBehaviour
     [SerializeField] private Button buyButton;
     [SerializeField] private TMP_Text buyButtonText;
 
-    [Header("¾ÆÀÌÄÜ")]
+    [Header("ì•„ì´ì½˜")]
     [SerializeField] private Image iconImage;
     [SerializeField] private Sprite iconSprite;
 
@@ -51,6 +51,7 @@ public class UpgradeCardUI : MonoBehaviour
             case UpgradeType.Dash: lm.BuyUpgradeDASH(); break;
             case UpgradeType.Gold: lm.BuyUpgradeGOLD(); break;
             case UpgradeType.Revive: lm.BuyUpgradeREVIVE(); break;
+            case UpgradeType.Speed: lm.BuyUpgradeSPEED(); break;
         }
     }
 
@@ -72,13 +73,13 @@ public class UpgradeCardUI : MonoBehaviour
         if (cost < 0)
         {
             costText.text = "MAX";
-            buyButtonText.text = "¿Ï·á";
+            buyButtonText.text = "ì™„ë£Œ";
             buyButton.interactable = false;
         }
         else
         {
             costText.text = $"{cost} G";
-            buyButtonText.text = "±¸¸Å";
+            buyButtonText.text = "êµ¬ë§¤";
             buyButton.interactable = (pd.currentGold >= cost);
         }
     }
@@ -92,6 +93,7 @@ public class UpgradeCardUI : MonoBehaviour
             case UpgradeType.Dash: return pd.levelDash;
             case UpgradeType.Gold: return pd.levelGold;
             case UpgradeType.Revive: return pd.levelRevive;
+            case UpgradeType.Speed: return pd.levelSpeed;
         }
         return 0;
     }
@@ -106,11 +108,12 @@ public class UpgradeCardUI : MonoBehaviour
     {
         switch (upgradeType)
         {
-            case UpgradeType.HP: return "°­ÀÎÇÑ ½ÅÃ¼";
-            case UpgradeType.ATK: return "³¯Ä«·Î¿î °Ë";
-            case UpgradeType.Dash: return "ÀÌÁß µµ¾à";
-            case UpgradeType.Gold: return "È²±İ ¼Õ±æ";
-            case UpgradeType.Revive: return "ºÒ»çÀÇ °¡È£";
+            case UpgradeType.HP: return "ê°•ì¸í•œ ì‹ ì²´";
+            case UpgradeType.ATK: return "ë‚ ì¹´ë¡œìš´ ê²€";
+            case UpgradeType.Dash: return "ì´ì¤‘ ë„ì•½";
+            case UpgradeType.Gold: return "í™©ê¸ˆ ì†ê¸¸";
+            case UpgradeType.Revive: return "ë¶ˆì‚¬ì˜ ê°€í˜¸";
+            case UpgradeType.Speed: return "ì‹ ì†í•œ ë°œ";
         }
         return "";
     }
@@ -119,11 +122,12 @@ public class UpgradeCardUI : MonoBehaviour
     {
         switch (upgradeType)
         {
-            case UpgradeType.HP: return "ÃÖ´ë Ã¼·Â Áõ°¡·®";
-            case UpgradeType.ATK: return "°ø°İ·Â Áõ°¡·®";
-            case UpgradeType.Dash: return "¿¬¼Ó ´ë½¬ +1";
-            case UpgradeType.Gold: return "°ñµå È¹µæ·® Áõ°¡";
-            case UpgradeType.Revive: return "»ç¸Á ½Ã 1È¸ ºÎÈ°";
+            case UpgradeType.HP: return "ìµœëŒ€ ì²´ë ¥ ì¦ê°€ëŸ‰";
+            case UpgradeType.ATK: return "ê³µê²©ë ¥ ì¦ê°€ëŸ‰";
+            case UpgradeType.Dash: return "ì—°ì† ëŒ€ì‰¬ +1";
+            case UpgradeType.Gold: return "ê³¨ë“œ íšë“ëŸ‰ ì¦ê°€";
+            case UpgradeType.Revive: return "ì‚¬ë§ ì‹œ 1íšŒ ë¶€í™œ";
+            case UpgradeType.Speed: return "ì´ë™ ì†ë„ ì¦ê°€ëŸ‰";
         }
         return "";
     }
@@ -134,19 +138,22 @@ public class UpgradeCardUI : MonoBehaviour
         {
             case UpgradeType.HP:
                 if (level >= maxLevel) return $"+{lm.GetBonusHP(level)} (MAX)";
-                return $"+{lm.GetBonusHP(level)} ¡æ +{lm.GetBonusHP(level + 1)}";
+                return $"+{lm.GetBonusHP(level)} â†’ +{lm.GetBonusHP(level + 1)}";
             case UpgradeType.ATK:
                 if (level >= maxLevel) return $"+{lm.GetBonusATK(level)} (MAX)";
-                return $"+{lm.GetBonusATK(level)} ¡æ +{lm.GetBonusATK(level + 1)}";
+                return $"+{lm.GetBonusATK(level)} â†’ +{lm.GetBonusATK(level + 1)}";
             case UpgradeType.Dash:
-                if (level >= maxLevel) return "+1 ´ë½¬ (MAX)";
-                return "+1 ´ë½¬ È¹µæ";
+                if (level >= maxLevel) return "+1 ëŒ€ì‰¬ (MAX)";
+                return "+1 ëŒ€ì‰¬ íšë“";
             case UpgradeType.Gold:
                 if (level >= maxLevel) return $"+{lm.GetBonusGold(level) * 100:0}% (MAX)";
-                return $"+{lm.GetBonusGold(level) * 100:0}% ¡æ +{lm.GetBonusGold(level + 1) * 100:0}%";
+                return $"+{lm.GetBonusGold(level) * 100:0}% â†’ +{lm.GetBonusGold(level + 1) * 100:0}%";
             case UpgradeType.Revive:
                 if (level >= maxLevel) return $"{lm.GetSetRevive(level) * 100:0}% (MAX)";
-                return $"{lm.GetSetRevive(level) * 100:0}% ¡æ {lm.GetSetRevive(level + 1) * 100:0}%";
+                return $"{lm.GetSetRevive(level) * 100:0}% â†’ {lm.GetSetRevive(level + 1) * 100:0}%";
+            case UpgradeType.Speed:
+                if (level >= maxLevel) return $"+{lm.GetBonusSpeed(level)} (MAX)";
+                return $"+{lm.GetBonusSpeed(level)} â†’ +{lm.GetBonusSpeed(level + 1)}";
         }
         return "";
     }
