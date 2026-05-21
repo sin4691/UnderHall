@@ -332,6 +332,12 @@ public class PlayerAttack : MonoBehaviour
         if (player.playerData.acquiredGifts.Contains(GiftType.RapidFire))
             finalCooldown *= 0.7f;
 
+        //창우_특수 공격 쿨타임 UI 연출 시작 트리거 (축소된 최종 쿨타임 반영)
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.StartSkillCooltime(finalCooldown);
+        }
+
         yield return new WaitForSeconds(finalCooldown);
         isSpecialAttackOnCooldown = false;
     }

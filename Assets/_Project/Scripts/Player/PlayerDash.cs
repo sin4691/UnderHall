@@ -38,6 +38,12 @@ public class PlayerDash : MonoBehaviour
         if (cooldownCoroutine != null) StopCoroutine(cooldownCoroutine);
         cooldownCoroutine = StartCoroutine(DashCooldownRoutine());
 
+        //창우_대시 UI 연출 시작 트리거
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.StartDashCooltime(player.playerData.dashCooldown);
+        }
+
         if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
         {
             player.attack.CancelAttack();
