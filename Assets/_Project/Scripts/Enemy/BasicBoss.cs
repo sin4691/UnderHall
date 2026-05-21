@@ -8,7 +8,8 @@ public class BasicBoss : EnemyBase
     public float attackDamage = 20f;
     public float attackCooldown = 2f;
     public float attackRadius = 3.0f;
-    public Transform attackPoint;
+    public Transform attackPoint; // 기존 방식 흔적 (안 쓰지만 에러 방지용으로 냅둠)
+    public Vector3 attackOffset = new Vector3(0, 1f, 2f); // 추가된 공격 위치 오프셋!
 
     [Header("─ 브레스 패턴 설정 ─")]
     public float breathCooldown = 3.5f;
@@ -57,6 +58,7 @@ public class BasicBoss : EnemyBase
 
         isSuperArmor = true; // 보스 상시 슈퍼아머 적용
 
+
         transform.position += new Vector3(0, startHeight, 0);
         agent.enabled = false;
         SetNextBreathThreshold();
@@ -90,13 +92,21 @@ public class BasicBoss : EnemyBase
 
         if (target != null && agent.enabled && !agent.isStopped)
         {
-            Vector3 lookDir = target.position - transform.position;
-            lookDir.y = 0;
-            if (lookDir != Vector3.zero)
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 15f);
+            Vector3 moveDir = agent.desiredVelocity;
+            moveDir.y = 0;
+
+            if (moveDir.sqrMagnitude > 0.1f)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(moveDir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 3f);
+            }
+
             anim.SetFloat("MoveSpeed", agent.velocity.magnitude);
         }
-        else anim.SetFloat("MoveSpeed", 0f);
+        else
+        {
+            anim.SetFloat("MoveSpeed", 0f);
+        }
     }
 
     public override void TakeDamage(float damage, bool isCritical = false)
@@ -274,15 +284,18 @@ public class BasicBoss : EnemyBase
 
     IEnumerator AttackRoutine()
     {
-        agent.isStopped = true; agent.velocity = Vector3.zero;
-        StartCoroutine(SmoothFaceTarget(0.5f, 15f));
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+
+        yield return StartCoroutine(SmoothFaceTarget(0.4f, 5f));
+
         anim.SetTrigger("Attack");
         basicAttackCount++;
 
-        yield return new WaitForSeconds(0.8f); // 공격 애니메이션 대기 후 이동 재개 가능
+        yield return new WaitForSeconds(0.6f);
 
         isAttacking = false;
-        timer = 0f; // 일반 공격 쿨타임 초기화
+        timer = 0f;
     }
 
     IEnumerator BreathAttackRoutine()
@@ -436,8 +449,13 @@ public class BasicBoss : EnemyBase
     public void OnAttackHit()
     {
         if (target == null) return;
-        if (attackPoint != null) VFXManager.Instance.PlayBossAttack(attackPoint.position, transform.forward);
-        Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRadius);
+
+        // 오프셋을 적용한 실제 타격 지점 계산
+        Vector3 hitCenter = transform.position + transform.rotation * attackOffset;
+
+        if (VFXManager.Instance != null) VFXManager.Instance.PlayBossAttack(hitCenter, transform.forward);
+
+        Collider[] hitPlayers = Physics.OverlapSphere(hitCenter, attackRadius);
         foreach (Collider hit in hitPlayers)
             if (hit.CompareTag("Player")) hit.GetComponent<Player>()?.TakeDamage(attackDamage);
     }
@@ -447,11 +465,11 @@ public class BasicBoss : EnemyBase
 
     protected override void OnDrawGizmosSelected()
     {
-        if (attackPoint != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
-        }
+        // 오프셋 위치에 맞춰서 빨간 원 그리기
+        Vector3 hitCenter = transform.position + transform.rotation * attackOffset;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(hitCenter, attackRadius);
+
         Gizmos.color = Color.red;
         Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position + transform.rotation * boxOffset, transform.rotation, Vector3.one);
         Gizmos.matrix = rotationMatrix;

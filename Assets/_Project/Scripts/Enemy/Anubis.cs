@@ -8,7 +8,8 @@ public class Anubis : EnemyBase
     private float spinTimer = 0f;
     public float spinHitRadius = 3.5f;
     public float spinDamage = 30f;
-    private float nextFinchTime = 0f;
+    private float nextFlinchTime = 0f;
+    public float flinchCooldown = 4f;
 
 
     protected override void Update()
@@ -121,9 +122,15 @@ public class Anubis : EnemyBase
         {
             anim.ResetTrigger("Hurt");
         }
+        else if (Time.time < nextFlinchTime)
+        {
+            anim.ResetTrigger("Hurt");
+        }
         else if (currentHealth > 0)
         {
             StopAllCoroutines();
+
+            nextFlinchTime = Time.time + flinchCooldown;
         }
     }
     protected override void OnDrawGizmosSelected()
