@@ -15362,7 +15362,7 @@ PrefabInstance:
     - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
       propertyPath: tierData
       value: 
-      objectReference: {fileID: 11400000, guid: 3934e8ac0815048429b13c11b0a8d4ef, type: 2}
+      objectReference: {fileID: 11400000, guid: c736a159accc77a4fb833e9ef331e0a9, type: 2}
     - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
       propertyPath: exitDoors.Array.size
       value: 2

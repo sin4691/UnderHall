@@ -12,23 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4820979b2bee3d4d979198fde6083f0, type: 3}
   m_Name: Tier2
   m_EditorClassIdentifier: Assembly-CSharp::TierData
+  enemyPool:
+  - enemyType: 1
+    enemyPrefab: {fileID: 564942560969224847, guid: d2b0f00502b7f8548b2a381237f0ca9b, type: 3}
+  - enemyType: 2
+    enemyPrefab: {fileID: 4652216871073188307, guid: a9a9751081df30147b2a151cd4114ab3, type: 3}
+  - enemyType: 0
+    enemyPrefab: {fileID: 1687552356792510833, guid: b7aaecc0fbf131e44b70569e4b136de6, type: 3}
   wave1:
     spawnInfos:
-    - enemyPrefab: {fileID: 6631393216345816413, guid: 300a17bc28055de4f8f4c9ad69911f56, type: 3}
-      count: 2
-    - enemyPrefab: {fileID: 8734851924109653997, guid: 1d71361d821e1b5489f96ce05c6560bc, type: 3}
-      count: 2
+    - enemyType: 1
+      count: 5
+    - enemyType: 2
+      count: 3
   wave2:
     spawnInfos:
-    - enemyPrefab: {fileID: 6631393216345816413, guid: 300a17bc28055de4f8f4c9ad69911f56, type: 3}
+    - enemyType: 0
       count: 2
-    - enemyPrefab: {fileID: 8734851924109653997, guid: 1d71361d821e1b5489f96ce05c6560bc, type: 3}
+    - enemyType: 2
       count: 2
-    - enemyPrefab: {fileID: 1687552356792510833, guid: b7aaecc0fbf131e44b70569e4b136de6, type: 3}
-      count: 1
   wave3:
     spawnInfos:
-    - enemyPrefab: {fileID: 8734851924109653997, guid: 1d71361d821e1b5489f96ce05c6560bc, type: 3}
-      count: 4
-    - enemyPrefab: {fileID: 1687552356792510833, guid: b7aaecc0fbf131e44b70569e4b136de6, type: 3}
+    - enemyType: 0
+      count: 2
+    - enemyType: 1
+      count: 6
+    - enemyType: 2
       count: 2
