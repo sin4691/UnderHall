@@ -28,7 +28,7 @@ public class PlayerData : ScriptableObject
     public float attackRange = 1.5f;
 
     [Tooltip("특수 공격 데미지 배율")]
-    [Range(1f, 5f)]
+    [Range(0.1f, 5f)]
     public float specialAttackMultiplier = 3f;
 
     [Tooltip("특수 공격 타격 반경")]
@@ -86,12 +86,61 @@ public class PlayerData : ScriptableObject
     public float goldGainMultiplier = 1.0f;
 
     [Header("강화 레벨 (0이 기본상태)")]
-    public int levelHP = 0;     
-    public int levelATK = 0;    
-    public int levelDash = 0;   
-    public int levelGold = 0;   
+    public int levelHP = 0;
+    public int levelATK = 0;
+    public int levelDash = 0;
+    public int levelGold = 0;
     public int levelRevive = 0;
+    public int levelSpeed = 0;
 
     [Header("===== 인게임 획득 기프트 (현재 런) =====")]
     public System.Collections.Generic.List<GiftType> acquiredGifts = new System.Collections.Generic.List<GiftType>();
+
+    // PlayerData.cs 파일의 맨 아래쪽에 이 함수를 덮어씌우세요.
+    public void ResetRunData()
+    {
+        acquiredGifts.Clear();
+
+        float[] bonusHP = { 0, 10, 20, 35, 50, 70 };
+        float[] bonusATK = { 0, 2, 4, 7, 10, 15 };
+        float[] bonusGold = { 0f, 0.1f, 0.2f, 0.3f, 0.5f, 1.0f };
+        float[] setRevive = { 0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f };
+        float[] bonusSpeed = { 0f, 0.5f, 1.0f, 1.5f, 2.0f, 2.5f }; 
+
+        maxHealth = 100f + bonusHP[levelHP];
+        damage = 10f + bonusATK[levelATK];
+        maxDashCount = 2 + levelDash;
+        goldGainMultiplier = 1.0f + bonusGold[levelGold];
+        maxResurrectionCount = (levelRevive > 0) ? 1 : 0;
+        resurrectionHealthPercent = setRevive[levelRevive];
+
+        moveSpeed = 5f + bonusSpeed[levelSpeed]; 
+
+        Debug.Log("[PlayerData] 모든 인게임 데이터가 초기화되었습니다.");
+    }
+
+    public void SaveToDevice()
+    {
+        PlayerPrefs.SetInt("Meta_Gold", currentGold);
+        PlayerPrefs.SetInt("Meta_LevelHP", levelHP);
+        PlayerPrefs.SetInt("Meta_LevelATK", levelATK);
+        PlayerPrefs.SetInt("Meta_LevelDash", levelDash);
+        PlayerPrefs.SetInt("Meta_LevelGold", levelGold);
+        PlayerPrefs.SetInt("Meta_LevelRevive", levelRevive);
+        PlayerPrefs.SetInt("Meta_LevelSpeed", levelSpeed); 
+        PlayerPrefs.Save();
+        Debug.Log("[PlayerData] 기기에 데이터 영구 저장 완료!");
+    }
+
+    public void LoadFromDevice()
+    {
+        currentGold = PlayerPrefs.GetInt("Meta_Gold", 0);
+        levelHP = PlayerPrefs.GetInt("Meta_LevelHP", 0);
+        levelATK = PlayerPrefs.GetInt("Meta_LevelATK", 0);
+        levelDash = PlayerPrefs.GetInt("Meta_LevelDash", 0);
+        levelGold = PlayerPrefs.GetInt("Meta_LevelGold", 0);
+        levelRevive = PlayerPrefs.GetInt("Meta_LevelRevive", 0);
+        levelSpeed = PlayerPrefs.GetInt("Meta_LevelSpeed", 0); 
+        Debug.Log("[PlayerData] 기기에서 데이터를 성공적으로 불러왔습니다!");
+    }
 }

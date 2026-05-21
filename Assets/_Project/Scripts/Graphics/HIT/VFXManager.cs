@@ -3,18 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// VFX 통합 매니저 (오브젝트 풀링 적용)
-/// 씬에 빈 오브젝트 만들고 이 스크립트 붙이면 됨
-/// 이름: VFXManager
-/// [몬스터 담당]
-/// 몬스터 피격:         VFXManager.Instance.PlayMonsterHit(vfxPoint.position, Vector3.up, gameObject);
-/// 몬스터 사망:         VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);
-/// [보스 드래곤]
-/// 지상 공격:           VFXManager.Instance.PlayBossAttack(vfxPoint.position, transform.forward);
-/// 지상 브레스:         VFXManager.Instance.PlayBossBreath(vfxPoint.position, transform.forward);
-/// 공중 공격:           VFXManager.Instance.PlayBossFlyAttack(vfxPoint.position, transform.forward);
-/// 공중 브레스:         VFXManager.Instance.PlayBossFlyBreath(vfxPoint.position, transform.forward);
-/// 공중 다이브:         VFXManager.Instance.PlayBossDive(vfxPoint.position, transform.forward);
+/// VFX 통합 매니저 (오브젝트 풀링 및 MaterialPropertyBlock 최적화 적용)
 /// </summary>
 public class VFXManager : MonoBehaviour
 {
@@ -53,6 +42,7 @@ public class VFXManager : MonoBehaviour
     [Header("─ 보스 지상 이펙트 ─")]
     [SerializeField] GameObject bossAttackPrefab;       // Attack / Attack02
     [SerializeField] GameObject bossBreathPrefab;       // BreatheFire
+    [SerializeField] GameObject bossRushPrefab;         //  [추가] 보스 드래곤 돌진 이펙트
 
     [Header("─ 보스 공중 이펙트 ─")]
     [SerializeField] GameObject bossFlyAttackPrefab;    // FlyAttack
@@ -67,19 +57,18 @@ public class VFXManager : MonoBehaviour
     [SerializeField] Color monsterHitColor = new Color(1f, 0.3f, 0.1f, 1f);
     [SerializeField] float hitFlashDuration = 0.12f;
 
-    [Header("─ 사망 Dissolve 설정 ─")]
-    [SerializeField] float dissolveDuration = 1.2f;
+    [Header("─ 방 클리어 / 보상 이펙트 ─")]
+    [SerializeField] GameObject roomClearVFXPrefab;
+    [SerializeField] GameObject rewardAppearVFXPrefab;
 
     Dictionary<GameObject, Queue<GameObject>> pool = new Dictionary<GameObject, Queue<GameObject>>();
     Transform poolRoot;
 
+    // 최적화를 위한 프로퍼티 블록 전역 변수화 (매번 new 생성 금지!)
+    private MaterialPropertyBlock hitMpb;
+
     static readonly int HitBlendID = Shader.PropertyToID("_HitEffectBlend");
     static readonly int HitColorID = Shader.PropertyToID("_HitColor");
-    static readonly int FadeAmountID = Shader.PropertyToID("_FadeAmount");
-
-    // ─────────────────────────────────────────
-    // 초기화
-    // ─────────────────────────────────────────
 
     void Awake()
     {
@@ -97,6 +86,10 @@ public class VFXManager : MonoBehaviour
         poolRoot = new GameObject("VFX_Pool").transform;
         poolRoot.SetParent(transform);
 
+        // 프로퍼티 블록 초기화
+        hitMpb = new MaterialPropertyBlock();
+
+        // 풀링 예열
         PrewarmPool(monsterAttackPrefab);
         PrewarmPool(weaponSwingPrefab);
         PrewarmPool(weaponSkillPrefab);
@@ -115,9 +108,12 @@ public class VFXManager : MonoBehaviour
         PrewarmPool(monsterDeathSmokePrefab);
         PrewarmPool(bossAttackPrefab);
         PrewarmPool(bossBreathPrefab);
+        PrewarmPool(bossRushPrefab); // 보스 돌진 풀링 예열 추가
         PrewarmPool(bossFlyAttackPrefab);
         PrewarmPool(bossFlyBreathPrefab);
         PrewarmPool(bossDivePrefab);
+        PrewarmPool(roomClearVFXPrefab);
+        PrewarmPool(rewardAppearVFXPrefab);
     }
 
     void PrewarmPool(GameObject prefab)
@@ -136,10 +132,10 @@ public class VFXManager : MonoBehaviour
     }
 
     // ─────────────────────────────────────────
-    // 풀 관리
+    // 풀 관리 기본 메커니즘
     // ─────────────────────────────────────────
 
-    GameObject GetFromPool(GameObject prefab, Vector3 position, Vector3 direction, bool useUnscaledTime = false)
+    GameObject GetFromPool(GameObject prefab, Vector3 position, Vector3 direction, bool useUnscaledTime = false, bool autoReturn = true)
     {
         if (prefab == null) return null;
         if (!pool.ContainsKey(prefab))
@@ -158,13 +154,16 @@ public class VFXManager : MonoBehaviour
         var ps = go.GetComponent<ParticleSystem>();
         if (ps != null) ps.Play();
 
-        float duration = ps != null
-            ? ps.main.duration + ps.main.startLifetime.constantMax
-            : 2f;
+        if (autoReturn)
+        {
+            float duration = ps != null
+                ? ps.main.duration + ps.main.startLifetime.constantMax
+                : 2f;
 
-        StartCoroutine(useUnscaledTime
-            ? ReturnToPoolUnscaled(go, prefab, duration)
-            : ReturnToPool(go, prefab, duration));
+            StartCoroutine(useUnscaledTime
+                ? ReturnToPoolUnscaled(go, prefab, duration)
+                : ReturnToPool(go, prefab, duration));
+        }
 
         return go;
     }
@@ -191,15 +190,17 @@ public class VFXManager : MonoBehaviour
     }
 
     // ─────────────────────────────────────────
-    // 무기 이펙트
+    // 인게임 컨텍스트 호출 함수들
     // ─────────────────────────────────────────
+
+    public void PlayRoomClear(Vector3 position)
+        => GetFromPool(roomClearVFXPrefab, position, Vector3.up);
+
+    public GameObject PlayRewardAppear(Vector3 position)
+        => GetFromPool(rewardAppearVFXPrefab, position, Vector3.up);
 
     public void PlayWeaponSwing(Vector3 position, Vector3 direction)
         => GetFromPool(weaponSwingPrefab, position, direction);
-
-    // ─────────────────────────────────────────
-    // 스킬 이펙트
-    // ─────────────────────────────────────────
 
     private GameObject activeWeaponSkillInstance;
     private GameObject activeWeaponSkillPrefab;
@@ -208,7 +209,7 @@ public class VFXManager : MonoBehaviour
     {
         StopWeaponSkillLoop();
         activeWeaponSkillPrefab = weaponSkillPrefab;
-        activeWeaponSkillInstance = GetFromPool(weaponSkillPrefab, targetTransform.position, targetTransform.forward);
+        activeWeaponSkillInstance = GetFromPool(weaponSkillPrefab, targetTransform.position, targetTransform.forward, false, false);
         if (activeWeaponSkillInstance != null)
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
@@ -231,7 +232,7 @@ public class VFXManager : MonoBehaviour
     {
         StopWeaponSkillLoop();
         activeWeaponSkillPrefab = weaponSkillExplosionPrefab;
-        activeWeaponSkillInstance = GetFromPool(weaponSkillExplosionPrefab, targetTransform.position, targetTransform.forward);
+        activeWeaponSkillInstance = GetFromPool(weaponSkillExplosionPrefab, targetTransform.position, targetTransform.forward, false, false);
         if (activeWeaponSkillInstance != null)
         {
             activeWeaponSkillInstance.transform.SetParent(targetTransform);
@@ -240,19 +241,11 @@ public class VFXManager : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────
-    // 타격 이펙트
-    // ─────────────────────────────────────────
-
     public void PlayAttackHit(Vector3 position, Vector3 normal)
     {
         GetFromPool(attackHitSparkPrefab, position, normal);
         GetFromPool(attackImpactPrefab, position, normal);
     }
-
-    // ─────────────────────────────────────────
-    // 대시 이펙트
-    // ─────────────────────────────────────────
 
     public void PlayDash(Vector3 position, Vector3 direction, float dashDuration)
     {
@@ -273,10 +266,6 @@ public class VFXManager : MonoBehaviour
         GetFromPool(dashEndPrefab, startPos, direction);
     }
 
-    // ─────────────────────────────────────────
-    // 플레이어 피격/사망
-    // ─────────────────────────────────────────
-
     public void PlayPlayerHit(Vector3 position, Vector3 normal, GameObject playerObj)
     {
         GetFromPool(playerHitPrefab, position, normal);
@@ -286,22 +275,13 @@ public class VFXManager : MonoBehaviour
     public void PlayPlayerDeath(Vector3 position, GameObject playerObj)
     {
         GetFromPool(playerDeathPrefab, position, Vector3.up);
-        StartCoroutine(DissolveRoutine(playerObj));
     }
-
-    // ─────────────────────────────────────────
-    // 플레이어 부활
-    // ─────────────────────────────────────────
 
     public void PlayPlayerResurrectStart(Vector3 position)
         => GetFromPool(playerResurrectStartPrefab, position, Vector3.up, useUnscaledTime: true);
 
     public void PlayPlayerResurrectEnd(Vector3 position)
         => GetFromPool(playerResurrectEndPrefab, position, Vector3.up);
-
-    // ─────────────────────────────────────────
-    // 몬스터 피격/사망
-    // ─────────────────────────────────────────
 
     public void PlayMonsterHit(Vector3 position, Vector3 normal, GameObject monsterObj)
     {
@@ -313,90 +293,92 @@ public class VFXManager : MonoBehaviour
     {
         GetFromPool(monsterDeathPrefab, position, Vector3.up);
         GetFromPool(monsterDeathSmokePrefab, position, Vector3.up);
-        StartCoroutine(DissolveRoutine(monsterObj));
     }
 
-    //-------------------------------------------------
-    // 몬스터 공격
-    //-------------------------------------------------
     public void PlayMonsterAttack(Vector3 position, Vector3 direction)
     {
         GetFromPool(monsterAttackPrefab, position, direction);
     }
 
     // ─────────────────────────────────────────
-    // 보스 이펙트
+    // 보스 드래곤 전용 액션 연출 호출부
     // ─────────────────────────────────────────
 
-    /// <summary>지상 일반 공격 (Attack / Attack02) — BossDragon에서 호출</summary>
     public void PlayBossAttack(Vector3 position, Vector3 direction)
         => GetFromPool(bossAttackPrefab, position, direction);
 
-    /// <summary>지상 브레스 (BreatheFire) — BossDragon에서 호출</summary>
-    public void PlayBossBreath(Vector3 position, Vector3 direction)
-        => GetFromPool(bossBreathPrefab, position, direction);
+    public void PlayBossBreath(Transform head, Vector3 direction)
+    {
+        GameObject go = GetFromPool(bossBreathPrefab, head.position, direction);
+        if (go != null)
+        {
+            go.transform.SetParent(head);
+            go.transform.localPosition = Vector3.zero;
+        }
+    }
 
-    /// <summary>공중 공격 (FlyAttack) — BossDragon에서 호출</summary>
+    /// <summary>
+    /// [신규 추가] 보스 드래곤 지상 돌진 이펙트 재생
+    /// 호출 방식: VFXManager.Instance.PlayBossRush(vfxPoint.position, transform.forward);
+    /// </summary>
+    public void PlayBossRush(Transform targetPoint)
+    {
+        // 1. 풀에서 이펙트를 vfxPoint의 현재 위치와 방향에 맞춰 꺼냅니다.
+        GameObject go = GetFromPool(bossRushPrefab, targetPoint.position, targetPoint.forward);
+
+        if (go != null)
+        {
+            // 2. 이펙트를 vfxPoint의 자식으로 등록해서 보스가 움직일 때 완벽히 고정되어 전진하게 만듭니다.
+            go.transform.SetParent(targetPoint);
+
+            // 3. vfxPoint 기준 정중앙 정렬 및 회전값 초기화
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = bossRushPrefab.transform.localRotation;
+        }
+    }
+
     public void PlayBossFlyAttack(Vector3 position, Vector3 direction)
         => GetFromPool(bossFlyAttackPrefab, position, direction);
 
-    /// <summary>공중 브레스 (FlyBreatheFire) — BossDragon에서 호출</summary>
     public void PlayBossFlyBreath(Vector3 position, Vector3 direction)
         => GetFromPool(bossFlyBreathPrefab, position, direction);
 
-    /// <summary>공중 다이브 (FlyDive) — BossDragon에서 호출</summary>
     public void PlayBossDive(Vector3 position, Vector3 direction)
         => GetFromPool(bossDivePrefab, position, direction);
 
     // ─────────────────────────────────────────
-    // 내부 코루틴
+    // 고성능 셰이더 프로퍼티 블록 연출 루틴 (Material 복사 없음)
     // ─────────────────────────────────────────
 
     IEnumerator FlashRoutine(GameObject target, Color color)
     {
         if (target == null) yield break;
-        var mats = GetMaterials(target);
-        foreach (var m in mats)
-        {
-            if (m.HasProperty(HitColorID)) m.SetColor(HitColorID, color);
-            if (m.HasProperty(HitBlendID)) m.SetFloat(HitBlendID, 1f);
-        }
-        yield return new WaitForSeconds(hitFlashDuration);
-        if (target == null) yield break;
-        foreach (var m in mats)
-            if (m.HasProperty(HitBlendID))
-                m.SetFloat(HitBlendID, 0f);
-    }
 
-    IEnumerator DissolveRoutine(GameObject target)
-    {
-        if (target == null) yield break;
-        var mats = GetMaterials(target);
-        float elapsed = 0f;
-        while (elapsed < dissolveDuration)
-        {
-            if (target == null) yield break;
-            float t = elapsed / dissolveDuration;
-            foreach (var m in mats)
-                if (m.HasProperty(FadeAmountID))
-                    m.SetFloat(FadeAmountID, t);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-        foreach (var m in mats)
-            if (m.HasProperty(FadeAmountID))
-                m.SetFloat(FadeAmountID, 1f);
-        yield return new WaitForSeconds(0.1f);
-        Destroy(target);
-    }
-
-    Material[] GetMaterials(GameObject target)
-    {
         var renderers = target.GetComponentsInChildren<Renderer>();
-        var list = new List<Material>();
+        if (renderers == null || renderers.Length == 0) yield break;
+
+        // 1. 블록에 값 세팅 후 GPU에 주입 (메테리얼 복사 원천 차단)
+        hitMpb.Clear();
+        hitMpb.SetColor(HitColorID, color);
+        hitMpb.SetFloat(HitBlendID, 1f);
+
         foreach (var r in renderers)
-            foreach (var m in r.materials)
-                list.Add(m);
-        return list.ToArray();
+        {
+            if (r != null) r.SetPropertyBlock(hitMpb);
+        }
+
+        // 피격 대기 시간
+        yield return new WaitForSeconds(hitFlashDuration);
+
+        // 2. 복구 전 오브젝트 파괴 예외 처리
+        if (target == null) yield break;
+
+        hitMpb.Clear();
+        hitMpb.SetFloat(HitBlendID, 0f);
+
+        foreach (var r in renderers)
+        {
+            if (r != null) r.SetPropertyBlock(hitMpb);
+        }
     }
 }

@@ -5,14 +5,17 @@ TagManager:
   serializedVersion: 3
   tags:
   - Enemy
+  - EnemySpawnPoint
+  - RewardSpawnPoint
+  - CameraBounds
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - CameraBounds
   - Water
   - UI
-  - 
+  - enemy
   - 
   - 
   - 

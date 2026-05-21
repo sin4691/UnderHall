@@ -13,9 +13,14 @@ public class EnemyBase : MonoBehaviour
     protected Animator anim;
     protected Transform target;
 
-    private float currentHealth;
-    private float timer;
+    protected float currentHealth; 
+    protected float timer;
     protected bool isDead = false;
+
+    protected bool isSuperArmor = false;
+
+    public float CurrentHealth => currentHealth;
+    public float MaxHealth => enemyData != null ? enemyData.maxHealth : 1f;
 
     [Header("Attack Settings")]
     [SerializeField] private float hitDelay = 0.5f;
@@ -23,7 +28,6 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] private float hitOffset = 1.5f;
     [SerializeField] private float hitHeight = 1.5f;
 
-    //VFX 코드를 실행하기 위한 위치 변수
     [Header("VFX Settings")]
     [SerializeField] protected Transform vfxPoint;
 
@@ -42,14 +46,8 @@ public class EnemyBase : MonoBehaviour
         {
             currentHealth = enemyData.maxHealth;
             agent.speed = enemyData.moveSpeed;
-
-            // 스폰 즉시 공격할 수 있도록 쿨타임을 꽉 채워둡니다.
             timer = enemyData.attackCooldown;
-
-            // 내브메쉬가 지멋대로 몸 돌리는 걸 금지시킵니다.
             agent.updateRotation = false;
-
-            // 몬스터가 플레이어 안으로 파고들지 않도록 네비메쉬 정지 거리를 공격 거리로 맞춥니다.
             agent.stoppingDistance = attackRange;
         }
     }
@@ -58,24 +56,20 @@ public class EnemyBase : MonoBehaviour
     {
         if (isDead || target == null || enemyData == null || !agent.isOnNavMesh) return;
 
-        // 이동 중이든 대기 중이든 항상 쿨타임을 회복합니다.
         timer += Time.deltaTime;
 
         float dist = Vector3.Distance(transform.position, target.position);
 
         if (dist <= enemyData.detectionRange)
         {
-            // 쫓아갈 때 무조건 플레이어 쪽으로 몸을 부드럽게 돌립니다.
             Vector3 lookDir = target.position - transform.position;
-            lookDir.y = 0; // 몬스터가 땅을 파거나 하늘을 보지 않게 Y축 고정
+            lookDir.y = 0;
 
             if (lookDir != Vector3.zero)
             {
-                // 숫자가 클수록 고개를 빨리 돌립니다.
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), Time.deltaTime * 15f);
             }
 
-            // agent.stoppingDistance 대신, 직접 설정한 attackRange(공격 사거리)를 사용합니다.
             if (dist <= attackRange)
             {
                 Attack();
@@ -92,7 +86,6 @@ public class EnemyBase : MonoBehaviour
             agent.velocity = Vector3.zero;
         }
 
-        // 애니메이션 속도 조절
         float speed = (agent.isStopped || dist <= attackRange) ? 0f : agent.velocity.magnitude;
         anim.SetFloat("MoveSpeed", speed, 0.05f, Time.deltaTime);
     }
@@ -102,13 +95,14 @@ public class EnemyBase : MonoBehaviour
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
 
-        // Update에서 이미 부드럽게 회전하고 있으므로, 여기서 갑자기 확 돌아보는 코드는 삭제했습니다.
-
-        // 쿨타임이 다 찼을 때만 공격을 실행합니다.
         if (timer >= enemyData.attackCooldown)
         {
             anim.SetTrigger("Attack");
-            timer = 0f; // 공격을 실행했으므로 쿨타임을 초기화합니다.
+            timer = 0f;
+            if (AudioManager.Instance != null && !string.IsNullOrEmpty(enemyData.attackSoundName))
+            {
+                AudioManager.Instance.PlaySFX(enemyData.attackSoundName);
+            }
             StartCoroutine(DealDamageCoroutine());
         }
     }
@@ -118,7 +112,6 @@ public class EnemyBase : MonoBehaviour
         yield return new WaitForSeconds(hitDelay);
         if (isDead) yield break;
 
-        // ] 공격 VFX 실행
         VFXManager.Instance.PlayMonsterAttack(
             transform.position + transform.forward * hitOffset,
             transform.forward
@@ -143,18 +136,26 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage, bool isCritical = false)
     {
+        if (isDead) return;
         currentHealth -= damage;
+
+        //창우_데미지넘버 스포너에 데미지 정보 전달
+        if (DamageNumberSpawner.Instance != null)
+            DamageNumberSpawner.Instance.Show(damage, transform.position, isCritical, gameObject);
+
         if (currentHealth <= 0)
         {
             Die();
         }
         else
         {
-            anim.SetTrigger("Hurt");
+            if (!isSuperArmor)
+            {
+                anim.SetTrigger("Hurt");
+            }
 
-            //피격 VFX 실행
             if (vfxPoint != null)
             {
                 VFXManager.Instance.PlayMonsterHit(vfxPoint.position, Vector3.up, gameObject);
@@ -162,25 +163,49 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    void Die()
+    protected virtual void Die()
     {
         if (isDead) return;
         isDead = true;
-        agent.isStopped = true;
-        agent.enabled = false;
-        anim.SetTrigger("Death");
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
 
+        StopAllCoroutines();
+        anim.ResetTrigger("Attack");
+        anim.ResetTrigger("Hurt");
 
-        //  사망 VFX 
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+
+        anim.Play("Death");
+
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (Collider col in colliders)
+        {
+            col.enabled = false;
+        }
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;       
+            rb.detectCollisions = false; 
+        }
+        if (AudioManager.Instance != null && !string.IsNullOrEmpty(enemyData.deathSoundName))
+        {
+            AudioManager.Instance.PlaySFX(enemyData.deathSoundName);
+        }
+
         if (vfxPoint != null)
         {
             VFXManager.Instance.PlayMonsterDeath(vfxPoint.position, gameObject);
         }
+
+        Destroy(gameObject, 3f);
     }
 
-    private void OnDrawGizmosSelected()
+    protected virtual void OnDrawGizmosSelected()
     {
         if (enemyData == null) return;
         Gizmos.color = Color.red;

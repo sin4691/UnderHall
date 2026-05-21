@@ -40,18 +40,56 @@ public class PlayerAttack : MonoBehaviour
         else if (currentCombo < maxCombo)
             isNextAttackBuffered = true;
     }
-
     // 마우스 우클릭 누름: 스킬 시작
     public void StartSpecialAttack()
     {
         if (isSpecialAttackOnCooldown || isSpinning || player.CurrentState == PlayerState.Dash || player.CurrentState == PlayerState.Dead) return;
 
         if (player.CurrentState != PlayerState.Attack && player.CurrentState != PlayerState.SpecialAttack)
+        {
+            if (specialAttackCoroutine != null) StopCoroutine(specialAttackCoroutine);
+
+            if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
+                VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint);
+            else
+                VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint);
+
+            if (AudioManager.Instance != null)
+                AudioManager.Instance.PlaySFXLoop("Player_Spin");
+
             specialAttackCoroutine = StartCoroutine(SpinRoutine());
+        }
     }
 
     // 마우스 우클릭 뗌: 스킬 중지
-    public void StopSpecialAttack() => isSpinning = false;
+    public void StopSpecialAttack()
+    {
+        if (!isSpinning) return;
+
+        if (specialAttackCoroutine != null)
+        {
+            StopCoroutine(specialAttackCoroutine);
+            specialAttackCoroutine = null;
+        }
+
+        isSpinning = false;
+
+        VFXManager.Instance.StopWeaponSkillLoop();
+
+        // 만약 VFXManager 안에 폭발 이펙트 전용 정지 함수가 있다면 아래 주석(//)을 반드시 풀어주세요!!
+        // VFXManager.Instance.StopWeaponSkillExplosion(); 
+
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.StopSFXLoop("Player_Spin");
+
+        if (player.CurrentState == PlayerState.SpecialAttack)
+        {
+            player.animator.CrossFade("idle", 0.15f);
+            player.ChangeState(PlayerState.Idle);
+        }
+
+        StartCoroutine(SpecialCooldownRoutine());
+    }
 
     // 대시 등으로 인한 강제 취소
     public void CancelAttack()
@@ -64,12 +102,22 @@ public class PlayerAttack : MonoBehaviour
         isSpinning = false;
         //창우_마지막 잔상 즉시 제거
         VFXManager.Instance.StopWeaponSkillLoop();
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopSFXLoop("Player_Spin");
+        }
+
         currentCombo = 0;
         isNextAttackBuffered = false;
         isAttackOnCooldown = false;
 
         if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
+        {
+            player.animator.CrossFade("idle", 0.1f);
             player.ChangeState(PlayerState.Idle);
+        }
+            
 
         if (wasSpinning)
         {
@@ -98,6 +146,11 @@ public class PlayerAttack : MonoBehaviour
 
             // 기본 공격 이펙트
             VFXManager.Instance.PlayWeaponSwing(weaponVFXPoint.position, weaponVFXPoint.forward);
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX("Attack_" + currentCombo);
+            }
 
             ExecuteHitDetection(transform.position + transform.forward * (player.playerData.attackRange * 0.5f),
                                 player.playerData.attackRange * 0.5f, 1f, false);
@@ -128,57 +181,25 @@ public class PlayerAttack : MonoBehaviour
         float tickRate = 0.25f;
         float tickTimer = tickRate;
 
-
-        if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
-        {
-            VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint); // 커진 프리팹
-        }
-        else
-        {
-            VFXManager.Instance.PlayWeaponSkillLoop(skillVFXPoint); // 기본 프리팹
-        }
-
         while (isSpinning && timer < maxDuration)
         {
-            if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting)
-            {
-                isSpinning = false;
-                break;
-            }
+            if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting) break;
 
             timer += Time.deltaTime;
             tickTimer += Time.deltaTime;
 
             if (tickTimer >= tickRate)
             {
-                // [폭발] 로직 : 타격 범위 반경 증가
                 float currentRadius = player.playerData.specialAttackRange;
-                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion))
-                {
-                    // 기프트 보유 시 공격 반경 1.5배 증가
-                    //VFXManager.Instance.PlayWeaponSkillExplosion(skillVFXPoint.position, skillVFXPoint.forward);
-                    currentRadius *= 1.5f;
-                }
+                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion)) currentRadius *= 1.5f;
 
-                // 변경된 Radius를 적용하여 데미지 판정 (isSpecial = true)
                 ExecuteHitDetection(transform.position, currentRadius, player.playerData.specialAttackMultiplier, true);
-
                 tickTimer = 0f;
             }
             yield return null;
         }
 
-        isSpinning = false;
-
-        //[VFX/FEAT]창우_마지막 잔상 즉시 제거
-        VFXManager.Instance.StopWeaponSkillLoop();
-
-        if (player.CurrentState == PlayerState.SpecialAttack)
-        {
-            player.animator.CrossFade("idle", 0.15f);
-            player.ChangeState(PlayerState.Idle);
-        }
-        StartCoroutine(SpecialCooldownRoutine());
+        StopSpecialAttack();
     }
 
     // 통합 데미지 판정 시스템
@@ -207,6 +228,8 @@ public class PlayerAttack : MonoBehaviour
             if (target != null && col.enabled)
             {
                 float finalDamage = player.playerData.damage * damageMultiplier;
+                bool isCritical = false; // 1_창우_여기 추가
+
 
                 // [패시브 계열]
                 // [광폭] 내 체력이 50% 이하면 데미지 +40%
@@ -223,30 +246,24 @@ public class PlayerAttack : MonoBehaviour
                     // [처형] 리플렉션으로 EnemyBase의 private 체력 읽어오기
                     if (player.playerData.acquiredGifts.Contains(GiftType.Execution))
                     {
-                        FieldInfo healthField = typeof(EnemyBase).GetField("currentHealth", BindingFlags.NonPublic | BindingFlags.Instance);
-                        FieldInfo dataField = typeof(EnemyBase).GetField("enemyData", BindingFlags.NonPublic | BindingFlags.Instance);
+                        // 방금 EnemyBase에 뚫어둔 통로로 체력 값을 즉시 가져옵니다. (속도 매우 빠름)
+                        float enemyCurrentHP = target.CurrentHealth;
+                        float enemyMaxHP = target.MaxHealth;
 
-                        if (healthField != null && dataField != null)
-                        {
-                            float enemyCurrentHP = (float)healthField.GetValue(target);
-                            var enemyData = dataField.GetValue(target);
-
-                            FieldInfo maxHpField = enemyData.GetType().GetField("maxHealth", BindingFlags.Public | BindingFlags.Instance);
-                            if (maxHpField != null)
-                            {
-                                float enemyMaxHP = (float)maxHpField.GetValue(enemyData);
-
-                                // 체력이 20% 이하면 데미지 2배!
-                                if (enemyCurrentHP <= enemyMaxHP * 0.2f) finalDamage *= 2f;
-                            }
-                        }
+                        // 체력이 20% 이하면 데미지 2배!
+                        if (enemyCurrentHP <= enemyMaxHP * 0.2f) finalDamage *= 2f;
                     }
 
                     // [치명타] 15% 확률로 2배
                     if (player.playerData.acquiredGifts.Contains(GiftType.Critical) && Random.value <= 0.15f)
                     {
                         finalDamage *= 2f;
+
+                        isCritical = true; //2_창우_Show 호출 삭제하고 이걸로 교체
+
                         Debug.Log("크리티컬 터짐!");
+                       
+
                     }
                 }
                 // [특수 공격 계열]
@@ -264,7 +281,16 @@ public class PlayerAttack : MonoBehaviour
                 Debug.Log($"[데미지 판정] {attackType} 명중! 최종 데미지: {finalDamage}");
 
                 // 데미지 적용
-                target.TakeDamage(finalDamage);
+                target.TakeDamage(finalDamage,isCritical); // 3_창우_isCritical 추가
+
+
+                //창우_카메라 흔들림 추가
+                CameraManager.Instance.ShakeOnAttackDirectional(transform.forward);
+
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX("Hit_Monster");
+                }
 
                 // [흡혈] 때린 직후에 콜라이더가 꺼졌다? = 적이 죽었다!
                 if (wasAlive && !col.enabled && player.playerData.acquiredGifts.Contains(GiftType.Vampirism))

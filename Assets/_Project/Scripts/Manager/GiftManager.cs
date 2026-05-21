@@ -32,7 +32,12 @@ public class GiftManager : MonoBehaviour
     public TextMeshProUGUI[] giftDescTexts;
 
     public TextMeshProUGUI[] giftCategoryTexts; 
-    public Image[] giftIconImages;            
+    public Image[] giftIconImages;
+
+    [Header("카테고리별 아이콘")]
+    public Sprite basicAttackIcon;
+    public Sprite specialAttackIcon;
+    public Sprite utilityIcon;
 
     [Header("전체 기프트 데이터베이스")]
     public List<GiftInfo> allGifts = new List<GiftInfo>();
@@ -58,48 +63,48 @@ public class GiftManager : MonoBehaviour
             {
                 case GiftType.Execution:
                     gift.category = GiftCategory.BasicAttack;
-                    gift.giftName = "Execution";
-                    gift.description = "Deal 2x damage to enemies below 20% HP";
+                    gift.giftName = "처형";
+                    gift.description = "체력 20% 이하 적에게 2배 피해";
                     break;
                 case GiftType.Combo:
                     gift.category = GiftCategory.BasicAttack;
-                    gift.giftName = "Combo";
-                    gift.description = "Basic attack speed +25%";
+                    gift.giftName = "연격";
+                    gift.description = "기본 공격 속도 +25%";
                     break;
                 case GiftType.Critical:
                     gift.category = GiftCategory.BasicAttack;
-                    gift.giftName = "Critical";
-                    gift.description = "Basic attacks have a 15% chance to deal 2x damage";
+                    gift.giftName = "치명타";
+                    gift.description = "기본 공격 15% 확률로 2배 피해";
                     break;
                 case GiftType.Explosion:
                     gift.category = GiftCategory.SpecialAttack;
-                    gift.giftName = "Explosion";
-                    gift.description = "Special attacks deal area damage on impact";
+                    gift.giftName = "확장";
+                    gift.description = "특수 공격 범위 +50%";
                     break;
                 case GiftType.RapidFire:
                     gift.category = GiftCategory.SpecialAttack;
-                    gift.giftName = "RapidFire";
-                    gift.description = "Special attack cooldown -30%";
+                    gift.giftName = "속사";
+                    gift.description = "특수 공격 쿨다운 -30%";
                     break;
                 case GiftType.Endurance:
                     gift.category = GiftCategory.SpecialAttack;
-                    gift.giftName = "Endurance";
-                    gift.description = "Special attack damage +30%";
+                    gift.giftName = "불굴";
+                    gift.description = "특수 공격 피해 +30%";
                     break;
                 case GiftType.Awakening:
                     gift.category = GiftCategory.Utility;
-                    gift.giftName = "Awakening";
-                    gift.description = "For 1 second after dashing, your next attack deals 2x damage";
+                    gift.giftName = "각성";
+                    gift.description = "대쉬 후 1초간 다음 공격 2배 피해";
                     break;
                 case GiftType.Vampirism:
                     gift.category = GiftCategory.Utility;
-                    gift.giftName = "Vampirism";
-                    gift.description = "Restore 5 HP when defeating an enemy";
+                    gift.giftName = "흡혈";
+                    gift.description = "적 처치 시 HP 5 회복";
                     break;
                 case GiftType.Berserk:
                     gift.category = GiftCategory.Utility;
-                    gift.giftName = "Berserk";
-                    gift.description = "Deal 40% more damage when below 50% HP";
+                    gift.giftName = "광폭화";
+                    gift.description = "HP 50% 이하일 때 피해 +40%";
                     break;
             }
         }
@@ -140,9 +145,10 @@ public class GiftManager : MonoBehaviour
 
                 if (giftIconImages != null && giftIconImages.Length > i)
                 {
-                    if (availableGifts[i].icon != null)
+                    Sprite categoryIcon = GetCategoryIcon(availableGifts[i].category);
+                    if (categoryIcon != null)
                     {
-                        giftIconImages[i].sprite = availableGifts[i].icon;
+                        giftIconImages[i].sprite = categoryIcon;
                         giftIconImages[i].gameObject.SetActive(true);
                     }
                     else
@@ -153,7 +159,10 @@ public class GiftManager : MonoBehaviour
 
                 giftButtons[i].onClick.RemoveAllListeners();
                 GiftType selectedType = availableGifts[i].type;
-                giftButtons[i].onClick.AddListener(() => SelectGift(selectedType));
+                giftButtons[i].onClick.AddListener(() => {
+                    if (AudioManager.Instance != null) AudioManager.Instance.PlaySFX("Upgrade_Success");
+                    SelectGift(selectedType);
+                });
             }
             else
             {
@@ -180,6 +189,16 @@ public class GiftManager : MonoBehaviour
             case GiftCategory.SpecialAttack: return "특수 공격";
             case GiftCategory.Utility: return "유틸리티";
             default: return "알 수 없음";
+        }
+    }
+    private Sprite GetCategoryIcon(GiftCategory category)
+    {
+        switch (category)
+        {
+            case GiftCategory.BasicAttack: return basicAttackIcon;
+            case GiftCategory.SpecialAttack: return specialAttackIcon;
+            case GiftCategory.Utility: return utilityIcon;
+            default: return null;
         }
     }
 }
