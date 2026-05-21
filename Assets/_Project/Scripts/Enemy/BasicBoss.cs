@@ -339,12 +339,26 @@ public class BasicBoss : EnemyBase
         SetGhostMode(true);
 
         anim.SetTrigger("FlyFast");
+
+        // 창우_ 보스의 브레스 위치인 vfxPoint를 통째로 넘겨서 그 자리에 부착합니다.
+        if (VFXManager.Instance != null && vfxPoint != null)
+        {
+            VFXManager.Instance.PlayBossRush(vfxPoint);
+        }
+
         yield return StartCoroutine(MoveTowardPlayerWithDamage(dashDuration));
         yield return new WaitForSeconds(0.2f);
 
         if (!isDead)
         {
             anim.SetTrigger("FlyFast");
+
+            // 창우_2타 돌진 때도 vfxPoint에 부착
+            if (VFXManager.Instance != null && vfxPoint != null)
+            {
+                VFXManager.Instance.PlayBossRush(vfxPoint);
+            }
+
             yield return StartCoroutine(MoveTowardPlayerWithDamage(dashDuration));
         }
 
