@@ -1044,8 +1044,8 @@ Transform:
   m_GameObject: {fileID: 1687552356792510833}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 36.43669, y: -0.85165423, z: 75.80254}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalPosition: {x: 35.85, y: 5.29, z: 83.42}
+  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4469542912167863543}
@@ -1168,7 +1168,8 @@ MonoBehaviour:
   vfxPoint: {fileID: 4461424374705741025}
   spinAttackCooldown: 8
   spinHitRadius: 3.5
-  spinDamage: 30
+  spinDamage: 20
+  flinchCooldown: 4
 --- !u!1 &1722045215190912660
 GameObject:
   m_ObjectHideFlags: 0

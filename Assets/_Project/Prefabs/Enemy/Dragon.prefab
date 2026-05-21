@@ -16867,7 +16867,7 @@ Transform:
   m_GameObject: {fileID: 2382066045459298468}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 35.324055, y: -0.7590423, z: 86.09972}
+  m_LocalPosition: {x: 37.29, y: 5.43, z: 58.35}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -16991,12 +16991,13 @@ MonoBehaviour:
   vfxPoint: {fileID: 6215494456043782174}
   attackDamage: 1
   attackCooldown: 2
-  attackRadius: 8
+  attackRadius: 2
   attackPoint: {fileID: 6467269619316742156}
+  attackOffset: {x: -0.4, y: 1, z: 6.35}
   breathCooldown: 3
   breathPoint: {fileID: 6215494456043782174}
-  boxSize: {x: 5, y: 10}
-  boxOffset: {x: 0, y: 1, z: 11}
+  boxSize: {x: 3, y: 10}
+  boxOffset: {x: -0.4, y: 1, z: 11}
   boxHeight: 5
   closeRangeDamage: 10
   closeRangeVFX: {fileID: 6251861998949262251}
@@ -17005,12 +17006,12 @@ MonoBehaviour:
   dashSpeed: 40
   dashDuration: 1
   dashCooldown: 1.5
-  leapTriggerDistance: 8
+  leapTriggerDistance: 20
   leapCooldown: 6
   leapDamage: 30
   leapRadius: 4
-  leapHeight: 12
-  leapHangTime: 0.8
+  leapHeight: 15
+  leapHangTime: 1
   warningVFX: {fileID: 0}
   slamVFX: {fileID: 0}
 --- !u!1 &2386502450153534050
@@ -51463,7 +51464,7 @@ Transform:
   m_GameObject: {fileID: 8386484086825122650}
   serializedVersion: 2
   m_LocalRotation: {x: -0.29676238, y: -0.64907813, z: 0.5971216, w: 0.36616322}
-  m_LocalPosition: {x: 0.43309596, y: 0.5253042, z: 0.12823632}
+  m_LocalPosition: {x: 0.426, y: 0.542, z: -0.019}
   m_LocalScale: {x: 0.9999897, y: 1.0000229, z: 0.9999843}
   m_ConstrainProportionsScale: 0
   m_Children: []
