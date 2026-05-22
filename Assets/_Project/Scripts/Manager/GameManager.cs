@@ -139,22 +139,24 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator GameClearRoutine()
     {
-        isTransitioning = true;
+        isTransitioning = true; 
 
         Player p = player.GetComponent<Player>();
         if (p != null)
         {
-            p.attack.CancelAttack();
+            p.attack.CancelAttack(); 
+            p.ForceStop();
+
             if (p.TryGetComponent<UnityEngine.InputSystem.PlayerInput>(out var input))
             {
-                input.enabled = false;
+                input.enabled = false; 
             }
             p.CommitGoldToSO();
         }
 
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlayBGM("Clear_BGM");
+            AudioManager.Instance.PlaySFX("Clear_BGM");
         }
 
         yield return new WaitForSeconds(4f);
@@ -164,7 +166,7 @@ public class GameManager : MonoBehaviour
             yield return StartCoroutine(Fade(1f));
         }
 
-        SceneManager.LoadScene("MainMenu");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
     private IEnumerator MapTransitionRoutine(GameObject nextMapPrefab)
     {
@@ -174,6 +176,15 @@ public class GameManager : MonoBehaviour
         if (p != null) p.attack.CancelAttack();
 
         yield return StartCoroutine(Fade(1f));
+
+        if (stageData != null && currentRoomIndex == stageData.roomSequence.Count - 1)
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayBGM("Boss_BGM"); 
+                Debug.Log("보스방 진입! 보스 브금을 재생합니다.");
+            }
+        }
 
         if (currentMapInstance != null)
         {

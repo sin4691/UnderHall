@@ -23,7 +23,7 @@ public class PlayerAttack : MonoBehaviour
     public Transform weaponVFXPoint; // 창우_VFXPoint_Weapon 드래그
     public Transform skillVFXPoint;  // 창우_VFXPoint_Body 드래그
 
-    private Collider[] hitColliders = new Collider[10];
+    private Collider[] hitColliders = new Collider[100];
 
     // 각성(대시 후 다음 공격 2배) 버프 상태
     public bool isAwakened = false;
@@ -191,7 +191,7 @@ public class PlayerAttack : MonoBehaviour
             if (tickTimer >= tickRate)
             {
                 float currentRadius = player.playerData.specialAttackRange;
-                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion)) currentRadius *= 1.5f;
+                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion)) currentRadius *= 1.8f;
 
                 ExecuteHitDetection(transform.position, currentRadius, player.playerData.specialAttackMultiplier, true);
                 tickTimer = 0f;
@@ -205,8 +205,11 @@ public class PlayerAttack : MonoBehaviour
     // 통합 데미지 판정 시스템
     private void ExecuteHitDetection(Vector3 center, float radius, float damageMultiplier, bool isSpecial)
     {
-        center.y += 1f;
-        // 변경된 radius 값이 Physics.OverlapSphereNonAlloc에 적용됩니다.
+        Vector3 pointBottom = center;
+        pointBottom.y += 0.2f; // 무릎/발목 높이
+
+        Vector3 pointTop = center;
+        pointTop.y += 1.8f; // 머리 꼭대기 높이
         int hitCount = Physics.OverlapSphereNonAlloc(center, radius, hitColliders);
 
         // [각성] 버프 사용 여부 확인

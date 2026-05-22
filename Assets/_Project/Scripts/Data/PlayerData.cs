@@ -15,7 +15,7 @@ public class PlayerData : ScriptableObject
 
     [Tooltip("이동 속도")]
     [Range(1, 20)]
-    public float moveSpeed = 5f;
+    public float moveSpeed = 7.5f;
 
     [Header("===== 공격 =====")]
 
@@ -114,7 +114,7 @@ public class PlayerData : ScriptableObject
         maxResurrectionCount = (levelRevive > 0) ? 1 : 0;
         resurrectionHealthPercent = setRevive[levelRevive];
 
-        moveSpeed = 5f + bonusSpeed[levelSpeed]; 
+        moveSpeed = 7.5f + bonusSpeed[levelSpeed];
 
         Debug.Log("[PlayerData] 모든 인게임 데이터가 초기화되었습니다.");
     }

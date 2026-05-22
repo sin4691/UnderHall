@@ -152,7 +152,8 @@ public class CameraManager : MonoBehaviour
             screenFlashImage.DOKill();
             DOTween.Sequence()
                 .Append(screenFlashImage.DOColor(hitFlashColor, flashInDuration).SetEase(Ease.OutQuad))
-                .Append(screenFlashImage.DOColor(new Color(hitFlashColor.r, hitFlashColor.g, hitFlashColor.b, 0f), flashOutDuration).SetEase(Ease.InQuad));
+                .Append(screenFlashImage.DOColor(new Color(hitFlashColor.r, hitFlashColor.g, hitFlashColor.b, 0f), flashOutDuration).SetEase(Ease.InQuad))
+                .SetUpdate(true);
         }
 
         if (chromaticAberration != null)
@@ -163,7 +164,8 @@ public class CameraManager : MonoBehaviour
                 () => chromaticAberration.intensity.value,
                 x => chromaticAberration.intensity.value = x,
                 0f, flashOutDuration
-            ).SetEase(Ease.InQuad);
+            ).SetEase(Ease.InQuad)
+             .SetUpdate(true);
         }
     }
 
