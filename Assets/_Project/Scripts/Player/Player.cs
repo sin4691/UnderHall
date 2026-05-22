@@ -147,6 +147,8 @@ public class Player : MonoBehaviour
         inputVector = Vector2.zero;
         rb.linearVelocity = Vector3.zero;
 
+        rb.isKinematic = true;
+
         animator.Play("Hit");
 
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
@@ -194,6 +196,7 @@ public class Player : MonoBehaviour
         animator.SetBool("isMoving", false);
         animator.CrossFade("idle", 0.1f);
 
+        rb.isKinematic = false;
         ChangeState(PlayerState.Idle);
         GrantInvincibility(playerData.resurrectionInvincibilityTime);
     }
