@@ -29,6 +29,10 @@ public class UIManager : MonoBehaviour
     [Header("─ Interaction UI ─")]
     public GameObject interactPromptUI;
 
+    [Header("─ Boss UI ─")]
+    public GameObject bossHealthContainer; 
+    public Slider bossHealthSlider;       
+
     private void Awake()
     {
 
@@ -106,5 +110,32 @@ public class UIManager : MonoBehaviour
             .Append(healthImage.DOColor(Color.white, 0.15f).SetEase(Ease.InFlash));
     }
 
-}
+  
 
+    // 보스 등장 시 체력바 켜기
+    public void ShowBossUI(float maxHealth)
+    {
+        if (bossHealthContainer != null) bossHealthContainer.SetActive(true);
+        if (bossHealthSlider != null)
+        {
+            bossHealthSlider.maxValue = maxHealth;
+            bossHealthSlider.value = maxHealth;
+        }
+    }
+
+    // 보스 피격 시 체력바 깎기 (두트윈으로 스무스하게!)
+    public void UpdateBossHealth(float currentHealth)
+    {
+        if (bossHealthSlider != null)
+        {
+            // 뚝뚝 끊기지 않고 0.2초에 걸쳐 부드럽게 깎이는 연출!
+            bossHealthSlider.DOValue(currentHealth, 0.2f).SetEase(Ease.OutCubic);
+        }
+    }
+
+    // 보스 처치 시 체력바 끄기
+    public void HideBossUI()
+    {
+        if (bossHealthContainer != null) bossHealthContainer.SetActive(false);
+    }
+}
