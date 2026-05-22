@@ -184,7 +184,29 @@ public class CameraManager : MonoBehaviour
         float dot = Vector3.Dot(horizontal, Camera.main.transform.right);
         impulseSource.GenerateImpulse(new Vector3(dot * attackShakeX, attackShakeY, 0f));
     }
+    public void ZoomTo(float targetFOV, float duration)
+    {
+        // 보스 슬램 FOV 트윈 즉시 중단
+        DOTween.Kill("BossSlamFOV");
 
+        if (virtualCamera == null) return;
+
+        DOTween.To(
+            () => virtualCamera.Lens.FieldOfView,
+            x => { var l = virtualCamera.Lens; l.FieldOfView = x; virtualCamera.Lens = l; },
+            targetFOV,
+            duration
+        )
+        .SetEase(Ease.OutQuad)
+        .SetUpdate(true)   // 슬로우모션 중에도 동작
+        .SetId("ResurrectFOV");
+    }
+
+    // 부활 시작 시 슬램 TimeScale 트윈 차단용
+    public void CancelSlamSlowMotion()
+    {
+        slowMotionTweener?.Kill();
+    }
     // ── 보스 착지 셰이크 ─────────────────
     public void ShakeOnBossSlam()
     {
@@ -256,6 +278,7 @@ public class CameraManager : MonoBehaviour
                 .Append(screenFlashImage.DOColor(transparentSlam, slamFlashDuration).SetEase(Ease.InQuad))
                 .SetUpdate(true);
         }
+
 
         // 5. 색수차 왜곡 (착지 충격파 느낌)
         if (chromaticAberration != null)
