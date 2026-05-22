@@ -446,6 +446,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Anubis
       objectReference: {fileID: 0}
+    - target: {fileID: 1687552356792510833, guid: b7aaecc0fbf131e44b70569e4b136de6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4461424374705741025, guid: b7aaecc0fbf131e44b70569e4b136de6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 31.09
@@ -521,7 +525,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2382066045459298468, guid: 590f69f56ae2cc240a45d7c0b6e8f792, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3105569434532432308, guid: 590f69f56ae2cc240a45d7c0b6e8f792, type: 3}
       propertyPath: breathAngle
@@ -594,11 +598,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4652216871073188307, guid: a9a9751081df30147b2a151cd4114ab3, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8796290003017214684, guid: a9a9751081df30147b2a151cd4114ab3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 51.08263
+      value: 14.84
       objectReference: {fileID: 0}
     - target: {fileID: 8796290003017214684, guid: a9a9751081df30147b2a151cd4114ab3, type: 3}
       propertyPath: m_LocalPosition.y
@@ -606,7 +610,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8796290003017214684, guid: a9a9751081df30147b2a151cd4114ab3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 74.486565
+      value: 35.31
       objectReference: {fileID: 0}
     - target: {fileID: 8796290003017214684, guid: a9a9751081df30147b2a151cd4114ab3, type: 3}
       propertyPath: m_LocalRotation.w
