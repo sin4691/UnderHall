@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
   maxHealth: 100
   damage: 10
-  moveSpeed: 5
+  moveSpeed: 7.5
   attackCooldown: 0.3
   attackRange: 3.6
   specialAttackMultiplier: 0.5
   specialAttackRange: 2.2
-  specialAttackCooldown: 5
+  specialAttackCooldown: 1
   dashSpeed: 20
   dashDuration: 0.2
   maxDashCount: 2
@@ -29,11 +29,12 @@ MonoBehaviour:
   maxResurrectionCount: 1
   resurrectionHealthPercent: 0.2
   resurrectionInvincibilityTime: 2
-  currentGold: 600
+  currentGold: 1900
   goldGainMultiplier: 1
   levelHP: 0
   levelATK: 0
   levelDash: 0
   levelGold: 0
   levelRevive: 1
-  acquiredGifts: 02000000
+  levelSpeed: 0
+  acquiredGifts: 

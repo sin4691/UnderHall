@@ -42,7 +42,24 @@ public class SpawnManager : MonoBehaviour
         {
             if (child.CompareTag("EnemySpawnPoint"))
             {
-                spawnPoints.Add(child);
+                bool isDuplicate = false;
+                foreach (Transform existingPoint in spawnPoints)
+                {
+                    if (Vector3.Distance(existingPoint.position, child.position) < 0.1f)
+                    {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!isDuplicate)
+                {
+                    spawnPoints.Add(child);
+                }
+                else
+                {
+                    Debug.LogWarning($"[SpawnManager] 위치가 겹치는 스폰 포인트 발견! 중복 소환을 막기 위해 하나를 삭제 취급합니다. (위치: {child.position})");
+                }
             }
         }
     }

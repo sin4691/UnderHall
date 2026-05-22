@@ -24,7 +24,8 @@ public class PauseMenuManager : MonoBehaviour
     [Header("Scene Settings")]
     public string mainMenuSceneName = "MainMenu";
 
-    private bool isPaused = false;
+    public static bool isPaused = false;
+    public static float previousTimeScale = 1f;
 
     //창우_[추가] 외부에서 일시정지 상태를 확인할 수 있도록 프로퍼티 추가
     public bool IsPaused => isPaused;
@@ -93,14 +94,22 @@ public class PauseMenuManager : MonoBehaviour
         isPaused = !isPaused;
         pausePanel.SetActive(isPaused);
 
-        Time.timeScale = isPaused ? 0f : 1f;
+        if (isPaused)
+        {
+            previousTimeScale = Time.timeScale; 
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            Time.timeScale = previousTimeScale;
+        }
     }
 
     public void ResumeGame()
     {
         isPaused = false;
         pausePanel.SetActive(false);
-        Time.timeScale = 1f;
+        Time.timeScale = previousTimeScale;
     }
 
     public void GoToMainMenu()
