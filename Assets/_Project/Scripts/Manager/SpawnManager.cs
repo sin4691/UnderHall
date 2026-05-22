@@ -170,6 +170,11 @@ public class SpawnManager : MonoBehaviour
     private void ClearRoom()
     {
         isRoomCleared = true;
+        if (GameManager.Instance != null && GameManager.Instance.IsGameCleared)
+        {
+            Debug.Log("[SpawnManager] 보스 클리어 상태이므로 보상 스폰 로직을 취소합니다.");
+            return;
+        }
         Debug.Log("[디버그 7] 모든 웨이브 클리어! 보상을 스폰합니다.");
 
         //창우_ 방 클리어 VFX (SpawnManager 위치 기준)

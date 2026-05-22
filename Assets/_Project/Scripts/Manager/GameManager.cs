@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     public GameObject currentMapInstance;
     private int currentRoomIndex = 0;
     private bool isTransitioning = false;
+    public bool IsGameCleared { get; private set; } = false;
 
     private RewardType upcomingReward;
     public PlayerData playerData;
@@ -133,6 +134,7 @@ public class GameManager : MonoBehaviour
     {
         if (!isTransitioning)
         {
+            IsGameCleared = true;
             StartCoroutine(GameClearRoutine());
         }
     }
