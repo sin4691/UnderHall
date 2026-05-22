@@ -9,14 +9,15 @@ public class BasicBoss : EnemyBase
     public float attackCooldown = 2f;
     public float attackRadius = 3.0f;
     public Transform attackPoint; // 기존 방식 흔적 (안 쓰지만 에러 방지용으로 냅둠)
-    public Vector3 attackOffset = new Vector3(0, 1f, 2f); // 추가된 공격 위치 오프셋!
+    public Vector3 attackOffset = new Vector3(0, 1f, 2f); // 추가된 공격 위치 오프셋
 
-    [Header("─ 브레스 패턴 설정 ─")]
+    [Header("─ 브레스 패턴 설정 (부채꼴) ─")]
     public float breathCooldown = 3.5f;
     public Transform breathPoint;
-    public Vector2 boxSize = new Vector2(5f, 10f);
-    public Vector3 boxOffset = new Vector3(0, 0, 5f);
-    public float boxHeight = 2f;
+
+    public float breathRange = 12f;      // 브레스가 뻗어나가는 최대 거리
+    public float breathAngle = 90f;      // 브레스 부채꼴 각도 (90도면 넓게 퍼짐)
+
     public float closeRangeDamage = 10.0f;
     public GameObject closeRangeVFX;
 
@@ -57,7 +58,6 @@ public class BasicBoss : EnemyBase
         base.Start();
 
         isSuperArmor = true; // 보스 상시 슈퍼아머 적용
-
 
         transform.position += new Vector3(0, startHeight, 0);
         agent.enabled = false;
@@ -163,7 +163,7 @@ public class BasicBoss : EnemyBase
                     if (isPhase2) StartCoroutine(ExecutePhase2Pattern());
                     else StartCoroutine(BreathAttackRoutine());
                 }
-                else if (timer >= attackCooldown) // 공격 쿨타임 확인 후 실행
+                else if (timer >= attackCooldown)
                 {
                     isAttacking = true;
                     StartCoroutine(AttackRoutine());
@@ -241,11 +241,8 @@ public class BasicBoss : EnemyBase
             while (t < 0.15f)
             {
                 if (isDead) yield break;
-
-
                 transform.position = Vector3.Lerp(dropStartPos, targetPos, t / 0.15f);
                 t += Time.unscaledDeltaTime;
-                //t += Time.deltaTime;
                 yield return null;
             }
             transform.position = targetPos;
@@ -284,7 +281,7 @@ public class BasicBoss : EnemyBase
             if (i < jumpCount - 1) yield return new WaitForSeconds(0.3f);
         }
 
-        yield return new WaitForSeconds(0.5f); // 도약 공격 후 대기 시간
+        yield return new WaitForSeconds(0.5f);
 
         lastLeapTime = Time.time;
         SetGhostMode(false);
@@ -336,9 +333,8 @@ public class BasicBoss : EnemyBase
 
         agent.isStopped = true; agent.velocity = Vector3.zero;
         anim.SetTrigger("Breath");
-        StartCoroutine(SmoothFaceTarget(4.0f, 2.0f));
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.0f);
 
         if (closeRangeVFX != null) { closeRangeVFX.SetActive(true); }
 
@@ -347,23 +343,29 @@ public class BasicBoss : EnemyBase
         float damageTickRate = 0.2f;
         float nextDamageTime = 0f;
 
-        Vector3 boxCenter = transform.position + transform.rotation * boxOffset;
-        Vector3 halfExtents = new Vector3(boxSize.x / 2, boxHeight / 2, boxSize.y / 2);
-
         while (timerForBreath < totalDuration)
         {
             if (isDead) yield break;
 
-            boxCenter = transform.position + transform.rotation * boxOffset;
-
             if (timerForBreath >= nextDamageTime)
             {
-                Collider[] hits = Physics.OverlapBox(boxCenter, halfExtents, transform.rotation);
+                Collider[] hits = Physics.OverlapSphere(transform.position, breathRange);
                 foreach (Collider hit in hits)
                 {
                     if (hit.CompareTag("Player"))
                     {
-                        hit.GetComponent<Player>()?.TakeDamage(closeRangeDamage);
+                        Vector3 dirToPlayer = (hit.transform.position - transform.position).normalized;
+                        dirToPlayer.y = 0;
+
+                        Vector3 forward = transform.forward;
+                        forward.y = 0;
+
+                        float angle = Vector3.Angle(forward, dirToPlayer);
+
+                        if (angle <= breathAngle / 2f)
+                        {
+                            hit.GetComponent<Player>()?.TakeDamage(closeRangeDamage);
+                        }
                     }
                 }
                 nextDamageTime += damageTickRate;
@@ -378,7 +380,7 @@ public class BasicBoss : EnemyBase
         basicAttackCount = 0;
         SetNextBreathThreshold();
 
-        yield return new WaitForSeconds(0.8f); // 브레스 패턴 종료 후 대기 시간
+        yield return new WaitForSeconds(0.8f);
 
         isBreathActive = false;
         isAttacking = false;
@@ -481,7 +483,6 @@ public class BasicBoss : EnemyBase
     {
         if (target == null) return;
 
-        // 오프셋을 적용한 실제 타격 지점 계산
         Vector3 hitCenter = transform.position + transform.rotation * attackOffset;
 
         if (VFXManager.Instance != null) VFXManager.Instance.PlayBossAttack(hitCenter, transform.forward);
@@ -496,17 +497,22 @@ public class BasicBoss : EnemyBase
 
     protected override void OnDrawGizmosSelected()
     {
-        // 오프셋 위치에 맞춰서 빨간 원 그리기
         Vector3 hitCenter = transform.position + transform.rotation * attackOffset;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(hitCenter, attackRadius);
 
-        Gizmos.color = Color.red;
-        Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position + transform.rotation * boxOffset, transform.rotation, Vector3.one);
-        Gizmos.matrix = rotationMatrix;
-        Gizmos.DrawWireCube(Vector3.zero, new Vector3(boxSize.x, boxHeight, boxSize.y));
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
+        Vector3 forward = transform.forward;
+        forward.y = 0;
 
-        Gizmos.matrix = Matrix4x4.identity; // 기즈모 그리기용 매트릭스 원상복구
+        Vector3 leftBoundary = Quaternion.Euler(0, -breathAngle / 2f, 0) * forward;
+        Vector3 rightBoundary = Quaternion.Euler(0, breathAngle / 2f, 0) * forward;
+
+        Gizmos.DrawRay(transform.position, leftBoundary * breathRange);
+        Gizmos.DrawRay(transform.position, rightBoundary * breathRange);
+        Gizmos.DrawRay(transform.position, forward * breathRange);
+
+        Gizmos.DrawWireSphere(transform.position, breathRange);
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, leapRadius);
