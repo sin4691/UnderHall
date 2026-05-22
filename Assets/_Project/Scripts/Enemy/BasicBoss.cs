@@ -249,6 +249,11 @@ public class BasicBoss : EnemyBase
 
             anim.SetTrigger("Land");
 
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX("Boss_Slam_Sound"); 
+            }
+
             //창우_[추가] 바닥 밟는 순간 화면 진동
             if (CameraManager.Instance != null)
             {
