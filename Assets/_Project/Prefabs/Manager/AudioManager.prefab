@@ -115,4 +115,6 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 1570ee4e2eb128c458b171f1e53c960e, type: 3}
   - name: Boss_Slam_Sound
     clip: {fileID: 8300000, guid: a12245397e7e0794cb5cf9344af65071, type: 3}
+  - name: Boss_Breath_Sound
+    clip: {fileID: 8300000, guid: cf66d7d96dd505748b92ffcf1c0af4d3, type: 3}
   sfxSourceCount: 10

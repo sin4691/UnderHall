@@ -50,3 +50,4 @@ MonoBehaviour:
   blackScreenDuration: 0.5
   stageData: {fileID: 11400000, guid: 5a7f6a843b0361e4cbc13777573b6114, type: 2}
   currentMapInstance: {fileID: 0}
+  playerData: {fileID: 11400000, guid: 44ad76d51a30ee74486bcc6c842e4478, type: 2}
