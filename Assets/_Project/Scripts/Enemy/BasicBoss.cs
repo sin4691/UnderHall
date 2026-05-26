@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using DG.Tweening; // DOTween 추가
 
 public class BasicBoss : EnemyBase
 {
@@ -52,6 +53,18 @@ public class BasicBoss : EnemyBase
     public GameObject warningVFX;
     public GameObject slamVFX;
     private bool isLeaping = false;
+
+    //창우_[추가] 2페이즈 연출용 DOTween 메쉬 및 옵션 변수들
+    [Header("─ 2페이즈 코드로 짜는 연출 세팅 ─")]
+    public GameObject backSpinesMesh;
+    public Vector3 originalSpinesScale = Vector3.one;
+    public float spinesGrowDuration = 6f;
+    [Space(5)]
+    public GameObject headMaskMesh;
+    public Vector3 originalMaskScale = Vector3.one;
+    public Vector3 originalMaskLocalPos = Vector3.zero;
+    public Vector3 maskStartOffset = new Vector3(0f, 0.5f, -0.3f);
+    public float maskAssembleDuration = 0.6f;
 
     protected override void Start()
     {
@@ -133,13 +146,114 @@ public class BasicBoss : EnemyBase
         }
     }
 
+    // ── 코드로 연출하는 2페이즈 돌입 시퀀스 ───────────────────
     IEnumerator Phase2TransitionRoutine()
     {
-        isPhase2 = true; isPhaseTransitioning = true; isAttacking = true;
+        //isPhase2 = true; isPhaseTransitioning = true; isAttacking = true;
+        //창우_[변경] 기존의 획일화된 단순 대기 방식(yield return new WaitForSeconds(2.0f);)을 완전히 들어내고
+        //창우_ 아래와 같이 unscaledDeltaTime 캐싱 기반 시퀀스 및 DOTween 연출 구조로 강화했습니다.
+
+        isPhase2 = true;
+        isPhaseTransitioning = true;
+        isAttacking = true;
+
         if (agent.enabled) { agent.isStopped = true; agent.velocity = Vector3.zero; }
-        anim.SetTrigger("Attack");
-        yield return new WaitForSeconds(2.0f);
-        isAttacking = false; isPhaseTransitioning = false;
+
+        // 1. 플레이어 카메라를 보스한테 강제로 고정 및 부드러운 줌인
+        Transform originalFollow = null;
+        Transform originalLookAt = null;
+
+        if (CameraManager.Instance != null && CameraManager.Instance.virtualCamera != null)
+        {
+            originalFollow = CameraManager.Instance.virtualCamera.Follow;
+            originalLookAt = CameraManager.Instance.virtualCamera.LookAt;
+
+            CameraManager.Instance.virtualCamera.Follow = this.transform;
+            CameraManager.Instance.virtualCamera.LookAt = this.transform;
+
+            CameraManager.Instance.ZoomTo(40f, 0.3f);
+        }
+
+        // 2. 기 모으는 울부짖기 모션 발동!
+        //anim.SetTrigger("Attack");
+        //yield return new WaitForSeconds(2.0f);
+        //isAttacking = false; isPhaseTransitioning = false;
+
+        // [창우_ 델타타임 캐싱] 애니메이션 발동 후 카메라 줌인 대기 (0.2초)
+        float elapsedTime = 0f;
+        while (elapsedTime < 0.2f)
+        {
+            elapsedTime += Time.unscaledDeltaTime; // 퍼즈/슬로우 모션 왜곡을 무시하고 현실 시간 누적
+            yield return null;
+        }
+
+        // 3. [시간 제어] 주변 환경을 극단적인 초슬로우 모션으로 전환하여 연출 집중도 극대화
+        // Time.timeScale = 0.02f; // 슬로우모션 제거를 위해 주석 처리 혹은 삭제 처리되었습니다.
+
+        // 4. 등가시(Spines)  트윈 재생
+        if (backSpinesMesh != null)
+        {
+            backSpinesMesh.SetActive(true);
+            backSpinesMesh.transform.localScale = Vector3.zero;
+            backSpinesMesh.transform.DOScale(originalSpinesScale, spinesGrowDuration)
+                .SetEase(Ease.OutBack)
+                .SetUpdate(true); // DOTween 환경도 오직 현실 시간 기준으로 작동
+        }
+
+        // [창우_ 델타타임 캐싱] 등가시가 자라나는 지정 시간 대기 (spinesGrowDuration * 0.6f)
+        elapsedTime = 0f;
+        float targetTime = spinesGrowDuration * 0.6f;
+        while (elapsedTime < targetTime)
+        {
+            elapsedTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // 5. 머리가면(Mask) 
+        if (headMaskMesh != null)
+        {
+            headMaskMesh.SetActive(true);
+            headMaskMesh.transform.localScale = Vector3.zero;
+            headMaskMesh.transform.localPosition = originalMaskLocalPos + maskStartOffset;
+
+            headMaskMesh.transform.DOScale(originalMaskScale, maskAssembleDuration)
+                .SetEase(Ease.OutQuad)
+                .SetUpdate(true);
+
+            headMaskMesh.transform.DOLocalMove(originalMaskLocalPos, maskAssembleDuration)
+                .SetEase(Ease.OutBounce) // 철컥하고 튕기는 안착감 부여
+                .SetUpdate(true);
+        }
+
+        // [창우_ 델타타임 캐싱]  (maskAssembleDuration + 0.5f)
+        elapsedTime = 0f;
+        targetTime = maskAssembleDuration + 0.5f;
+        while (elapsedTime < targetTime)
+        {
+            elapsedTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // 6. 카메라 원래대로 복구 (다시 플레이어 비추기)
+        if (CameraManager.Instance != null && CameraManager.Instance.virtualCamera != null)
+        {
+            CameraManager.Instance.virtualCamera.Follow = originalFollow;
+            CameraManager.Instance.virtualCamera.LookAt = originalLookAt;
+            CameraManager.Instance.ZoomTo(60f, 0.4f);
+        }
+
+        // [창우_ 델타타임 캐싱] 카메라가 플레이어에게 온전히 돌아갈 때까지 복귀 대기 (0.4초)
+        elapsedTime = 0f;
+        while (elapsedTime < 0.4f)
+        {
+            elapsedTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // 7. 연출 완전히 종료, 게임 정상 타임스케일 재개
+        // Time.timeScale = 1f; // 앞에서 변경하지 않았으므로 정상 속도 유지를 위해 주석 처리되었습니다.
+        isAttacking = false;
+        isPhaseTransitioning = false;
     }
 
     IEnumerator BossThinkRoutine()
@@ -255,7 +369,7 @@ public class BasicBoss : EnemyBase
 
             if (AudioManager.Instance != null)
             {
-                AudioManager.Instance.PlaySFX("Boss_Slam_Sound"); 
+                AudioManager.Instance.PlaySFX("Boss_Slam_Sound");
             }
 
             //창우_[추가] 바닥 밟는 순간 화면 진동
@@ -324,6 +438,7 @@ public class BasicBoss : EnemyBase
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
 
+        // 기존 주석 유지: SmoothFaceTarget 실행
         yield return StartCoroutine(SmoothFaceTarget(0.4f, 5f));
 
         anim.SetTrigger("Attack");
@@ -389,6 +504,7 @@ public class BasicBoss : EnemyBase
         basicAttackCount = 0;
         SetNextBreathThreshold();
 
+        // 기존 주석 유지: 브레스 후 후딜레이 대기
         yield return new WaitForSeconds(0.8f);
 
         isBreathActive = false;
@@ -510,7 +626,7 @@ public class BasicBoss : EnemyBase
 
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.PlaySFX("Boss_Breath_Sound"); 
+            AudioManager.Instance.PlaySFX("Boss_Breath_Sound");
         }
     }
     protected override void Attack() { }

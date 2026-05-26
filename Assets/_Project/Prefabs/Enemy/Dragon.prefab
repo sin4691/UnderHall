@@ -16996,9 +16996,8 @@ MonoBehaviour:
   attackOffset: {x: -0.4, y: 1, z: 6.35}
   breathCooldown: 3
   breathPoint: {fileID: 6215494456043782174}
-  boxSize: {x: 3, y: 10}
-  boxOffset: {x: -0.4, y: 1, z: 11}
-  boxHeight: 5
+  breathRange: 12
+  breathAngle: 90
   closeRangeDamage: 10
   closeRangeVFX: {fileID: 6251861998949262251}
   startHeight: 20
@@ -17014,6 +17013,14 @@ MonoBehaviour:
   leapHangTime: 1
   warningVFX: {fileID: 0}
   slamVFX: {fileID: 0}
+  backSpinesMesh: {fileID: 4198248840217906370}
+  originalSpinesScale: {x: 1, y: 1, z: 1}
+  spinesGrowDuration: 2
+  headMaskMesh: {fileID: 1880293751782334132}
+  originalMaskScale: {x: 1, y: 1, z: 1}
+  originalMaskLocalPos: {x: 0, y: 0, z: 0}
+  maskStartOffset: {x: 2, y: 2, z: -0.3}
+  maskAssembleDuration: 0
 --- !u!1 &2386502450153534050
 GameObject:
   m_ObjectHideFlags: 0
