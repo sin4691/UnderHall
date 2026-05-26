@@ -344,7 +344,7 @@ public class BasicBoss : EnemyBase
         if (closeRangeVFX != null) { closeRangeVFX.SetActive(true); }
 
         float timerForBreath = 0f;
-        float totalDuration = 6.0f;
+        float totalDuration = 6f;
         float damageTickRate = 0.2f;
         float nextDamageTime = 0f;
 
@@ -497,7 +497,18 @@ public class BasicBoss : EnemyBase
             if (hit.CompareTag("Player")) hit.GetComponent<Player>()?.TakeDamage(attackDamage);
     }
 
-    public void OnBreathFire() { if (breathPoint != null) VFXManager.Instance.PlayBossBreath(breathPoint, breathPoint.forward); }
+    public void OnBreathFire()
+    {
+        if (breathPoint != null)
+        {
+            VFXManager.Instance.PlayBossBreath(breathPoint, breathPoint.forward);
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Boss_Breath_Sound"); 
+        }
+    }
     protected override void Attack() { }
 
     protected override void OnDrawGizmosSelected()

@@ -1367,36 +1367,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.size
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
       propertyPath: sfxList.Array.size
-      value: 28
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[3].clip
+      propertyPath: sfxList.Array.data[29].clip
       value: 
-      objectReference: {fileID: 8300000, guid: 8168ffe6ae3dc51468ec01f0c46022f4, type: 3}
+      objectReference: {fileID: 8300000, guid: cf66d7d96dd505748b92ffcf1c0af4d3, type: 3}
     - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[3].name
-      value: Boss_BGM
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[4].clip
-      value: 
-      objectReference: {fileID: 8300000, guid: 8168ffe6ae3dc51468ec01f0c46022f4, type: 3}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: bgmList.Array.data[4].name
-      value: Boss_BGM
-      objectReference: {fileID: 0}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: sfxList.Array.data[27].clip
-      value: 
-      objectReference: {fileID: 8300000, guid: 2375205092ea73b4191d34c1380b33f6, type: 3}
-    - target: {fileID: 7776693761300037057, guid: eb931b598ac3b8a4e8f3a9a7b873e6b1, type: 3}
-      propertyPath: sfxList.Array.data[27].name
-      value: Clear_BGM
+      propertyPath: sfxList.Array.data[29].name
+      value: Boss_Breath_Sound
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

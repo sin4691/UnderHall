@@ -153,6 +153,7 @@ public class GameManager : MonoBehaviour
             {
                 input.enabled = false; 
             }
+            p.AddGold(200);
             p.CommitGoldToSO();
         }
 

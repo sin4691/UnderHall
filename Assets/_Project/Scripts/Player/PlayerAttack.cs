@@ -176,16 +176,14 @@ public class PlayerAttack : MonoBehaviour
         player.ChangeState(PlayerState.SpecialAttack);
         player.animator.CrossFade("specialAttack", 0.1f);
 
-        float timer = 0f;
-        float maxDuration = 5f;
+
         float tickRate = 0.25f;
         float tickTimer = tickRate;
 
-        while (isSpinning && timer < maxDuration)
+        while (isSpinning)
         {
             if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting) break;
 
-            timer += Time.deltaTime;
             tickTimer += Time.deltaTime;
 
             if (tickTimer >= tickRate)
