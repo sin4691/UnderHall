@@ -1,8 +1,9 @@
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Collections;
-using UnityEngine.UI; // 슬라이더, 토글 사용을 위해 추가
 using TMPro;          // TextMeshPro 사용을 위해 추가
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI; // 슬라이더, 토글 사용을 위해 추가
 
 public class MainMenuManager : MonoBehaviour
 {
@@ -35,6 +36,21 @@ public class MainMenuManager : MonoBehaviour
         {
             fadeCanvasGroup.alpha = 1f;
             fadeCanvasGroup.blocksRaycasts = true;
+        }
+    }
+
+    private void Update()
+    {
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            if (settingsPanel.activeSelf)
+            {
+                OnSettingsBack();
+            }
+            else if (metaUpgradePanel.activeSelf)
+            {
+                OnMetaUpgradeBack();
+            }
         }
     }
 
