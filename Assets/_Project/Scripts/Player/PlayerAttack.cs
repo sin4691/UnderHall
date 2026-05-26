@@ -111,13 +111,21 @@ public class PlayerAttack : MonoBehaviour
         currentCombo = 0;
         isNextAttackBuffered = false;
         isAttackOnCooldown = false;
+        if (player.animator != null)
+        {
+            player.animator.ResetTrigger("Attack");
+            player.animator.ResetTrigger("SpecialAttack");
+
+            player.animator.SetBool("isAttacking", false);
+            player.animator.SetBool("isSpecial", false);
+            player.animator.speed = 1f;
+        }
 
         if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
         {
             player.animator.CrossFade("idle", 0.1f);
             player.ChangeState(PlayerState.Idle);
         }
-            
 
         if (wasSpinning)
         {
@@ -263,7 +271,7 @@ public class PlayerAttack : MonoBehaviour
                         isCritical = true; //2_창우_Show 호출 삭제하고 이걸로 교체
 
                         Debug.Log("크리티컬 터짐!");
-                       
+
 
                     }
                 }
@@ -290,7 +298,7 @@ public class PlayerAttack : MonoBehaviour
                 Debug.Log($"[데미지 판정] {attackType} 명중! 최종 데미지: {finalDamage}");
 
                 // 데미지 적용
-                target.TakeDamage(finalDamage,isCritical); // 3_창우_isCritical 추가
+                target.TakeDamage(finalDamage, isCritical); // 3_창우_isCritical 추가
 
 
                 //창우_카메라 흔들림 추가
