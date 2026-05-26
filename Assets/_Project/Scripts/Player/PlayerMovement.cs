@@ -68,18 +68,14 @@ public class PlayerMovement : MonoBehaviour
     {
         Vector3 targetVelocity = moveDirection * player.playerData.moveSpeed;
 
-        // 바닥 레이캐스트 (발목 살짝 위에서 0.5m 아래로 발사)
-        if (Physics.Raycast(transform.position + Vector3.up * 0.2f, Vector3.down, out RaycastHit hit, 0.5f))
+        if (Physics.Raycast(transform.position + Vector3.up * 0.2f, Vector3.down, out RaycastHit hit, 1.2f))
         {
-            // 💡 [핵심 기술!] 대시에서 쓰셨던 지형 적응 로직을 걷기에도 적용!
-            // 이동 방향(targetVelocity)을 바닥의 기울기(hit.normal)에 맞춰 비스듬하게 꺾어줍니다.
             targetVelocity = Vector3.ProjectOnPlane(targetVelocity, hit.normal).normalized * player.playerData.moveSpeed;
 
-            // 계단을 타고 올라가는 중(targetVelocity.y > 0)이 아닐 때만 땅에 붙여줍니다.
             if (targetVelocity.y <= 0f)
             {
                 // 평지나 내리막길에서는 살짝만 눌러줘서 붕 뜨는 것을 방지
-                targetVelocity.y -= 2f;
+                targetVelocity.y -= 8f;
             }
             else
             {
