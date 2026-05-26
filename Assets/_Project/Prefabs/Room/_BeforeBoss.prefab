@@ -3078,18 +3078,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
-      propertyPath: tierData
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
-      propertyPath: exitDoors.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4095815303348115601, guid: 28d56be3b72287946b8a8e45b9d9f188, type: 3}
-      propertyPath: 'exitDoors.Array.data[0]'
-      value: 
-      objectReference: {fileID: 3013464616499991694}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3822,17 +3810,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6711094242999944545, guid: d21253058f7f39946a3946d4d1e604f4, type: 3}
   m_PrefabInstance: {fileID: 6910171002108508854}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3013464616499991694 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8517470111623360056, guid: d21253058f7f39946a3946d4d1e604f4, type: 3}
-  m_PrefabInstance: {fileID: 6910171002108508854}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f40878cb481971d46b9644275ce72852, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Door
 --- !u!1001 &7128920435090437878
 PrefabInstance:
   m_ObjectHideFlags: 0
