@@ -77,6 +77,8 @@ public class BasicBoss : EnemyBase
             if (target != null && enemyData != null && Vector3.Distance(transform.position, target.position) <= enemyData.detectionRange)
             {
                 isAwake = true;
+                if (UIManager.Instance != null)
+                    UIManager.Instance.ShowBossUI(enemyData.maxHealth);
                 targetLandingPosition = target.position + (target.forward * 10.0f);
                 StartCoroutine(DropDownRoutine());
             }
@@ -116,6 +118,8 @@ public class BasicBoss : EnemyBase
         if (isBreathActive || isLeaping)
         {
             currentHealth -= damage;
+            if (UIManager.Instance != null)
+                UIManager.Instance.UpdateBossHealth(currentHealth);
 
             if (DamageNumberSpawner.Instance != null)
                 DamageNumberSpawner.Instance.Show(damage, transform.position, isCritical, gameObject);
@@ -537,6 +541,9 @@ public class BasicBoss : EnemyBase
     protected override void Die()
     {
         base.Die();
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.HideBossUI();
 
         if (GameManager.Instance != null)
         {
