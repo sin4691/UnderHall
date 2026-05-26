@@ -15,8 +15,13 @@ public class Door : MonoBehaviour
     [Header("양문 컨트롤러")]
     public DoubleDoorController doubleDoor;
 
+    [Header("Boss Door Settings")]
+    public bool isBossDoor = false;   // 보스방으로 가는 문이면 체크
+
     public void SetNextRoomReward(RewardType type, Sprite icon)
     {
+        if (isBossDoor) return; // 보스문이면 보상체크 무시
+
         nextRewardType = type;
 
         if (rewardIconRenderer != null)
