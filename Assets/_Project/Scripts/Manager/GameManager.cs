@@ -153,7 +153,9 @@ public class GameManager : MonoBehaviour
             {
                 input.enabled = false; 
             }
-            p.AddGold(200);
+            float baseClearGold = 200f;
+            float currentMultiplier = p.playerData.goldGainMultiplier;
+            int finalBonusGold = Mathf.RoundToInt(baseClearGold * currentMultiplier);
             p.CommitGoldToSO();
         }
 
