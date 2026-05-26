@@ -273,6 +273,14 @@ public class PlayerAttack : MonoBehaviour
                     // [지속력] 특수공격 데미지 30% 증가
                     if (player.playerData.acquiredGifts.Contains(GiftType.Endurance))
                         finalDamage *= 1.3f;
+
+                    // [추가] [속사] 10% 확률로 특수공격 데미지 2배
+                    if (player.playerData.acquiredGifts.Contains(GiftType.RapidFire) && Random.value <= 0.10f)
+                    {
+                        finalDamage *= 2f;
+                        isCritical = true; // 데미지 텍스트가 크리티컬로 뜨게 만듭니다!
+                        Debug.Log("[속사] 특수 공격 치명타 터짐!");
+                    }
                 }
 
                 // 타격 직전의 콜라이더 상태 저장
@@ -328,10 +336,6 @@ public class PlayerAttack : MonoBehaviour
     {
         isSpecialAttackOnCooldown = true;
         float finalCooldown = player.playerData.specialAttackCooldown;
-
-        // [속사] 특수공격 쿨타임 -30%
-        if (player.playerData.acquiredGifts.Contains(GiftType.RapidFire))
-            finalCooldown *= 0.7f;
 
         yield return new WaitForSeconds(finalCooldown);
         isSpecialAttackOnCooldown = false;
