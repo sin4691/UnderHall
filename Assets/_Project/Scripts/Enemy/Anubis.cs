@@ -8,8 +8,9 @@ public class Anubis : EnemyBase
     private float spinTimer = 0f;
     public float spinHitRadius = 3.5f;
     public float spinDamage = 30f;
-    private float nextFlinchTime = 0f;
-    public float flinchCooldown = 4f;
+    public float spinDuration = 3.0f; 
+    public float spinTickRate = 0.4f;
+    public int maxSpinHits = 2;
 
 
     protected override void Update()
@@ -88,31 +89,46 @@ public class Anubis : EnemyBase
         isSuperArmor = true;
         anim.SetTrigger("SpinAttack");
 
-        yield return new WaitForSeconds(0.5f);
+        float timer = 0f;
+        float nextHitTime = 0.2f;
+        int currentHits = 0; 
 
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, spinHitRadius);
-        foreach (Collider hit in hitColliders)
+        while (timer < spinDuration)
         {
-            if (hit.CompareTag("Player"))
+            if (isDead) yield break;
+
+            if (timer >= nextHitTime && currentHits < maxSpinHits)
             {
-                Player player = hit.GetComponent<Player>();
-                if (player != null)
+                Collider[] hitColliders = Physics.OverlapSphere(transform.position, spinHitRadius);
+                foreach (Collider hit in hitColliders)
                 {
-                    player.TakeDamage(spinDamage);
+                    if (hit.CompareTag("Player"))
+                    {
+                        hit.GetComponent<Player>()?.TakeDamage(spinDamage);
+                        currentHits++; 
+                        break;
+                    }
                 }
-                break;
+                nextHitTime += spinTickRate;
             }
+
+            timer += Time.deltaTime;
+            yield return null;
         }
 
-
-        yield return new WaitForSeconds(2.0f);
-
+        yield return new WaitForSeconds(0.5f);
         isSuperArmor = false;
     }
 
     public override void TakeDamage(float damage, bool isCritical = false)
     {
         base.TakeDamage(damage, isCritical);
+
+        if (isDead)
+        {
+            StopAllCoroutines();
+            return;
+        }
 
         AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
         bool isAttackingNow = stateInfo.IsName("Attack");
@@ -122,15 +138,9 @@ public class Anubis : EnemyBase
         {
             anim.ResetTrigger("Hurt");
         }
-        else if (Time.time < nextFlinchTime)
-        {
-            anim.ResetTrigger("Hurt");
-        }
         else if (currentHealth > 0)
         {
             StopAllCoroutines();
-
-            nextFlinchTime = Time.time + flinchCooldown;
         }
     }
     protected override void OnDrawGizmosSelected()

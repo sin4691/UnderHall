@@ -128,21 +128,28 @@ public class BasicBoss : EnemyBase
     {
         if (isDead || isPhaseTransitioning) return;
 
+        // 1. 데미지 입기 (패턴 중인지 평상시인지 구분)
         if (isBreathActive || isLeaping)
         {
             currentHealth -= damage;
-            if (UIManager.Instance != null)
-                UIManager.Instance.UpdateBossHealth(currentHealth);
 
             if (DamageNumberSpawner.Instance != null)
                 DamageNumberSpawner.Instance.Show(damage, transform.position, isCritical, gameObject);
-
-            if (!isPhase2 && enemyData != null && currentHealth <= enemyData.maxHealth * 0.5f)
-                StartCoroutine(Phase2TransitionRoutine());
         }
         else
         {
             base.TakeDamage(damage, isCritical);
+        }
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateBossHealth(currentHealth);
+        }
+
+        // 3. 2페이즈 변신 체크
+        if (!isPhase2 && enemyData != null && currentHealth <= enemyData.maxHealth * 0.5f)
+        {
+            StartCoroutine(Phase2TransitionRoutine());
         }
     }
 

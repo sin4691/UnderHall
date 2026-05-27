@@ -123,12 +123,13 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 보스 피격 시 체력바 깎기 (두트윈으로 스무스하게!)
+    // 보스 피격 시 체력바 깎기 (두트윈으로 스무스하게)
     public void UpdateBossHealth(float currentHealth)
     {
         if (bossHealthSlider != null)
         {
-            // 뚝뚝 끊기지 않고 0.2초에 걸쳐 부드럽게 깎이는 연출!
+            bossHealthSlider.DOKill();
+
             bossHealthSlider.DOValue(currentHealth, 0.2f).SetEase(Ease.OutCubic);
         }
     }
