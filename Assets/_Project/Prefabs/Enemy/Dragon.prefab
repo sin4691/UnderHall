@@ -16867,7 +16867,7 @@ Transform:
   m_GameObject: {fileID: 2382066045459298468}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 38.541664, y: 3.520492, z: 79.05983}
+  m_LocalPosition: {x: 35.846058, y: 3.53229, z: 72.68066}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -16989,7 +16989,7 @@ MonoBehaviour:
   hitOffset: 1.51
   hitHeight: 1
   vfxPoint: {fileID: 6215494456043782174}
-  attackDamage: 1
+  attackDamage: 20
   attackCooldown: 2
   attackRadius: 2
   attackPoint: {fileID: 6467269619316742156}

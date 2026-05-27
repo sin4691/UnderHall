@@ -571,7 +571,7 @@ public class BasicBoss : EnemyBase
                 {
                     if (hitCol.CompareTag("Player"))
                     {
-                        hitCol.GetComponent<Player>()?.TakeDamage(10.0f);
+                        hitCol.GetComponent<Player>()?.TakeDamage(30.0f);
                         hasHitThisDash = true; break;
                     }
                 }

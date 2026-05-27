@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: 
   enemyType: 3
-  maxHealth: 1000
+  maxHealth: 3000
   moveSpeed: 5
   damage: 10
   attackRange: 10
