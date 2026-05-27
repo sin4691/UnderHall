@@ -9,13 +9,16 @@ public class ButtonTextColor : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public Color normalColor = Color.white;
     public Color hoverColor = Color.yellow;
 
-    public GameObject hoverIcon;   // 마우스 올릴 때만 보일 아이콘
+    public GameObject hoverIcon;
 
-    void Start()
+    void OnEnable()
     {
-        // 시작할 때 아이콘 꺼두기
-        if (hoverIcon != null)
-            hoverIcon.SetActive(false);
+        ResetState();
+    }
+
+    void OnDisable()
+    {
+        ResetState();
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -27,7 +30,13 @@ public class ButtonTextColor : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        label.color = normalColor;
+        ResetState();
+    }
+
+    void ResetState()
+    {
+        if (label != null)
+            label.color = normalColor;
         if (hoverIcon != null)
             hoverIcon.SetActive(false);
     }
