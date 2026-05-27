@@ -8,10 +8,7 @@ public class Anubis : EnemyBase
     private float spinTimer = 0f;
     public float spinHitRadius = 3.5f;
     public float spinDamage = 30f;
-    public float spinDuration = 3.0f; 
-    public float spinTickRate = 0.4f;
-    public int maxSpinHits = 2;
-
+    public float spinDuration = 3.0f;
 
     protected override void Update()
     {
@@ -89,34 +86,30 @@ public class Anubis : EnemyBase
         isSuperArmor = true;
         anim.SetTrigger("SpinAttack");
 
-        float timer = 0f;
-        float nextHitTime = 0.2f;
-        int currentHits = 0; 
+        yield return new WaitForSeconds(spinDuration);
 
-        while (timer < spinDuration)
+        isSuperArmor = false;
+    }
+
+    public void OnSpinHitEvent()
+    {
+        if (isDead) return;
+
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, spinHitRadius);
+        foreach (Collider hit in hitColliders)
         {
-            if (isDead) yield break;
-
-            if (timer >= nextHitTime && currentHits < maxSpinHits)
+            if (hit.CompareTag("Player"))
             {
-                Collider[] hitColliders = Physics.OverlapSphere(transform.position, spinHitRadius);
-                foreach (Collider hit in hitColliders)
-                {
-                    if (hit.CompareTag("Player"))
-                    {
-                        hit.GetComponent<Player>()?.TakeDamage(spinDamage);
-                        currentHits++; 
-                        break;
-                    }
-                }
-                nextHitTime += spinTickRate;
+                hit.GetComponent<Player>()?.TakeDamage(spinDamage);
+                break; // 1타당 1번만 데미지
             }
-
-            timer += Time.deltaTime;
-            yield return null;
         }
+    }
 
-        yield return new WaitForSeconds(0.5f);
+    IEnumerator HitSuperArmorRoutine()
+    {
+        isSuperArmor = true;
+        yield return new WaitForSeconds(3.0f);
         isSuperArmor = false;
     }
 
@@ -141,16 +134,15 @@ public class Anubis : EnemyBase
         else if (currentHealth > 0)
         {
             StopAllCoroutines();
+            StartCoroutine(HitSuperArmorRoutine());
         }
     }
+
     protected override void OnDrawGizmosSelected()
     {
-
         base.OnDrawGizmosSelected();
 
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, spinHitRadius);
     }
 }
-
-    
