@@ -16867,7 +16867,7 @@ Transform:
   m_GameObject: {fileID: 2382066045459298468}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 37.29, y: 5.43, z: 58.35}
+  m_LocalPosition: {x: 38.541664, y: 3.520492, z: 79.05983}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -16996,8 +16996,9 @@ MonoBehaviour:
   attackOffset: {x: -0.4, y: 1, z: 6.35}
   breathCooldown: 3
   breathPoint: {fileID: 6215494456043782174}
-  breathRange: 12
-  breathAngle: 90
+  boxSize: {x: 3.87, y: 11.04}
+  boxOffset: {x: 0, y: 1.17, z: 10.06}
+  boxHeight: 2
   closeRangeDamage: 10
   closeRangeVFX: {fileID: 6251861998949262251}
   startHeight: 20
@@ -17021,6 +17022,7 @@ MonoBehaviour:
   originalMaskLocalPos: {x: 0, y: 0, z: 0}
   maskStartOffset: {x: 2, y: 2, z: -0.3}
   maskAssembleDuration: 0
+  bossHealthCanvas: {fileID: 0}
 --- !u!1 &2386502450153534050
 GameObject:
   m_ObjectHideFlags: 0

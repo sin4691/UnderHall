@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using DG.Tweening; // DOTween 추가
+using DG.Tweening; //  [추가] 두트윈 네임스페이스
 
 public class BasicBoss : EnemyBase
 {
@@ -12,12 +12,13 @@ public class BasicBoss : EnemyBase
     public Transform attackPoint; // 기존 방식 흔적 (안 쓰지만 에러 방지용으로 냅둠)
     public Vector3 attackOffset = new Vector3(0, 1f, 2f); // 추가된 공격 위치 오프셋
 
-    [Header("─ 브레스 패턴 설정 (부채꼴) ─")]
+    // 🟢 부채꼴 대신 사각형 세팅으로 롤백!
+    [Header("─ 브레스 패턴 설정 (사각형 박스) ─")]
     public float breathCooldown = 3.5f;
     public Transform breathPoint;
-
-    public float breathRange = 12f;      // 브레스가 뻗어나가는 최대 거리
-    public float breathAngle = 90f;      // 브레스 부채꼴 각도 (90도면 넓게 퍼짐)
+    public Vector2 boxSize = new Vector2(5f, 10f);
+    public Vector3 boxOffset = new Vector3(0, 0, 5f);
+    public float boxHeight = 2f;
 
     public float closeRangeDamage = 10.0f;
     public GameObject closeRangeVFX;
@@ -66,6 +67,9 @@ public class BasicBoss : EnemyBase
     public Vector3 maskStartOffset = new Vector3(0f, 0.5f, -0.3f);
     public float maskAssembleDuration = 0.6f;
 
+    [Header("─ UI 제어 ─")]
+    public GameObject bossHealthCanvas;
+
     protected override void Start()
     {
         base.Start();
@@ -77,6 +81,9 @@ public class BasicBoss : EnemyBase
         SetNextBreathThreshold();
         if (closeRangeVFX != null) closeRangeVFX.SetActive(false);
         StartCoroutine(BossThinkRoutine());
+
+        // 보스방 캔버스 초기화 (끄고 시작)
+        if (bossHealthCanvas != null) bossHealthCanvas.SetActive(false);
     }
 
     protected override void Update()
@@ -141,6 +148,7 @@ public class BasicBoss : EnemyBase
             base.TakeDamage(damage, isCritical);
         }
 
+        // 2. 보스 체력바 UI 업데이트
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdateBossHealth(currentHealth);
@@ -156,17 +164,12 @@ public class BasicBoss : EnemyBase
     // ── 코드로 연출하는 2페이즈 돌입 시퀀스 ───────────────────
     IEnumerator Phase2TransitionRoutine()
     {
-        //isPhase2 = true; isPhaseTransitioning = true; isAttacking = true;
-        //창우_[변경] 기존의 획일화된 단순 대기 방식(yield return new WaitForSeconds(2.0f);)을 완전히 들어내고
-        //창우_ 아래와 같이 unscaledDeltaTime 캐싱 기반 시퀀스 및 DOTween 연출 구조로 강화했습니다.
-
         isPhase2 = true;
         isPhaseTransitioning = true;
         isAttacking = true;
 
         if (agent.enabled) { agent.isStopped = true; agent.velocity = Vector3.zero; }
 
-        // 1. 플레이어 카메라를 보스한테 강제로 고정 및 부드러운 줌인
         Transform originalFollow = null;
         Transform originalLookAt = null;
 
@@ -181,33 +184,22 @@ public class BasicBoss : EnemyBase
             CameraManager.Instance.ZoomTo(40f, 0.3f);
         }
 
-        // 2. 기 모으는 울부짖기 모션 발동!
-        //anim.SetTrigger("Attack");
-        //yield return new WaitForSeconds(2.0f);
-        //isAttacking = false; isPhaseTransitioning = false;
-
-        // [창우_ 델타타임 캐싱] 애니메이션 발동 후 카메라 줌인 대기 (0.2초)
         float elapsedTime = 0f;
         while (elapsedTime < 0.2f)
         {
-            elapsedTime += Time.unscaledDeltaTime; // 퍼즈/슬로우 모션 왜곡을 무시하고 현실 시간 누적
+            elapsedTime += Time.unscaledDeltaTime;
             yield return null;
         }
 
-        // 3. [시간 제어] 주변 환경을 극단적인 초슬로우 모션으로 전환하여 연출 집중도 극대화
-        // Time.timeScale = 0.02f; // 슬로우모션 제거를 위해 주석 처리 혹은 삭제 처리되었습니다.
-
-        // 4. 등가시(Spines)  트윈 재생
         if (backSpinesMesh != null)
         {
             backSpinesMesh.SetActive(true);
             backSpinesMesh.transform.localScale = Vector3.zero;
             backSpinesMesh.transform.DOScale(originalSpinesScale, spinesGrowDuration)
                 .SetEase(Ease.OutBack)
-                .SetUpdate(true); // DOTween 환경도 오직 현실 시간 기준으로 작동
+                .SetUpdate(true);
         }
 
-        // [창우_ 델타타임 캐싱] 등가시가 자라나는 지정 시간 대기 (spinesGrowDuration * 0.6f)
         elapsedTime = 0f;
         float targetTime = spinesGrowDuration * 0.6f;
         while (elapsedTime < targetTime)
@@ -216,7 +208,6 @@ public class BasicBoss : EnemyBase
             yield return null;
         }
 
-        // 5. 머리가면(Mask) 
         if (headMaskMesh != null)
         {
             headMaskMesh.SetActive(true);
@@ -228,11 +219,10 @@ public class BasicBoss : EnemyBase
                 .SetUpdate(true);
 
             headMaskMesh.transform.DOLocalMove(originalMaskLocalPos, maskAssembleDuration)
-                .SetEase(Ease.OutBounce) // 철컥하고 튕기는 안착감 부여
+                .SetEase(Ease.OutBounce)
                 .SetUpdate(true);
         }
 
-        // [창우_ 델타타임 캐싱]  (maskAssembleDuration + 0.5f)
         elapsedTime = 0f;
         targetTime = maskAssembleDuration + 0.5f;
         while (elapsedTime < targetTime)
@@ -241,7 +231,6 @@ public class BasicBoss : EnemyBase
             yield return null;
         }
 
-        // 6. 카메라 원래대로 복구 (다시 플레이어 비추기)
         if (CameraManager.Instance != null && CameraManager.Instance.virtualCamera != null)
         {
             CameraManager.Instance.virtualCamera.Follow = originalFollow;
@@ -249,7 +238,6 @@ public class BasicBoss : EnemyBase
             CameraManager.Instance.ZoomTo(60f, 0.4f);
         }
 
-        // [창우_ 델타타임 캐싱] 카메라가 플레이어에게 온전히 돌아갈 때까지 복귀 대기 (0.4초)
         elapsedTime = 0f;
         while (elapsedTime < 0.4f)
         {
@@ -257,8 +245,6 @@ public class BasicBoss : EnemyBase
             yield return null;
         }
 
-        // 7. 연출 완전히 종료, 게임 정상 타임스케일 재개
-        // Time.timeScale = 1f; // 앞에서 변경하지 않았으므로 정상 속도 유지를 위해 주석 처리되었습니다.
         isAttacking = false;
         isPhaseTransitioning = false;
     }
@@ -314,7 +300,6 @@ public class BasicBoss : EnemyBase
         {
             anim.SetTrigger("Jump");
 
-            // 창우_ [추가] 공중으로 뛰어오르는 순간 공중 공격 이펙트 재생 (FlyAttack)
             if (VFXManager.Instance != null && vfxPoint != null)
             {
                 VFXManager.Instance.PlayBossFlyAttack(vfxPoint);
@@ -355,7 +340,6 @@ public class BasicBoss : EnemyBase
                 transform.rotation = Quaternion.LookRotation(lookDir);
             }
 
-            //창우_[추가] 공중에서 플레이어를 향해 수직 낙하(다이브)를 시작하는 타이밍 (FlyDive)
             if (VFXManager.Instance != null && vfxPoint != null)
             {
                 VFXManager.Instance.PlayBossDive(vfxPoint);
@@ -379,7 +363,6 @@ public class BasicBoss : EnemyBase
                 AudioManager.Instance.PlaySFX("Boss_Slam_Sound");
             }
 
-            //창우_[추가] 바닥 밟는 순간 화면 진동
             if (CameraManager.Instance != null)
             {
                 CameraManager.Instance.ShakeOnBossSlam();
@@ -387,10 +370,8 @@ public class BasicBoss : EnemyBase
             if (VFXManager.Instance != null)
                 VFXManager.Instance.PlayBossSlam(targetPos);
 
-
             if (warningVFX != null) warningVFX.SetActive(false);
 
-            //창우_[변경] 바닥 착지 후 쾅! 터지는 슬램 연출을 VFX 매니저의 지상 공격 풀링으로 변경
             if (VFXManager.Instance != null)
             {
                 VFXManager.Instance.PlayBossAttack(targetPos, transform.forward);
@@ -445,7 +426,6 @@ public class BasicBoss : EnemyBase
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
 
-        // 기존 주석 유지: SmoothFaceTarget 실행
         yield return StartCoroutine(SmoothFaceTarget(0.4f, 5f));
 
         anim.SetTrigger("Attack");
@@ -457,6 +437,7 @@ public class BasicBoss : EnemyBase
         timer = 0f;
     }
 
+    // 🟢 머리 돌리기 + 사각형 브레스 장판 롤백 적용!
     IEnumerator BreathAttackRoutine()
     {
         isAttacking = true;
@@ -465,40 +446,57 @@ public class BasicBoss : EnemyBase
         agent.isStopped = true; agent.velocity = Vector3.zero;
         anim.SetTrigger("Breath");
 
+        // 🟢 7.0초로 변경! (선딜 1초 + 브레스 6초 내내 머리를 회전함)
+        StartCoroutine(SmoothFaceTarget(7.0f, 1.5f));
+
         yield return new WaitForSeconds(1.0f);
 
         if (closeRangeVFX != null) { closeRangeVFX.SetActive(true); }
 
         float timerForBreath = 0f;
-        float totalDuration = 6f;
+        float totalDuration = 6.0f;
         float damageTickRate = 0.2f;
         float nextDamageTime = 0f;
+
+        float poisonAreaRadius = 4.0f; // 🟢 근접 장판 반경
+
+        Vector3 boxCenter = transform.position + transform.rotation * boxOffset;
+        Vector3 halfExtents = new Vector3(boxSize.x / 2, boxHeight / 2, boxSize.y / 2);
 
         while (timerForBreath < totalDuration)
         {
             if (isDead) yield break;
 
+            boxCenter = transform.position + transform.rotation * boxOffset;
+
             if (timerForBreath >= nextDamageTime)
             {
-                Collider[] hits = Physics.OverlapSphere(transform.position, breathRange);
-                foreach (Collider hit in hits)
+                // 🟢 1. 근접 장판 데미지 확인 (OverlapSphere)
+                Collider[] closeHits = Physics.OverlapSphere(transform.position, poisonAreaRadius);
+                bool playerHitByPoison = false;
+
+                foreach (Collider hit in closeHits)
                 {
                     if (hit.CompareTag("Player"))
                     {
-                        Vector3 dirToPlayer = (hit.transform.position - transform.position).normalized;
-                        dirToPlayer.y = 0;
+                        hit.GetComponent<Player>()?.TakeDamage(closeRangeDamage);
+                        playerHitByPoison = true; // 장판에 맞았으면 2중 데미지 방지
+                    }
+                }
 
-                        Vector3 forward = transform.forward;
-                        forward.y = 0;
-
-                        float angle = Vector3.Angle(forward, dirToPlayer);
-
-                        if (angle <= breathAngle / 2f)
+                // 🟢 2. 사각형 박스 데미지 확인 (장판을 안 맞은 경우에만)
+                if (!playerHitByPoison)
+                {
+                    Collider[] hits = Physics.OverlapBox(boxCenter, halfExtents, transform.rotation);
+                    foreach (Collider hit in hits)
+                    {
+                        if (hit.CompareTag("Player"))
                         {
                             hit.GetComponent<Player>()?.TakeDamage(closeRangeDamage);
                         }
                     }
                 }
+
                 nextDamageTime += damageTickRate;
             }
 
@@ -511,7 +509,6 @@ public class BasicBoss : EnemyBase
         basicAttackCount = 0;
         SetNextBreathThreshold();
 
-        // 기존 주석 유지: 브레스 후 후딜레이 대기
         yield return new WaitForSeconds(0.8f);
 
         isBreathActive = false;
@@ -526,7 +523,6 @@ public class BasicBoss : EnemyBase
 
         anim.SetTrigger("FlyFast");
 
-        // 창우_ 보스의 브레스 위치인 vfxPoint를 통째로 넘겨서 그 자리에 부착합니다.
         if (VFXManager.Instance != null && vfxPoint != null)
         {
             VFXManager.Instance.PlayBossRush(vfxPoint);
@@ -539,7 +535,6 @@ public class BasicBoss : EnemyBase
         {
             anim.SetTrigger("FlyFast");
 
-            // 창우_2타 돌진 때도 vfxPoint에 부착
             if (VFXManager.Instance != null && vfxPoint != null)
             {
                 VFXManager.Instance.PlayBossRush(vfxPoint);
@@ -636,29 +631,47 @@ public class BasicBoss : EnemyBase
             AudioManager.Instance.PlaySFX("Boss_Breath_Sound");
         }
     }
+
     protected override void Attack() { }
 
+    // 🟢 기즈모 사각형으로 롤백 적용 완료!
     protected override void OnDrawGizmosSelected()
     {
         Vector3 hitCenter = transform.position + transform.rotation * attackOffset;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(hitCenter, attackRadius);
 
-        Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
-        Vector3 forward = transform.forward;
-        forward.y = 0;
+        Gizmos.color = Color.red;
+        Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position + transform.rotation * boxOffset, transform.rotation, Vector3.one);
+        Gizmos.matrix = rotationMatrix;
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(boxSize.x, boxHeight, boxSize.y));
+        Gizmos.matrix = Matrix4x4.identity;
 
-        Vector3 leftBoundary = Quaternion.Euler(0, -breathAngle / 2f, 0) * forward;
-        Vector3 rightBoundary = Quaternion.Euler(0, breathAngle / 2f, 0) * forward;
-
-        Gizmos.DrawRay(transform.position, leftBoundary * breathRange);
-        Gizmos.DrawRay(transform.position, rightBoundary * breathRange);
-        Gizmos.DrawRay(transform.position, forward * breathRange);
-
-        Gizmos.DrawWireSphere(transform.position, breathRange);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, 4.0f);
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, leapRadius);
+    }
+
+    private void OnEnable()
+    {
+        if (bossHealthCanvas != null) bossHealthCanvas.SetActive(true);
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowBossUI(enemyData.maxHealth);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (bossHealthCanvas != null) bossHealthCanvas.SetActive(false);
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.HideBossUI();
+        }
     }
 
     protected override void Die()
