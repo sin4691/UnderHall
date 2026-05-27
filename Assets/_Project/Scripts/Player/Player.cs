@@ -147,23 +147,58 @@ public class Player : MonoBehaviour
         inputVector = Vector2.zero;
         rb.linearVelocity = Vector3.zero;
 
+        rb.isKinematic = true;
+
         animator.Play("Hit");
+
+        //창우_부활 시작 시점에 VFX 매니저를 호출하여 부활 시작 이펙트를 재생합니다.
+        VFXManager.Instance.PlayPlayerResurrectStart(vfxPoint.position);
+        //창우_슬램 슬로우모션 트윈 차단 후 timeScale 설정
+        if (CameraManager.Instance != null)
+            CameraManager.Instance.CancelSlamSlowMotion();
+
 
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
         Time.timeScale = 0.1f;
 
+        //창우_CameraManager로 줌인 (코루틴 제거)
+        if (CameraManager.Instance != null)
+            CameraManager.Instance.ZoomTo(zoomInFOV, zoomDuration);
+
+
         VFXManager.Instance.PlayPlayerResurrectStart(vfxPoint.position);
         StartCoroutine(CameraZoomRoutine(zoomInFOV, zoomDuration));
 
-        yield return new WaitForSecondsRealtime(4f);
+        float waitTime = 4f;
+        float currentTimer = 0f;
+        while (currentTimer < waitTime)
+        {
+            if (!PauseMenuManager.isPaused)
+            {
+                currentTimer += Time.unscaledDeltaTime;
+            }
+            yield return null;
+        }
 
         remainingResurrections--;
         currentHealth = playerData.maxHealth * playerData.resurrectionHealthPercent;
 
         if (UIManager.Instance != null) UIManager.Instance.UpdateHealthUI(currentHealth, playerData.maxHealth);
 
-        Time.timeScale = 1f;
+        if (PauseMenuManager.isPaused)
+        {
+            PauseMenuManager.previousTimeScale = 1f;
+        }
+        else
+        {
+            Time.timeScale = 1f;
+        }
+
         animator.updateMode = AnimatorUpdateMode.Normal;
+
+        //창우_줌아웃도 CameraManager로
+        if (CameraManager.Instance != null)
+            CameraManager.Instance.ZoomTo(originalFOV, 0.2f);
 
         StartCoroutine(CameraZoomRoutine(originalFOV, 0.2f));
 
@@ -177,6 +212,7 @@ public class Player : MonoBehaviour
         animator.SetBool("isMoving", false);
         animator.CrossFade("idle", 0.1f);
 
+        rb.isKinematic = false;
         ChangeState(PlayerState.Idle);
         GrantInvincibility(playerData.resurrectionInvincibilityTime);
     }
@@ -322,6 +358,13 @@ public class Player : MonoBehaviour
             earnedGoldDuringRun = 0;
             playerData.SaveToDevice();
         }
+    }
+    public void ForceStop()
+    {
+        inputVector = Vector2.zero;
+        rb.linearVelocity = Vector3.zero; 
+        animator.SetBool("isMoving", false); 
+        ChangeState(PlayerState.Idle);
     }
     public void SetNearbyDoor(Door door) => nearbyDoor = door;
     public void ClearNearbyDoor(Door door) { if (nearbyDoor == door) nearbyDoor = null; }

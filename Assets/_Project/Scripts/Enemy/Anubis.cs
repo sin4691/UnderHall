@@ -8,9 +8,7 @@ public class Anubis : EnemyBase
     private float spinTimer = 0f;
     public float spinHitRadius = 3.5f;
     public float spinDamage = 30f;
-    private float nextFlinchTime = 0f;
-    public float flinchCooldown = 4f;
-
+    public float spinDuration = 3.0f;
 
     protected override void Update()
     {
@@ -88,31 +86,42 @@ public class Anubis : EnemyBase
         isSuperArmor = true;
         anim.SetTrigger("SpinAttack");
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(spinDuration);
+
+        isSuperArmor = false;
+    }
+
+    public void OnSpinHitEvent()
+    {
+        if (isDead) return;
 
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, spinHitRadius);
         foreach (Collider hit in hitColliders)
         {
             if (hit.CompareTag("Player"))
             {
-                Player player = hit.GetComponent<Player>();
-                if (player != null)
-                {
-                    player.TakeDamage(spinDamage);
-                }
-                break;
+                hit.GetComponent<Player>()?.TakeDamage(spinDamage);
+                break; // 1타당 1번만 데미지
             }
         }
+    }
 
-
-        yield return new WaitForSeconds(2.0f);
-
+    IEnumerator HitSuperArmorRoutine()
+    {
+        isSuperArmor = true;
+        yield return new WaitForSeconds(3.0f);
         isSuperArmor = false;
     }
 
     public override void TakeDamage(float damage, bool isCritical = false)
     {
         base.TakeDamage(damage, isCritical);
+
+        if (isDead)
+        {
+            StopAllCoroutines();
+            return;
+        }
 
         AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
         bool isAttackingNow = stateInfo.IsName("Attack");
@@ -122,25 +131,18 @@ public class Anubis : EnemyBase
         {
             anim.ResetTrigger("Hurt");
         }
-        else if (Time.time < nextFlinchTime)
-        {
-            anim.ResetTrigger("Hurt");
-        }
         else if (currentHealth > 0)
         {
             StopAllCoroutines();
-
-            nextFlinchTime = Time.time + flinchCooldown;
+            StartCoroutine(HitSuperArmorRoutine());
         }
     }
+
     protected override void OnDrawGizmosSelected()
     {
-
         base.OnDrawGizmosSelected();
 
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, spinHitRadius);
     }
 }
-
-    

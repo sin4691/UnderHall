@@ -32,7 +32,7 @@ public class EnemyRange : EnemyBase
 
         if (!isAppeared)
         {
-            if (dist <= detectRange)
+            if (dist <= enemyData.detectionRange)
             {
                 isAppeared = true;
                 anim.SetTrigger("Appear");
@@ -40,7 +40,7 @@ public class EnemyRange : EnemyBase
             return;
         }
 
-        if (dist <= detectRange)
+        if (dist <= enemyData.attackRange)
         {
             Attack();
         }

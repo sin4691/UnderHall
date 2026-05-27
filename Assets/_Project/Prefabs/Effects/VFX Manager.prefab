@@ -63,7 +63,7 @@ MonoBehaviour:
   bossAttackPrefab: {fileID: 0}
   bossBreathPrefab: {fileID: 5058549489459257812, guid: d39dd2810133cf34d8cb804fa333b82f, type: 3}
   bossRushPrefab: {fileID: 1267622881173442705, guid: c15e6ae34ba4f4342aaea160e0d30071, type: 3}
-  bossFlyAttackPrefab: {fileID: 0}
+  bossFlyAttackPrefab: {fileID: 1267622881173442705, guid: c15e6ae34ba4f4342aaea160e0d30071, type: 3}
   bossFlyBreathPrefab: {fileID: 0}
   bossDivePrefab: {fileID: 0}
   poolSizePerPrefab: 5

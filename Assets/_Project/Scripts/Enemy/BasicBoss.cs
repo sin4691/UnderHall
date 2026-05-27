@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
+using DG.Tweening; //  [추가] 두트윈 네임스페이스
 
 public class BasicBoss : EnemyBase
 {
@@ -9,14 +10,16 @@ public class BasicBoss : EnemyBase
     public float attackCooldown = 2f;
     public float attackRadius = 3.0f;
     public Transform attackPoint; // 기존 방식 흔적 (안 쓰지만 에러 방지용으로 냅둠)
-    public Vector3 attackOffset = new Vector3(0, 1f, 2f); // 추가된 공격 위치 오프셋!
+    public Vector3 attackOffset = new Vector3(0, 1f, 2f); // 추가된 공격 위치 오프셋
 
-    [Header("─ 브레스 패턴 설정 ─")]
+    // 🟢 부채꼴 대신 사각형 세팅으로 롤백!
+    [Header("─ 브레스 패턴 설정 (사각형 박스) ─")]
     public float breathCooldown = 3.5f;
     public Transform breathPoint;
     public Vector2 boxSize = new Vector2(5f, 10f);
     public Vector3 boxOffset = new Vector3(0, 0, 5f);
     public float boxHeight = 2f;
+
     public float closeRangeDamage = 10.0f;
     public GameObject closeRangeVFX;
 
@@ -52,18 +55,35 @@ public class BasicBoss : EnemyBase
     public GameObject slamVFX;
     private bool isLeaping = false;
 
+    //창우_[추가] 2페이즈 연출용 DOTween 메쉬 및 옵션 변수들
+    [Header("─ 2페이즈 코드로 짜는 연출 세팅 ─")]
+    public GameObject backSpinesMesh;
+    public Vector3 originalSpinesScale = Vector3.one;
+    public float spinesGrowDuration = 6f;
+    [Space(5)]
+    public GameObject headMaskMesh;
+    public Vector3 originalMaskScale = Vector3.one;
+    public Vector3 originalMaskLocalPos = Vector3.zero;
+    public Vector3 maskStartOffset = new Vector3(0f, 0.5f, -0.3f);
+    public float maskAssembleDuration = 0.6f;
+
+    [Header("─ UI 제어 ─")]
+    public GameObject bossHealthCanvas;
+
     protected override void Start()
     {
         base.Start();
 
         isSuperArmor = true; // 보스 상시 슈퍼아머 적용
 
-
         transform.position += new Vector3(0, startHeight, 0);
         agent.enabled = false;
         SetNextBreathThreshold();
         if (closeRangeVFX != null) closeRangeVFX.SetActive(false);
         StartCoroutine(BossThinkRoutine());
+
+        // 보스방 캔버스 초기화 (끄고 시작)
+        if (bossHealthCanvas != null) bossHealthCanvas.SetActive(false);
     }
 
     protected override void Update()
@@ -77,6 +97,8 @@ public class BasicBoss : EnemyBase
             if (target != null && enemyData != null && Vector3.Distance(transform.position, target.position) <= enemyData.detectionRange)
             {
                 isAwake = true;
+                if (UIManager.Instance != null)
+                    UIManager.Instance.ShowBossUI(enemyData.maxHealth);
                 targetLandingPosition = target.position + (target.forward * 10.0f);
                 StartCoroutine(DropDownRoutine());
             }
@@ -113,29 +135,118 @@ public class BasicBoss : EnemyBase
     {
         if (isDead || isPhaseTransitioning) return;
 
+        // 1. 데미지 입기 (패턴 중인지 평상시인지 구분)
         if (isBreathActive || isLeaping)
         {
             currentHealth -= damage;
 
             if (DamageNumberSpawner.Instance != null)
                 DamageNumberSpawner.Instance.Show(damage, transform.position, isCritical, gameObject);
-
-            if (!isPhase2 && enemyData != null && currentHealth <= enemyData.maxHealth * 0.5f)
-                StartCoroutine(Phase2TransitionRoutine());
         }
         else
         {
             base.TakeDamage(damage, isCritical);
         }
+
+        // 2. 보스 체력바 UI 업데이트
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateBossHealth(currentHealth);
+        }
+
+        // 3. 2페이즈 변신 체크
+        if (!isPhase2 && enemyData != null && currentHealth <= enemyData.maxHealth * 0.5f)
+        {
+            StartCoroutine(Phase2TransitionRoutine());
+        }
     }
 
+    // ── 코드로 연출하는 2페이즈 돌입 시퀀스 ───────────────────
     IEnumerator Phase2TransitionRoutine()
     {
-        isPhase2 = true; isPhaseTransitioning = true; isAttacking = true;
+        isPhase2 = true;
+        isPhaseTransitioning = true;
+        isAttacking = true;
+
         if (agent.enabled) { agent.isStopped = true; agent.velocity = Vector3.zero; }
-        anim.SetTrigger("Attack");
-        yield return new WaitForSeconds(2.0f);
-        isAttacking = false; isPhaseTransitioning = false;
+
+        Transform originalFollow = null;
+        Transform originalLookAt = null;
+
+        if (CameraManager.Instance != null && CameraManager.Instance.virtualCamera != null)
+        {
+            originalFollow = CameraManager.Instance.virtualCamera.Follow;
+            originalLookAt = CameraManager.Instance.virtualCamera.LookAt;
+
+            CameraManager.Instance.virtualCamera.Follow = this.transform;
+            CameraManager.Instance.virtualCamera.LookAt = this.transform;
+
+            CameraManager.Instance.ZoomTo(40f, 0.3f);
+        }
+
+        float elapsedTime = 0f;
+        while (elapsedTime < 0.2f)
+        {
+            elapsedTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (backSpinesMesh != null)
+        {
+            backSpinesMesh.SetActive(true);
+            backSpinesMesh.transform.localScale = Vector3.zero;
+            backSpinesMesh.transform.DOScale(originalSpinesScale, spinesGrowDuration)
+                .SetEase(Ease.OutBack)
+                .SetUpdate(true);
+        }
+
+        elapsedTime = 0f;
+        float targetTime = spinesGrowDuration * 0.6f;
+        while (elapsedTime < targetTime)
+        {
+            elapsedTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (headMaskMesh != null)
+        {
+            headMaskMesh.SetActive(true);
+            headMaskMesh.transform.localScale = Vector3.zero;
+            headMaskMesh.transform.localPosition = originalMaskLocalPos + maskStartOffset;
+
+            headMaskMesh.transform.DOScale(originalMaskScale, maskAssembleDuration)
+                .SetEase(Ease.OutQuad)
+                .SetUpdate(true);
+
+            headMaskMesh.transform.DOLocalMove(originalMaskLocalPos, maskAssembleDuration)
+                .SetEase(Ease.OutBounce)
+                .SetUpdate(true);
+        }
+
+        elapsedTime = 0f;
+        targetTime = maskAssembleDuration + 0.5f;
+        while (elapsedTime < targetTime)
+        {
+            elapsedTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (CameraManager.Instance != null && CameraManager.Instance.virtualCamera != null)
+        {
+            CameraManager.Instance.virtualCamera.Follow = originalFollow;
+            CameraManager.Instance.virtualCamera.LookAt = originalLookAt;
+            CameraManager.Instance.ZoomTo(60f, 0.4f);
+        }
+
+        elapsedTime = 0f;
+        while (elapsedTime < 0.4f)
+        {
+            elapsedTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        isAttacking = false;
+        isPhaseTransitioning = false;
     }
 
     IEnumerator BossThinkRoutine()
@@ -163,7 +274,7 @@ public class BasicBoss : EnemyBase
                     if (isPhase2) StartCoroutine(ExecutePhase2Pattern());
                     else StartCoroutine(BreathAttackRoutine());
                 }
-                else if (timer >= attackCooldown) // 공격 쿨타임 확인 후 실행
+                else if (timer >= attackCooldown)
                 {
                     isAttacking = true;
                     StartCoroutine(AttackRoutine());
@@ -188,6 +299,11 @@ public class BasicBoss : EnemyBase
         for (int i = 0; i < jumpCount; i++)
         {
             anim.SetTrigger("Jump");
+
+            if (VFXManager.Instance != null && vfxPoint != null)
+            {
+                VFXManager.Instance.PlayBossFlyAttack(vfxPoint);
+            }
 
             Vector3 startPos = transform.position;
             Vector3 peakPos = startPos + Vector3.up * leapHeight;
@@ -224,19 +340,42 @@ public class BasicBoss : EnemyBase
                 transform.rotation = Quaternion.LookRotation(lookDir);
             }
 
+            if (VFXManager.Instance != null && vfxPoint != null)
+            {
+                VFXManager.Instance.PlayBossDive(vfxPoint);
+            }
+
             t = 0;
             Vector3 dropStartPos = transform.position;
             while (t < 0.15f)
             {
                 if (isDead) yield break;
                 transform.position = Vector3.Lerp(dropStartPos, targetPos, t / 0.15f);
-                t += Time.deltaTime;
+                t += Time.unscaledDeltaTime;
                 yield return null;
             }
             transform.position = targetPos;
 
             anim.SetTrigger("Land");
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX("Boss_Slam_Sound");
+            }
+
+            if (CameraManager.Instance != null)
+            {
+                CameraManager.Instance.ShakeOnBossSlam();
+            }
+            if (VFXManager.Instance != null)
+                VFXManager.Instance.PlayBossSlam(targetPos);
+
             if (warningVFX != null) warningVFX.SetActive(false);
+
+            if (VFXManager.Instance != null)
+            {
+                VFXManager.Instance.PlayBossAttack(targetPos, transform.forward);
+            }
 
             if (slamVFX != null)
             {
@@ -253,7 +392,7 @@ public class BasicBoss : EnemyBase
             if (i < jumpCount - 1) yield return new WaitForSeconds(0.3f);
         }
 
-        yield return new WaitForSeconds(0.5f); // 도약 공격 후 대기 시간
+        yield return new WaitForSeconds(0.5f);
 
         lastLeapTime = Time.time;
         SetGhostMode(false);
@@ -298,6 +437,7 @@ public class BasicBoss : EnemyBase
         timer = 0f;
     }
 
+    // 🟢 머리 돌리기 + 사각형 브레스 장판 롤백 적용!
     IEnumerator BreathAttackRoutine()
     {
         isAttacking = true;
@@ -305,9 +445,11 @@ public class BasicBoss : EnemyBase
 
         agent.isStopped = true; agent.velocity = Vector3.zero;
         anim.SetTrigger("Breath");
-        StartCoroutine(SmoothFaceTarget(4.0f, 2.0f));
 
-        yield return new WaitForSeconds(1f);
+        // 🟢 7.0초로 변경! (선딜 1초 + 브레스 6초 내내 머리를 회전함)
+        StartCoroutine(SmoothFaceTarget(7.0f, 1.5f));
+
+        yield return new WaitForSeconds(1.0f);
 
         if (closeRangeVFX != null) { closeRangeVFX.SetActive(true); }
 
@@ -315,6 +457,8 @@ public class BasicBoss : EnemyBase
         float totalDuration = 6.0f;
         float damageTickRate = 0.2f;
         float nextDamageTime = 0f;
+
+        float poisonAreaRadius = 4.0f; // 🟢 근접 장판 반경
 
         Vector3 boxCenter = transform.position + transform.rotation * boxOffset;
         Vector3 halfExtents = new Vector3(boxSize.x / 2, boxHeight / 2, boxSize.y / 2);
@@ -327,14 +471,32 @@ public class BasicBoss : EnemyBase
 
             if (timerForBreath >= nextDamageTime)
             {
-                Collider[] hits = Physics.OverlapBox(boxCenter, halfExtents, transform.rotation);
-                foreach (Collider hit in hits)
+                // 🟢 1. 근접 장판 데미지 확인 (OverlapSphere)
+                Collider[] closeHits = Physics.OverlapSphere(transform.position, poisonAreaRadius);
+                bool playerHitByPoison = false;
+
+                foreach (Collider hit in closeHits)
                 {
                     if (hit.CompareTag("Player"))
                     {
                         hit.GetComponent<Player>()?.TakeDamage(closeRangeDamage);
+                        playerHitByPoison = true; // 장판에 맞았으면 2중 데미지 방지
                     }
                 }
+
+                // 🟢 2. 사각형 박스 데미지 확인 (장판을 안 맞은 경우에만)
+                if (!playerHitByPoison)
+                {
+                    Collider[] hits = Physics.OverlapBox(boxCenter, halfExtents, transform.rotation);
+                    foreach (Collider hit in hits)
+                    {
+                        if (hit.CompareTag("Player"))
+                        {
+                            hit.GetComponent<Player>()?.TakeDamage(closeRangeDamage);
+                        }
+                    }
+                }
+
                 nextDamageTime += damageTickRate;
             }
 
@@ -347,7 +509,7 @@ public class BasicBoss : EnemyBase
         basicAttackCount = 0;
         SetNextBreathThreshold();
 
-        yield return new WaitForSeconds(0.8f); // 브레스 패턴 종료 후 대기 시간
+        yield return new WaitForSeconds(0.8f);
 
         isBreathActive = false;
         isAttacking = false;
@@ -361,7 +523,6 @@ public class BasicBoss : EnemyBase
 
         anim.SetTrigger("FlyFast");
 
-        // 창우_ 보스의 브레스 위치인 vfxPoint를 통째로 넘겨서 그 자리에 부착합니다.
         if (VFXManager.Instance != null && vfxPoint != null)
         {
             VFXManager.Instance.PlayBossRush(vfxPoint);
@@ -374,7 +535,6 @@ public class BasicBoss : EnemyBase
         {
             anim.SetTrigger("FlyFast");
 
-            // 창우_2타 돌진 때도 vfxPoint에 부착
             if (VFXManager.Instance != null && vfxPoint != null)
             {
                 VFXManager.Instance.PlayBossRush(vfxPoint);
@@ -411,7 +571,7 @@ public class BasicBoss : EnemyBase
                 {
                     if (hitCol.CompareTag("Player"))
                     {
-                        hitCol.GetComponent<Player>()?.TakeDamage(10.0f);
+                        hitCol.GetComponent<Player>()?.TakeDamage(30.0f);
                         hasHitThisDash = true; break;
                     }
                 }
@@ -450,7 +610,6 @@ public class BasicBoss : EnemyBase
     {
         if (target == null) return;
 
-        // 오프셋을 적용한 실제 타격 지점 계산
         Vector3 hitCenter = transform.position + transform.rotation * attackOffset;
 
         if (VFXManager.Instance != null) VFXManager.Instance.PlayBossAttack(hitCenter, transform.forward);
@@ -460,12 +619,24 @@ public class BasicBoss : EnemyBase
             if (hit.CompareTag("Player")) hit.GetComponent<Player>()?.TakeDamage(attackDamage);
     }
 
-    public void OnBreathFire() { if (breathPoint != null) VFXManager.Instance.PlayBossBreath(breathPoint, breathPoint.forward); }
+    public void OnBreathFire()
+    {
+        if (breathPoint != null)
+        {
+            VFXManager.Instance.PlayBossBreath(breathPoint, breathPoint.forward);
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX("Boss_Breath_Sound");
+        }
+    }
+
     protected override void Attack() { }
 
+    // 🟢 기즈모 사각형으로 롤백 적용 완료!
     protected override void OnDrawGizmosSelected()
     {
-        // 오프셋 위치에 맞춰서 빨간 원 그리기
         Vector3 hitCenter = transform.position + transform.rotation * attackOffset;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(hitCenter, attackRadius);
@@ -474,16 +645,41 @@ public class BasicBoss : EnemyBase
         Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position + transform.rotation * boxOffset, transform.rotation, Vector3.one);
         Gizmos.matrix = rotationMatrix;
         Gizmos.DrawWireCube(Vector3.zero, new Vector3(boxSize.x, boxHeight, boxSize.y));
+        Gizmos.matrix = Matrix4x4.identity;
 
-        Gizmos.matrix = Matrix4x4.identity; // 기즈모 그리기용 매트릭스 원상복구
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, 4.0f);
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, leapRadius);
     }
 
+    private void OnEnable()
+    {
+        if (bossHealthCanvas != null) bossHealthCanvas.SetActive(true);
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowBossUI(enemyData.maxHealth);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (bossHealthCanvas != null) bossHealthCanvas.SetActive(false);
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.HideBossUI();
+        }
+    }
+
     protected override void Die()
     {
         base.Die();
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.HideBossUI();
 
         if (GameManager.Instance != null)
         {

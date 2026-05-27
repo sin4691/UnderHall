@@ -67,7 +67,28 @@ public class PlayerMovement : MonoBehaviour
     private void ApplyMovement()
     {
         Vector3 targetVelocity = moveDirection * player.playerData.moveSpeed;
-        targetVelocity.y = player.rb.linearVelocity.y;
+
+        if (Physics.Raycast(transform.position + Vector3.up * 0.2f, Vector3.down, out RaycastHit hit, 1.2f))
+        {
+            targetVelocity = Vector3.ProjectOnPlane(targetVelocity, hit.normal).normalized * player.playerData.moveSpeed;
+
+            if (player.rb.linearVelocity.y > 0.1f)
+            {
+                // 이때는 짓누르지 말고 물리 엔진이 밀어올리는 힘을 그대로 존중합니다.
+                targetVelocity.y = Mathf.Clamp(player.rb.linearVelocity.y, 0f, 3f);
+            }
+            else if (targetVelocity.y <= 0f)
+            {
+                // 평지나 내리막길일 때만 확실하게 바닥으로 당겨줍니다.
+                targetVelocity.y -= 8f;
+            }
+        }
+        else
+        {
+            // 공중에 완전히 떠 있을 때는 기존 중력(낙하 속도) 유지
+            targetVelocity.y = player.rb.linearVelocity.y;
+        }
+
         player.rb.linearVelocity = targetVelocity;
 
         if (moveDirection != Vector3.zero)

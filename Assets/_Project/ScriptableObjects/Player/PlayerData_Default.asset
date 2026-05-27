@@ -17,23 +17,24 @@ MonoBehaviour:
   moveSpeed: 5
   attackCooldown: 0.3
   attackRange: 3.6
-  specialAttackMultiplier: 0.5
+  specialAttackMultiplier: 0.3
   specialAttackRange: 2.2
-  specialAttackCooldown: 5
+  specialAttackCooldown: 1
   dashSpeed: 20
   dashDuration: 0.2
   maxDashCount: 2
   dashCooldown: 1
   dashInvincibilityTime: 0.2
   hitInvincibilityTime: 0.5
-  maxResurrectionCount: 1
-  resurrectionHealthPercent: 0.2
+  maxResurrectionCount: 0
+  resurrectionHealthPercent: 0.1
   resurrectionInvincibilityTime: 2
-  currentGold: 600
+  currentGold: 0
   goldGainMultiplier: 1
   levelHP: 0
   levelATK: 0
   levelDash: 0
   levelGold: 0
-  levelRevive: 1
-  acquiredGifts: 02000000
+  levelRevive: 0
+  levelSpeed: 0
+  acquiredGifts: 

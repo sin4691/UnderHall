@@ -23,7 +23,7 @@ public class PlayerAttack : MonoBehaviour
     public Transform weaponVFXPoint; // 창우_VFXPoint_Weapon 드래그
     public Transform skillVFXPoint;  // 창우_VFXPoint_Body 드래그
 
-    private Collider[] hitColliders = new Collider[10];
+    private Collider[] hitColliders = new Collider[100];
 
     // 각성(대시 후 다음 공격 2배) 버프 상태
     public bool isAwakened = false;
@@ -111,13 +111,21 @@ public class PlayerAttack : MonoBehaviour
         currentCombo = 0;
         isNextAttackBuffered = false;
         isAttackOnCooldown = false;
+        if (player.animator != null)
+        {
+            player.animator.ResetTrigger("Attack");
+            player.animator.ResetTrigger("SpecialAttack");
+
+            player.animator.SetBool("isAttacking", false);
+            player.animator.SetBool("isSpecial", false);
+            player.animator.speed = 1f;
+        }
 
         if (player.CurrentState == PlayerState.Attack || player.CurrentState == PlayerState.SpecialAttack)
         {
             player.animator.CrossFade("idle", 0.1f);
             player.ChangeState(PlayerState.Idle);
         }
-            
 
         if (wasSpinning)
         {
@@ -176,22 +184,20 @@ public class PlayerAttack : MonoBehaviour
         player.ChangeState(PlayerState.SpecialAttack);
         player.animator.CrossFade("specialAttack", 0.1f);
 
-        float timer = 0f;
-        float maxDuration = 5f;
+
         float tickRate = 0.25f;
         float tickTimer = tickRate;
 
-        while (isSpinning && timer < maxDuration)
+        while (isSpinning)
         {
             if (player.CurrentState == PlayerState.Dead || player.CurrentState == PlayerState.Resurrecting) break;
 
-            timer += Time.deltaTime;
             tickTimer += Time.deltaTime;
 
             if (tickTimer >= tickRate)
             {
                 float currentRadius = player.playerData.specialAttackRange;
-                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion)) currentRadius *= 1.5f;
+                if (player.playerData.acquiredGifts.Contains(GiftType.Explosion)) currentRadius *= 1.8f;
 
                 ExecuteHitDetection(transform.position, currentRadius, player.playerData.specialAttackMultiplier, true);
                 tickTimer = 0f;
@@ -205,8 +211,11 @@ public class PlayerAttack : MonoBehaviour
     // 통합 데미지 판정 시스템
     private void ExecuteHitDetection(Vector3 center, float radius, float damageMultiplier, bool isSpecial)
     {
-        center.y += 1f;
-        // 변경된 radius 값이 Physics.OverlapSphereNonAlloc에 적용됩니다.
+        Vector3 pointBottom = center;
+        pointBottom.y += 0.2f; // 무릎/발목 높이
+
+        Vector3 pointTop = center;
+        pointTop.y += 1.8f; // 머리 꼭대기 높이
         int hitCount = Physics.OverlapSphereNonAlloc(center, radius, hitColliders);
 
         // [각성] 버프 사용 여부 확인
@@ -262,7 +271,7 @@ public class PlayerAttack : MonoBehaviour
                         isCritical = true; //2_창우_Show 호출 삭제하고 이걸로 교체
 
                         Debug.Log("크리티컬 터짐!");
-                       
+
 
                     }
                 }
@@ -272,6 +281,14 @@ public class PlayerAttack : MonoBehaviour
                     // [지속력] 특수공격 데미지 30% 증가
                     if (player.playerData.acquiredGifts.Contains(GiftType.Endurance))
                         finalDamage *= 1.3f;
+
+                    // [추가] [속사] 10% 확률로 특수공격 데미지 2배
+                    if (player.playerData.acquiredGifts.Contains(GiftType.RapidFire) && Random.value <= 0.10f)
+                    {
+                        finalDamage *= 2f;
+                        isCritical = true; // 데미지 텍스트가 크리티컬로 뜨게 만듭니다!
+                        Debug.Log("[속사] 특수 공격 치명타 터짐!");
+                    }
                 }
 
                 // 타격 직전의 콜라이더 상태 저장
@@ -281,7 +298,7 @@ public class PlayerAttack : MonoBehaviour
                 Debug.Log($"[데미지 판정] {attackType} 명중! 최종 데미지: {finalDamage}");
 
                 // 데미지 적용
-                target.TakeDamage(finalDamage,isCritical); // 3_창우_isCritical 추가
+                target.TakeDamage(finalDamage, isCritical); // 3_창우_isCritical 추가
 
 
                 //창우_카메라 흔들림 추가
@@ -327,10 +344,6 @@ public class PlayerAttack : MonoBehaviour
     {
         isSpecialAttackOnCooldown = true;
         float finalCooldown = player.playerData.specialAttackCooldown;
-
-        // [속사] 특수공격 쿨타임 -30%
-        if (player.playerData.acquiredGifts.Contains(GiftType.RapidFire))
-            finalCooldown *= 0.7f;
 
         yield return new WaitForSeconds(finalCooldown);
         isSpecialAttackOnCooldown = false;

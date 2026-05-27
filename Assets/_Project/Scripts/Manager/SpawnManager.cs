@@ -42,7 +42,24 @@ public class SpawnManager : MonoBehaviour
         {
             if (child.CompareTag("EnemySpawnPoint"))
             {
-                spawnPoints.Add(child);
+                bool isDuplicate = false;
+                foreach (Transform existingPoint in spawnPoints)
+                {
+                    if (Vector3.Distance(existingPoint.position, child.position) < 0.1f)
+                    {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (!isDuplicate)
+                {
+                    spawnPoints.Add(child);
+                }
+                else
+                {
+                    Debug.LogWarning($"[SpawnManager] 위치가 겹치는 스폰 포인트 발견! 중복 소환을 막기 위해 하나를 삭제 취급합니다. (위치: {child.position})");
+                }
             }
         }
     }
@@ -153,6 +170,11 @@ public class SpawnManager : MonoBehaviour
     private void ClearRoom()
     {
         isRoomCleared = true;
+        if (GameManager.Instance != null && GameManager.Instance.IsGameCleared)
+        {
+            Debug.Log("[SpawnManager] 보스 클리어 상태이므로 보상 스폰 로직을 취소합니다.");
+            return;
+        }
         Debug.Log("[디버그 7] 모든 웨이브 클리어! 보상을 스폰합니다.");
 
         //창우_ 방 클리어 VFX (SpawnManager 위치 기준)

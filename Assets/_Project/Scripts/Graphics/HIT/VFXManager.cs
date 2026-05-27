@@ -48,6 +48,7 @@ public class VFXManager : MonoBehaviour
     [SerializeField] GameObject bossFlyAttackPrefab;    // FlyAttack
     [SerializeField] GameObject bossFlyBreathPrefab;    // FlyBreatheFire
     [SerializeField] GameObject bossDivePrefab;         // FlyDive
+    [SerializeField] GameObject bossSlamPrefab; // 땅 착지 이펙트
 
     [Header("─ 풀링 설정 ─")]
     [SerializeField] int poolSizePerPrefab = 5;
@@ -112,6 +113,7 @@ public class VFXManager : MonoBehaviour
         PrewarmPool(bossFlyAttackPrefab);
         PrewarmPool(bossFlyBreathPrefab);
         PrewarmPool(bossDivePrefab);
+        PrewarmPool(bossSlamPrefab);
         PrewarmPool(roomClearVFXPrefab);
         PrewarmPool(rewardAppearVFXPrefab);
     }
@@ -336,15 +338,33 @@ public class VFXManager : MonoBehaviour
             go.transform.localRotation = bossRushPrefab.transform.localRotation;
         }
     }
+    public void PlayBossSlam(Vector3 position)
+    => GetFromPool(bossSlamPrefab, position, Vector3.up);
 
-    public void PlayBossFlyAttack(Vector3 position, Vector3 direction)
-        => GetFromPool(bossFlyAttackPrefab, position, direction);
+    public void PlayBossFlyAttack(Transform targetPoint)
+    {
+        GameObject go = GetFromPool(bossFlyAttackPrefab, targetPoint.position, targetPoint.forward);
+        if (go != null)
+        {
+            go.transform.SetParent(targetPoint);
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = bossFlyAttackPrefab.transform.localRotation;
+        }
+    }
 
     public void PlayBossFlyBreath(Vector3 position, Vector3 direction)
         => GetFromPool(bossFlyBreathPrefab, position, direction);
 
-    public void PlayBossDive(Vector3 position, Vector3 direction)
-        => GetFromPool(bossDivePrefab, position, direction);
+    public void PlayBossDive(Transform targetPoint)
+    {
+        GameObject go = GetFromPool(bossDivePrefab, targetPoint.position, targetPoint.forward);
+        if (go != null)
+        {
+            go.transform.SetParent(targetPoint);
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = bossDivePrefab.transform.localRotation;
+        }
+    }
 
     // ─────────────────────────────────────────
     // 고성능 셰이더 프로퍼티 블록 연출 루틴 (Material 복사 없음)

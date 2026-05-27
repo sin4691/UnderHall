@@ -14,7 +14,7 @@ public class EnemyData : ScriptableObject
     [Header("===== 스탯 =====")]
 
     [Tooltip("최대 체력")]
-    [Range(1, 1000)]
+    [Range(1, 3000)]
     public float maxHealth = 30f;
 
     [Tooltip("이동 속도")]

@@ -110,7 +110,7 @@ public class UpgradeCardUI : MonoBehaviour
         {
             case UpgradeType.HP: return "강인한 신체";
             case UpgradeType.ATK: return "날카로운 검";
-            case UpgradeType.Dash: return "이중 도약";
+            case UpgradeType.Dash: return "삼중 도약";
             case UpgradeType.Gold: return "황금 손길";
             case UpgradeType.Revive: return "불사의 가호";
             case UpgradeType.Speed: return "신속한 발";
