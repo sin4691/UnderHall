@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 533338edfcbfec445bfa5616bde10c0f, type: 3}
   m_Name: PlayerData_Default
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
-  maxHealth: 185
+  maxHealth: 135
   damage: 25
   moveSpeed: 9
   attackCooldown: 0.3
@@ -29,7 +29,7 @@ MonoBehaviour:
   maxResurrectionCount: 1
   resurrectionHealthPercent: 0.4
   resurrectionInvincibilityTime: 2
-  currentGold: 120
+  currentGold: 240
   goldGainMultiplier: 1.2
   levelHP: 3
   levelATK: 5
@@ -37,4 +37,4 @@ MonoBehaviour:
   levelGold: 2
   levelRevive: 2
   levelSpeed: 3
-  acquiredGifts: 080000000700000001000000
+  acquiredGifts: 

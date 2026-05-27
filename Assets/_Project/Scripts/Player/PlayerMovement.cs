@@ -72,15 +72,15 @@ public class PlayerMovement : MonoBehaviour
         {
             targetVelocity = Vector3.ProjectOnPlane(targetVelocity, hit.normal).normalized * player.playerData.moveSpeed;
 
-            if (targetVelocity.y <= 0f)
+            if (player.rb.linearVelocity.y > 0.1f)
             {
-                // 평지나 내리막길에서는 살짝만 눌러줘서 붕 뜨는 것을 방지
-                targetVelocity.y -= 8f;
+                // 이때는 짓누르지 말고 물리 엔진이 밀어올리는 힘을 그대로 존중합니다.
+                targetVelocity.y = Mathf.Clamp(player.rb.linearVelocity.y, 0f, 3f);
             }
-            else
+            else if (targetVelocity.y <= 0f)
             {
-                // 계단이나 오르막을 오를 때는 물리 엔진이 캐릭터를 위로 밀어 올리려는 힘을 방해하지 않고 그대로 존중합니다!
-                targetVelocity.y = Mathf.Max(targetVelocity.y, player.rb.linearVelocity.y);
+                // 평지나 내리막길일 때만 확실하게 바닥으로 당겨줍니다.
+                targetVelocity.y -= 8f;
             }
         }
         else
