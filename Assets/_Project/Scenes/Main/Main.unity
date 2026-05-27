@@ -713,6 +713,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 81503355}
     - target: {fileID: 8783256870082313160, guid: 422cef5e8d21d8e46a3a0bc9e8fdf166, type: 3}
+      propertyPath: bossHealthSlider
+      value: 
+      objectReference: {fileID: 1840417165}
+    - target: {fileID: 8783256870082313160, guid: 422cef5e8d21d8e46a3a0bc9e8fdf166, type: 3}
       propertyPath: interactPromptUI
       value: 
       objectReference: {fileID: 327220987}
@@ -720,6 +724,10 @@ PrefabInstance:
       propertyPath: healthBarContainer
       value: 
       objectReference: {fileID: 1840417163}
+    - target: {fileID: 8783256870082313160, guid: 422cef5e8d21d8e46a3a0bc9e8fdf166, type: 3}
+      propertyPath: bossHealthContainer
+      value: 
+      objectReference: {fileID: 1840417164}
     - target: {fileID: 8866608274952476509, guid: 422cef5e8d21d8e46a3a0bc9e8fdf166, type: 3}
       propertyPath: m_Name
       value: UIManager
@@ -1932,6 +1940,10 @@ PrefabInstance:
       propertyPath: m_text
       value: "[E]\uB85C \uC0C1\uD638\uC791\uC6A9"
       objectReference: {fileID: 0}
+    - target: {fileID: 2711289182222877945, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3037978084025354609, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -2016,6 +2028,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerUICanvas
       objectReference: {fileID: 0}
+    - target: {fileID: 4082757950701851169, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4082757950701851169, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -2032,6 +2052,22 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5090014230142537482, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
   m_PrefabInstance: {fileID: 1840417162}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1840417164 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2711289182222877945, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
+  m_PrefabInstance: {fileID: 1840417162}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1840417165 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3055636556886106683, guid: c03b47472e48e1d40b61724bae1b73a6, type: 3}
+  m_PrefabInstance: {fileID: 1840417162}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1840417164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Slider
 --- !u!1001 &1918800538
 PrefabInstance:
   m_ObjectHideFlags: 0
