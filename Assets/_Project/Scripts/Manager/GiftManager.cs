@@ -83,7 +83,7 @@ public class GiftManager : MonoBehaviour
                     break;
                 case GiftType.RapidFire:
                     gift.category = GiftCategory.SpecialAttack;
-                    gift.giftName = "속사";
+                    gift.giftName = "간파";
                     gift.description = "특수 공격 10% 확률로 2배 피해";
                     break;
                 case GiftType.Endurance:
