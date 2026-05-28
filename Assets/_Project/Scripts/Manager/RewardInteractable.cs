@@ -42,7 +42,7 @@ public class RewardInteractable : MonoBehaviour
         }
         else if (rewardType == RewardType.Gold)
         {
-            int goldAmount = 100; 
+            int goldAmount = 10000; 
             goldAmount = Mathf.RoundToInt(goldAmount * player.playerData.goldGainMultiplier);
             player.AddGold(goldAmount);
         }
