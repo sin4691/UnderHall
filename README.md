@@ -101,7 +101,7 @@
    ```
    Assets/_Project/Scenes/Main/MainMenu.unity
    ```
-4. 상단 ▶ (Play) 버튼을 눌러 실행합니다.
+4. 상단 ▶ (Play) 버튼을 눌러 실행합니다. (외부 에셋은 저장소에 없으므로 따로 넣어야 화면이 정상으로 보입니다.)
 5. 메인 메뉴에서 **시작** 버튼을 누르면 게임이 시작됩니다.
 
 ---
@@ -125,3 +125,9 @@
 | 서동연 | 적 / AI | |
 | 정창우 | 그래픽 / 셰이더 | |
 | 신재윤 | 팀장 · 방 프리팹 · UI · 통합 | 밸런싱 · 데이터 총괄 |
+
+## 외부 에셋
+
+사용한 에셋: POLYGON Dungeon·POLYGON Particle FX(Synty), DOTween Pro, All In 1 Sprite Shader, Layer Lab 아이콘, Hun0FX·VFX Klaus·Special Skills 이펙트, polyperfect, 커서 팩, 몬스터 모델(Dragon·Anubis 등).
+
+유료·스토어 에셋은 라이선스상 공개 저장소에 둘 수 없어서 저장소에서 뺐습니다. 그래서 받은 그대로는 씬의 모델·UI가 비어 보입니다. 코드는 모두 그대로 있습니다.

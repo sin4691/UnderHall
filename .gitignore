@@ -79,3 +79,27 @@ Thumbs.db
 # Visual Studio config
 *.vsconfig
 *.slnx
+
+# 외부 에셋 (라이선스상 공개 저장소에서 제외)
+/Assets/Cursors/
+/Assets/Cursors.meta
+/Assets/Hun0FX/
+/Assets/Hun0FX.meta
+/Assets/Layer Lab/
+/Assets/Layer Lab.meta
+/Assets/Monster/
+/Assets/Monster.meta
+/Assets/Plugins/AllIn1SpriteShader/
+/Assets/Plugins/AllIn1SpriteShader.meta
+/Assets/Plugins/Demigiant/
+/Assets/Plugins/Demigiant.meta
+/Assets/PolygonDungeon/
+/Assets/PolygonDungeon.meta
+/Assets/PolygonParticleFX/
+/Assets/PolygonParticleFX.meta
+/Assets/SpecialSkillsEffectsPack/
+/Assets/SpecialSkillsEffectsPack.meta
+/Assets/VFX_Klaus/
+/Assets/VFX_Klaus.meta
+/Assets/polyperfect/
+/Assets/polyperfect.meta
