@@ -8,6 +8,22 @@
 
 📂 자세한 설명: [포트폴리오 – UnderHall](https://sin4691.github.io/#under-hall)
 
+## 👀 신재윤 작업만 보기
+
+4인 팀 프로젝트라 스크립트 대부분은 팀원 코드입니다. 아래 파일만 보시면 제가 만든 부분입니다. 비중은 현재 코드 기준 `git blame`으로 셌습니다.
+
+| 기능 | 파일 | 비중 |
+|---|---|---|
+| 방 프리팹 8종 (문·스폰 지점·NavMesh) | [`Assets/_Project/Prefabs/Room`](Assets/_Project/Prefabs/Room) | 폴더 전체 |
+| 로비 강화 카드 UI | [`UpgradeCardUI.cs`](Assets/_Project/Scripts/UI/MainMenu/UpgradeCardUI.cs) · [`MataUpgradePanel.cs`](Assets/_Project/Scripts/UI/MainMenu/MataUpgradePanel.cs) · [`ButtonTextColor.cs`](Assets/_Project/Scripts/UI/MainMenu/ButtonTextColor.cs) | 전부 |
+| 강화 UI용 이벤트·읽기 전용 Getter | [`LobbyManager.cs`](Assets/_Project/Scripts/Manager/LobbyManager.cs) | 일부 (16줄) |
+| 문 상호작용 (근처 등록 + 입력으로 이동) | [`Door.cs`](Assets/_Project/Scripts/Manager/Door.cs) 트리거·`Interact` · [`Player.cs`](Assets/_Project/Scripts/Player/Player.cs) `OnInteract` | 일부 |
+| 메인 메뉴·일시정지 | [`MainMenuManager.cs`](Assets/_Project/Scripts/UI/MainMenu/MainMenuManager.cs) · [`PauseMenuManager.cs`](Assets/_Project/Scripts/Manager/PauseMenuManager.cs) | 일부 |
+| 보상 카테고리 아이콘·설명 | [`GiftManager.cs`](Assets/_Project/Scripts/Manager/GiftManager.cs) | 일부 |
+| 빌드 한글 크래시 해결 (정적 폰트) | [`Assets/_Project/Fonts`](Assets/_Project/Fonts) | 전부 |
+
+[제 커밋만 모아 보기](https://github.com/sin4691/UnderHall/commits?author=sin4691)
+
 ## 🙋 내가 맡은 것 (신재윤 · 팀장)
 
 - **팀장·협업**: Git Flow와 커밋 규칙, Git 협업 가이드 공지, 팀원별 개인 작업 씬으로 씬 충돌 예방, Discord–GitHub PR 알림, PR 확인 후 병합
@@ -76,17 +92,11 @@
 
 ## 🚀 실행 방법
 
-### 1. 빌드된 버전으로 실행 (가장 간단)
-1. [Releases](https://github.com/Devel-Rocket-ClassRoom/team-project-may-5-3/releases) 페이지에서 최신 빌드 파일을 다운로드합니다.
-2. 압축을 해제하고 실행 파일(`.exe`)을 실행합니다.
-
-### 2. Unity 에디터에서 실행 (개발용)
 1. 저장소를 클론합니다.
    ```bash
-   git clone https://github.com/Devel-Rocket-ClassRoom/team-project-may-5-3.git
+   git clone https://github.com/sin4691/UnderHall.git
    ```
 2. **Unity 6.4 (6000.4.5f1)** 버전으로 프로젝트를 엽니다.
-   > ⚠️ 팀 전원 동일 버전을 사용합니다. 버전이 다르면 프로젝트가 깨질 수 있습니다.
 3. **시작 씬**을 엽니다.
    ```
    Assets/_Project/Scenes/Main/MainMenu.unity
